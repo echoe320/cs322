@@ -1,0 +1,40 @@
+(:secondtest
+	(:secondtest
+		0
+		
+		%var1 <- 1
+		%var2 <- 2
+		%var3 <- 3
+		%var4 <- 4
+		%var5 <- 5
+		%var6 <- 6
+		
+		rdi <- %var1
+		rdi += %var2
+		rdi *= %var3
+		rdi &= %var5 //quadrupleInt input, rdi should be 1 here
+		
+		mem rsp -8 <- :quadruple_ret
+		call :quadrupleInt 1
+		:quadruple_ret
+		
+		rdi <- rax
+		rdi <<= 1
+		rdi += 1 
+		call print 1 //value should be quadruple the input, aka 4
+		rdi <- %var1
+		rdi <<= 1
+		rdi += 1
+		call print 1 //original var1 value, should be 1
+		
+		return
+	)
+	(:quadrupleInt
+		1
+		
+		rdi *= 4
+		rax <- rdi
+		return
+	)
+)
+		
