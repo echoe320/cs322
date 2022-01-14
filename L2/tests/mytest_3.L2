@@ -1,0 +1,55 @@
+(:add_num
+	(:add_num
+		0
+		
+		rdi <- 17
+		rsi <- 1
+		call allocate 2
+		mem rax 8 <- 1
+		mem rax 16 <- 2
+		mem rax 24 <- 3
+		mem rax 32 <- 4
+		mem rax 40 <- 5
+		mem rax 48 <- 6
+		mem rax 56 <- 7
+		mem rax 64 <- 8
+		
+		%array1 <- rax
+		
+		rdi <- mem %array1 8
+		rsi <- mem %array1 16
+		rdx <- mem %array1 24
+		rcx <- mem %array1 32
+		r8 <- mem %array1 40
+		r9 <- mem %array1 48
+		mem rsp -16 <- mem %array1 56
+		mem rsp -24 <- mem %array1 64
+		mem rsp -8 <- :encoding_ret
+		call :encoding 8
+		:encoding_ret
+		
+		rdi <- rax
+		rdi <<= 1
+		rdi += 1
+		call print 1
+		return
+	)
+	(:encoding
+		8
+		
+		%arg7 <- stack-arg 8
+		%arg8 <- stack-arg 0
+		
+		%result <- 0
+		%result += rdi
+		%result += rsi
+		%result += rdx
+		%result += rcx
+		%result += r8
+		%result += r9
+		%result += %arg7
+		%result += %arg8
+		rax <- %result
+		return
+	)
+)
