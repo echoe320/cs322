@@ -78,8 +78,11 @@ namespace L1 {
    */
   struct str_return : TAOCPP_PEGTL_STRING( "return" ) {};
   struct str_arrow : TAOCPP_PEGTL_STRING( "<-" ) {}; //"
-  
+
   //Registers
+  struct str_rsp : TAOCPP_PEGTL_STRING( "rsp" ) {};
+  struct register_rsp_rule : str_rsp {};
+
   struct register_rule :
     pegtl::sor<
       argRegister,
@@ -152,7 +155,14 @@ namespace L1 {
   // mem rule aka memory offsets
   struct str_mem : TAOCPP_PEGTL_STRING( "mem" ) {};
 
-  struct mem_rule : str_mem {};
+  struct mem_rule : 
+    pegtl::seq<
+      str_mem,
+      seps,
+      pegtl::sor<register_rule, register_rsp_rule>,
+      seps,
+      pegtl::digit 
+    > {};
 
   //struct register_rdi_rule:
   //     str_rdi {};
@@ -213,41 +223,148 @@ namespace L1 {
 
   struct Instruction_assignment_rule: // mem rsp 0 <- rdi
   //1. register <- register
-    pegtl::sor<
-      pegtl::seq<
-        register_rule,
-        seps,
-        str_arrow,
-        seps,
-        register_rule
-      >,
   //2. mem to reg
-      pegtl::seq<
-        mem_rule,
-        seps,
-        str_arrow,
-        seps,
-        register_rule
-      >,
-
   //3. reg to mem
-      pegtl::seq<
+  //4. assign number
+    pegtl::seq<
+      pegtl::sor<
         register_rule,
-        seps,
-        str_arrow,
-        seps,
         mem_rule
       >,
+      seps,
+      str_arrow,
+      seps,
+      pegtl::sor<
+        register_rule,
+        mem_rule,
+        number
+      >
     > {};
 
-  // Arithmetic operations
+  //------------------------ Arithmetic operations ------------------------
 
-  // 
+  struct str_plusEqual : TAOCPP_PEGTL_STRING( "+=" ) {};
+  struct str_minusEqual : TAOCPP_PEGTL_STRING( "-=" ) {};
+  struct str_multEqual : TAOCPP_PEGTL_STRING( "*=" ) {};
+  struct str_bitAND : TAOCPP_PEGTL_STRING( "&=" ) {};
+  
+  struct aop_rule :
+    pegtl::sor<
+      str_plusEqual,
+      str_minusEqual,
+      str_multEqual,
+      str_bitAND
+    > {};
+    
+  struct arithmetic_rule :
+    pegtl::seq<
+      pegtl::sor<
+        register_rule,
+        mem_rule,
+      >,
+      seps,
+      aop_rule,
+      seps,
+      // denoted as 't' in L1 slide
+      pegtl::sor<
+        register_rule,
+        register_rsp_rule,
+        number,
+        mem_rule,
+      >
+    > {};
+  //!============== CHANGELOG ==============
+  //1. register to register i.e. rdi += rax
+  //2. single register i.e. rdi-- or rdi++
+  //3. Arithmetic operations in memory
+    //1. register to mem i.e. rdi -= mem rsp 8
+    //2. mem to register
+  //4. added second arg arithmetic for rsp and numbers
+  //5. shift operations
+  //6. comparison operations
+  //7. Call operations
+    //1. Runtime operations i.e. print, input, allocate, tensor-error
+    //2. bigger call_rule
 
+  //------------------------ Shift Operations ------------------------
+  struct str_leftShift : TAOCPP_PEGTL_STRING( "<<=" ) {};
+  struct str_rightShift : TAOCPP_PEGTL_STRING( ">>=" ) {};
+
+  struct sop_rule : 
+    pegtl::sor<
+      str_leftShift,
+      str_rightShift
+    > {};
+
+  struct shift_rule :
+    pegtl::seq<
+      register_rule,
+      seps,
+      sop_rule,
+      seps,
+      pegtl::sor<register_rcx_rule, number> //? why is sx only rcx?
+    > {};
+  
+  //------------------------ Comparison operations ------------------------
+  struct str_less : TAOCPP_PEGTL_STRING( '<' ) {};
+  struct str_lessEqual : TAOCPP_PEGTL_STRING( '<=' ) {};
+  struct str_equal : TAOCPP_PEGTL_STRING( '=' ) {};
+
+  struct cmp_rule :
+    pegtl::sor<
+      str_less,
+      str_lessEqual,
+      str_equal
+    > {};
+
+  
+  //------------------------ Conditional Jumps ------------------------------
+  
+  
+  
+  //------------------------ LEA operation ------------------------------
+
+  struct 
+
+  //------------------------ Call operations ------------------------------
+
+  // Runtime operations
+  // includes: print, input, allocate, tensor-error
+  struct str_print : TAOCPP_PEGTL_STRING( "print" ) {};
+  struct str_input : TAOCPP_PEGTL_STRING( "input" ) {};
+  struct str_allocate : TAOCPP_PEGTL_STRING( "allocate" ) {};
+  struct str_tensor_error : TAOCPP_PEGTL_STRING( "tensor-error" ) {};
+  struct str_call : TAOCPP_PEGTL_STRING( "call" ) {};
+
+  struct runtime_op_rule :
+    pegtl::sor<
+      str_print,
+      str_input,
+      str_allocate,
+      str_tensor_error
+    > {};
+
+  struct call_rule:
+    pegtl::seq<
+      str_call,
+      seps,
+      pegtl::sor<
+        register_rule,
+        label,
+        runtime_op_rule,
+      >,
+      seps,
+      number
+    > {};
+
+  //------------------------ Instruction rules ------------------------
+  //
   struct Instruction_rule:
     pegtl::sor<
       pegtl::seq< pegtl::at<Instruction_return_rule>            , Instruction_return_rule             >,
-      pegtl::seq< pegtl::at<Instruction_assignment_rule>        , Instruction_assignment_rule         >
+      pegtl::seq< pegtl::at<Instruction_assignment_rule>        , Instruction_assignment_rule         >,
+      pegtl::seq< pegtl::at<Instruction_return_rule>            , Instruction_return_rule             >,
+      pegtl::seq< pegtl::at<Instruction_assignment_rule>        , Instruction_assignment_rule         >,
     > { };
 
   struct Instructions_rule:
