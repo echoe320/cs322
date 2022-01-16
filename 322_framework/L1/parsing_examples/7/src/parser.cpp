@@ -62,13 +62,86 @@ namespace L1 {
       >
     > {};
 
+    //===================== jacobie defined =====================
+    // // N
+    // struct number:
+    //   pegtl::seq<
+    //     pegtl::opt <
+    //       pegtl::sor<'+', '-'>,
+    //     >,
+    //     pegtl::one<pegtl::range<1, 9>>,
+    //     pegtl::star<pegtl::digit>
+    //   >
+
   /* 
    * Keywords.
    */
   struct str_return : TAOCPP_PEGTL_STRING( "return" ) {};
-  struct str_arrow : TAOCPP_PEGTL_STRING( "<-" ) {};
+  struct str_arrow : TAOCPP_PEGTL_STRING( "<-" ) {}; //"
+  
+  //Registers
+  struct register_rule :
+    pegtl::sor<
+      argRegister,
+      register_rax_rule,
+      register_rbx_rule,
+      register_rbp_rule,
+      register_r10_rule,
+      register_r11_rule,
+      register_r12_rule,
+      register_r13_rule,
+      register_r14_rule,
+      register_r15_rule,
+    > {};
+  
+  //Argument registers
+  
   struct str_rdi : TAOCPP_PEGTL_STRING( "rdi" ) {};
+  struct str_rsi : TAOCPP_PEGTL_STRING( "rsi" ) {};
+  struct str_rdx : TAOCPP_PEGTL_STRING( "rdx" ) {};
+  struct str_rcx : TAOCPP_PEGTL_STRING( "rcx" ) {};
+  struct str_r8 : TAOCPP_PEGTL_STRING( "r8" ) {};
+  struct str_r9 : TAOCPP_PEGTL_STRING( "r9" ) {};
+
+  struct register_rdi_rule : str_rdi {};
+  struct register_rsi_rule : str_rsi {};
+  struct register_rdx_rule : str_rdx {};
+  struct register_rcx_rule : str_rcx {};
+  struct register_r8_rule : str_r8 {};
+  struct register_r9_rule : str_r9 {};
+
+  //? do we need to differentiate this? if not, we can abstract argRegister to register
+  struct argRegister :
+    pegtl::sor<
+      register_rdi_rule,
+      register_rsi_rule,
+      register_rdx_rule,
+      register_rcx_rule,
+      register_r8_rule,
+      register_r9_rule,
+    > {};
+
+  //Result registers
+
   struct str_rax : TAOCPP_PEGTL_STRING( "rax" ) {};
+
+  //Caller save -> also includes rdi, rsi, rdx, rcx, r8, r9, rax
+
+  struct str_r10 : TAOCPP_PEGTL_STRING( "r10" ) {};
+  struct str_r11 : TAOCPP_PEGTL_STRING( "r11" ) {};
+
+  struct register_r10_rule : str_r10 {};
+  struct register_r11_rule : str_r11 {};
+  
+  //Callee save -> also includes 
+  
+  struct str_r12 : TAOCPP_PEGTL_STRING( "r12" ) {};
+  struct str_r13 : TAOCPP_PEGTL_STRING( "r13" ) {};
+  struct str_r14 : TAOCPP_PEGTL_STRING( "r14" ) {};
+  struct str_r15 : TAOCPP_PEGTL_STRING( "r15" ) {};
+  struct str_rbp : TAOCPP_PEGTL_STRING( "rbp" ) {};
+  struct str_rbx : TAOCPP_PEGTL_STRING( "rbx" ) {};
+
 
   struct label:
     pegtl::seq<
@@ -76,18 +149,24 @@ namespace L1 {
       name
     > {};
 
-  struct register_rdi_rule:
-      str_rdi {};
+  // mem rule aka memory offsets
+  struct str_mem : TAOCPP_PEGTL_STRING( "mem" ) {};
 
-  struct register_rax_rule:
-      str_rax {};
+  struct mem_rule : str_mem {};
+
+  //struct register_rdi_rule:
+  //     str_rdi {};
+    
+  // struct register_rax_rule:
+  //     str_rax {};
    
-  struct register_rule:
-    pegtl::sor<
-      register_rdi_rule,
-      register_rax_rule
-    > {};
-
+  // struct register_rule:
+  //   pegtl::sor<
+  //     register_rdi_rule,
+  //     register_rax_rule
+  //   > {};
+  
+  // denoted as 'N' on L1 language slide
   struct number:
     pegtl::seq<
       pegtl::opt<
@@ -132,14 +211,38 @@ namespace L1 {
       str_return
     > { };
 
-  struct Instruction_assignment_rule:
-    pegtl::seq<
-      register_rule,
-      seps,
-      str_arrow,
-      seps,
-      register_rule
+  struct Instruction_assignment_rule: // mem rsp 0 <- rdi
+  //1. register <- register
+    pegtl::sor<
+      pegtl::seq<
+        register_rule,
+        seps,
+        str_arrow,
+        seps,
+        register_rule
+      >,
+  //2. mem to reg
+      pegtl::seq<
+        mem_rule,
+        seps,
+        str_arrow,
+        seps,
+        register_rule
+      >,
+
+  //3. reg to mem
+      pegtl::seq<
+        register_rule,
+        seps,
+        str_arrow,
+        seps,
+        mem_rule
+      >,
     > {};
+
+  // Arithmetic operations
+
+  // 
 
   struct Instruction_rule:
     pegtl::sor<
@@ -172,7 +275,7 @@ namespace L1 {
       pegtl::one< ')' >
     > {};
 
-  struct Functions_rule:
+  struct Functions_rule: // covers multiple functions
     pegtl::plus<
       seps,
       Function_rule,
