@@ -1,0 +1,59 @@
+(:firsttest
+	(:firsttest
+		0 6
+		r10 <- 1
+		r11 <- 2
+		r8 <- 3
+		r9 <- 4
+		rcx <- 5
+		rdx <- 6  
+
+		mem rsp 0 <- r10
+		mem rsp 8 <- r11
+		mem rsp 16 <- r8
+		mem rsp 24 <- r9
+		mem rsp 32 <- rcx
+		mem rsp 40 <- rdx
+
+		rdi <- r10
+		rdi *= 2
+		rdi <<= 1
+		rdi += 1
+		call print 1
+
+		mem rsp -8 <- :ft_helper_ret
+		call :firsttest_helper 0
+		:ft_helper_ret
+
+		rdi <- rax
+		rdi <<= 1
+		rdi += 1
+		call print 1 //r10 value doubled by helper function	
+		
+		r10 <- mem rsp 0
+		r11 <- mem rsp 8
+		r8 <- mem rsp 16
+		r9 <- mem rsp 24
+		rcx <- mem rsp 32
+		rdx <- mem rsp 40
+	
+		rdi <- r10
+		rdi <<= 1
+		rdi += 1
+		call print 1 //original r10 value, caller-save
+		return	
+	)
+	(:firsttest_helper
+		0 0
+		r10 += 1 
+		r11 += r8
+		r9 += rcx
+		r10 += r11
+		r10 += r9
+		r10 += rdx
+		rax <- r10
+		return
+	)
+)
+
+
