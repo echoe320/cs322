@@ -62,22 +62,19 @@ namespace L1 {
       >
     > {};
 
-    //===================== jacobie defined =====================
-    // // N
-    // struct number:
-    //   pegtl::seq<
-    //     pegtl::opt <
-    //       pegtl::sor<'+', '-'>,
-    //     >,
-    //     pegtl::one<pegtl::range<1, 9>>,
-    //     pegtl::star<pegtl::digit>
-    //   >
+  //===================== jacobie defined =====================
+  struct t_rule :
+    pegtl::sor<
+      register_rule,
+      register_rsp_rule,
+      number
+    > {};
 
   /* 
    * Keywords.
    */
   struct str_return : TAOCPP_PEGTL_STRING( "return" ) {};
-  struct str_arrow : TAOCPP_PEGTL_STRING( "<-" ) {}; //"
+  struct str_arrow : TAOCPP_PEGTL_STRING( "<-" ) {}; //!DO SOMETHIGN ABOUT THIS"
 
   //Registers
   struct str_rsp : TAOCPP_PEGTL_STRING( "rsp" ) {};
@@ -146,7 +143,7 @@ namespace L1 {
   struct str_rbx : TAOCPP_PEGTL_STRING( "rbx" ) {};
 
 
-  struct label:
+  struct label :
     pegtl::seq<
       pegtl::one<':'>,
       name
@@ -190,22 +187,22 @@ namespace L1 {
       >
     >{};
 
-  struct function_name:
+  struct function_name :
     label {};
 
-  struct argument_number:
+  struct argument_number :
     number {};
 
-  struct local_number:
+  struct local_number :
     number {} ;
 
-  struct comment: 
+  struct comment : 
     pegtl::disable< 
       TAOCPP_PEGTL_STRING( "//" ), 
       pegtl::until< pegtl::eolf > 
     > {};
 
-  struct seps: 
+  struct seps : 
     pegtl::star< 
       pegtl::sor< 
         pegtl::ascii::space, 
@@ -216,37 +213,14 @@ namespace L1 {
   struct Label_rule:
     label {};
 
-  struct Instruction_return_rule:
-    pegtl::seq<
-      str_return
-    > { };
-
-  struct Instruction_assignment_rule: // mem rsp 0 <- rdi
-  //1. register <- register
-  //2. mem to reg
-  //3. reg to mem
-  //4. assign number
-    pegtl::seq<
-      pegtl::sor<
-        register_rule,
-        mem_rule
-      >,
-      seps,
-      str_arrow,
-      seps,
-      pegtl::sor<
-        register_rule,
-        mem_rule,
-        number
-      >
-    > {};
-
   //------------------------ Arithmetic operations ------------------------
 
   struct str_plusEqual : TAOCPP_PEGTL_STRING( "+=" ) {};
   struct str_minusEqual : TAOCPP_PEGTL_STRING( "-=" ) {};
   struct str_multEqual : TAOCPP_PEGTL_STRING( "*=" ) {};
   struct str_bitAND : TAOCPP_PEGTL_STRING( "&=" ) {};
+  struct str_inc : TAOCPP_PEGTL_STRING( "++" ) {};
+  struct str_dec : TAOCPP_PEGTL_STRING( "--" ) {};
   
   struct aop_rule :
     pegtl::sor<
@@ -255,54 +229,18 @@ namespace L1 {
       str_multEqual,
       str_bitAND
     > {};
-    
-  struct arithmetic_rule :
-    pegtl::seq<
-      pegtl::sor<
-        register_rule,
-        mem_rule,
-      >,
-      seps,
-      aop_rule,
-      seps,
-      // denoted as 't' in L1 slide
-      pegtl::sor<
-        register_rule,
-        register_rsp_rule,
-        number,
-        mem_rule,
-      >
-    > {};
-  //!============== CHANGELOG ==============
-  //1. register to register i.e. rdi += rax
-  //2. single register i.e. rdi-- or rdi++
-  //3. Arithmetic operations in memory
-    //1. register to mem i.e. rdi -= mem rsp 8
-    //2. mem to register
-  //4. added second arg arithmetic for rsp and numbers
-  //5. shift operations
-  //6. comparison operations
-  //7. Call operations
-    //1. Runtime operations i.e. print, input, allocate, tensor-error
-    //2. bigger call_rule
+
+  struct crement_rule :
+    pegtl::sor<str_inc, str_dec> {};
 
   //------------------------ Shift Operations ------------------------
-  struct str_leftShift : TAOCPP_PEGTL_STRING( "<<=" ) {};
+  struct str_leftShift : TAOCPP_PEGTL_STRING( "<<=" ) {}; //!DO SOMETHIGN ABOUT THIS"
   struct str_rightShift : TAOCPP_PEGTL_STRING( ">>=" ) {};
 
   struct sop_rule : 
     pegtl::sor<
       str_leftShift,
       str_rightShift
-    > {};
-
-  struct shift_rule :
-    pegtl::seq<
-      register_rule,
-      seps,
-      sop_rule,
-      seps,
-      pegtl::sor<register_rcx_rule, number> //? why is sx only rcx?
     > {};
   
   //------------------------ Comparison operations ------------------------
@@ -316,15 +254,15 @@ namespace L1 {
       str_lessEqual,
       str_equal
     > {};
-
-  
+    
   //------------------------ Conditional Jumps ------------------------------
-  
-  
-  
+  struct str_cjump : TAOCPP_PEGTL_STRING ( "cjump" ) {};
+  struct str_goto : TAOCPP_PEGTL_STRING ( "goto" ) {};
+
+
   //------------------------ LEA operation ------------------------------
 
-  struct 
+  struct str_at : TAOCPP_PEGTL_STRING ( "@" ) {};
 
   //------------------------ Call operations ------------------------------
 
@@ -344,7 +282,81 @@ namespace L1 {
       str_tensor_error
     > {};
 
-  struct call_rule:
+  //------------------------ Instruction rules ------------------------
+  struct Instruction_return_rule :
+    pegtl::seq<
+      str_return
+    > { };
+
+  struct Instruction_assignment_rule : // mem rsp 0 <- rdi
+  //1. register <- register
+  //2. mem to reg
+  //3. reg to mem
+  //4. assign number
+  //5. assign comparison
+    pegtl::seq<
+      pegtl::sor<
+        register_rule,
+        mem_rule
+      >,
+      seps,
+      str_arrow,
+      seps,
+      pegtl::sor<
+        register_rule,
+        mem_rule,
+        number
+      >
+    > {};
+
+  struct Instruction_arithmetic_rule :
+    pegtl::seq<
+      pegtl::sor<
+        register_rule,
+        mem_rule
+      >,
+      seps,
+      aop_rule,
+      seps,
+      t_rule
+    > {};
+
+  struct Instruction_shift_rule :
+    pegtl::seq<
+      register_rule,
+      seps,
+      sop_rule,
+      seps,
+      pegtl::sor<register_rcx_rule, number> //? why is sx only rcx?
+    > {};
+
+  struct Instruction_cmp_rule :
+    pegtl::seq<
+      register_rule,
+      seps,
+      str_arrow,
+      seps,
+      t_rule, 
+      seps, 
+      cmp_rule, 
+      seps, 
+      t_rule
+    > {};
+
+  struct Instruction_cjump_rule :
+    pegtl::seq<
+      str_cjump,
+      seps,
+      t_rule,
+      seps,
+      cmp_rule,
+      seps,
+      t_rule,
+      seps,
+      label
+    > {};
+    
+  struct Instruction_call_rule :
     pegtl::seq<
       str_call,
       seps,
@@ -357,14 +369,42 @@ namespace L1 {
       number
     > {};
 
-  //------------------------ Instruction rules ------------------------
-  //
+  struct Instruction_crement_rule :
+    pegtl::seq<
+      register_rule,
+      seps,
+      crement_rule
+    > {};
+
+  struct Instruction_LEA_rule :
+    pegtl::seq<
+      register_rule,
+      seps,
+      register_rule,
+      seps,
+      register_rule,
+      seps,
+      number
+    > {};
+
+  //============================ Umbrella Instruction Rule(s) ============================
+  //1. return
+  //2. assignment
+  //3. arithmetic
+  //4. shift
+  //5. cjump
+  //6. LEA
+  //7. call
   struct Instruction_rule:
     pegtl::sor<
-      pegtl::seq< pegtl::at<Instruction_return_rule>            , Instruction_return_rule             >,
-      pegtl::seq< pegtl::at<Instruction_assignment_rule>        , Instruction_assignment_rule         >,
-      pegtl::seq< pegtl::at<Instruction_return_rule>            , Instruction_return_rule             >,
-      pegtl::seq< pegtl::at<Instruction_assignment_rule>        , Instruction_assignment_rule         >,
+      pegtl::seq< pegtl::at<Instruction_return_rule>      , Instruction_return_rule       >,
+      pegtl::seq< pegtl::at<Instruction_assignment_rule>  , Instruction_assignment_rule   >,
+      pegtl::seq< pegtl::at<Instruction_arithmetic_rule>  , Instruction_arithmetic_rule   >,
+      pegtl::seq< pegtl::at<Instruction_crement_rule>     , Instruction_crement_rule      >,
+      pegtl::seq< pegtl::at<Instruction_shift_rule>       , Instruction_shift_rule        >,
+      pegtl::seq< pegtl::at<Instruction_cjump_rule>       , Instruction_cjump_rule        >,
+      pegtl::seq< pegtl::at<Instruction_LEA_rule>         , Instruction_LEA_rule          >,
+      pegtl::seq< pegtl::at<Instruction_call_rule>        , Instruction_call_rule         >
     > { };
 
   struct Instructions_rule:
@@ -416,7 +456,7 @@ namespace L1 {
     pegtl::must< 
       entry_point_rule
     > {};
-
+//*================================= ACTIONS =================================
   /* 
    * Actions attached to grammar rules.
    */
@@ -498,6 +538,8 @@ namespace L1 {
     }
   };
 
+
+
   template<> struct action < Instruction_assignment_rule > {
     template< typename Input >
 	static void apply( const Input & in, Program & p){
@@ -511,7 +553,142 @@ namespace L1 {
        * Create the instruction.
        */ 
       auto i = new Instruction_assignment();
+      i->src = parsed_items.back(); //mem
+      parsed_items.pop_back();
+      i->dst = parsed_items.back();
+      parsed_items.pop_back();
+
+      /* 
+       * Add the just-created instruction to the current function.
+       */ 
+      currentF->instructions.push_back(i);
+    }
+  };
+
+  template<> struct action < pegtl::sor<Instruction_arithmetic_rule, Instruction_shift_rule> > {
+    template< typename Input >
+	static void apply( const Input & in, Program & p){
+
+      /* 
+       * Fetch the current function.
+       */ 
+      auto currentF = p.functions.back();
+
+      /* 
+       * Create the instruction.
+       */ 
+      auto i = new Instruction_arithmetic_shift();
       i->src = parsed_items.back();
+      parsed_items.pop_back();
+      i->a = parsed_items.back();
+      parsed_items.pop_back();
+      i->dst = parsed_items.back();
+      parsed_items.pop_back();
+
+      /* 
+       * Add the just-created instruction to the current function.
+       */ 
+      currentF->instructions.push_back(i);
+    }
+  };
+
+  template<> struct action < Instruction_shift_rule > {
+    template< typename Input >
+	static void apply( const Input & in, Program & p){
+
+      /* 
+       * Fetch the current function.
+       */ 
+      auto currentF = p.functions.back();
+
+      /* 
+       * Create the instruction.
+       */ 
+      auto i = new Instruction_shift();
+      i->src = parsed_items.back();
+      parsed_items.pop_back();
+      i->a = parsed_items.back();
+      parsed_items.pop_back();
+      i->dst = parsed_items.back();
+      parsed_items.pop_back();
+
+      /* 
+       * Add the just-created instruction to the current function.
+       */ 
+      currentF->instructions.push_back(i);
+    }
+  };
+
+  template<> struct action < Instruction_shift_rule > {
+    template< typename Input >
+	static void apply( const Input & in, Program & p){
+
+      /* 
+       * Fetch the current function.
+       */ 
+      auto currentF = p.functions.back();
+
+      /* 
+       * Create the instruction.
+       */ 
+      auto i = new Instruction_cjump();
+      i->src = parsed_items.back();
+      parsed_items.pop_back();
+      i->s = parsed_items.back();
+      parsed_items.pop_back();
+      i->dst = parsed_items.back();
+      parsed_items.pop_back();
+
+      /* 
+       * Add the just-created instruction to the current function.
+       */ 
+      currentF->instructions.push_back(i);
+    }
+  };
+
+  template<> struct action < Instruction_shift_rule > {
+    template< typename Input >
+	static void apply( const Input & in, Program & p){
+
+      /* 
+       * Fetch the current function.
+       */ 
+      auto currentF = p.functions.back();
+
+      /* 
+       * Create the instruction.
+       */ 
+      auto i = new Instruction_shift();
+      i->src = parsed_items.back();
+      parsed_items.pop_back();
+      i->s = parsed_items.back();
+      parsed_items.pop_back();
+      i->dst = parsed_items.back();
+      parsed_items.pop_back();
+
+      /* 
+       * Add the just-created instruction to the current function.
+       */ 
+      currentF->instructions.push_back(i);
+    }
+  };
+
+  template<> struct action < Instruction_shift_rule > {
+    template< typename Input >
+	static void apply( const Input & in, Program & p){
+
+      /* 
+       * Fetch the current function.
+       */ 
+      auto currentF = p.functions.back();
+
+      /* 
+       * Create the instruction.
+       */ 
+      auto i = new Instruction_shift();
+      i->src = parsed_items.back();
+      parsed_items.pop_back();
+      i->s = parsed_items.back();
       parsed_items.pop_back();
       i->dst = parsed_items.back();
       parsed_items.pop_back();
