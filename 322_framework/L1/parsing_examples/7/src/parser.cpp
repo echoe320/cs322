@@ -317,7 +317,8 @@ namespace L1 {
       pegtl::sor<
         register_rule,
         mem_rule,
-        number
+        number,
+        label
       >
     > {};
 
