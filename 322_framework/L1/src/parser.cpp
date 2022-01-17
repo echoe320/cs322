@@ -41,7 +41,9 @@ namespace L1 {
    * Data required to parse
    */ 
   std::vector<Item> parsed_items;
-  std::vector<
+  std::vector<operation> parsed_ops;
+
+  std::vector<std::string> allRegisters = {"rdi", "rsi", "rdx", "rcx", "r8", "r9", "rax", "rbx", "rbp", "r10", "r11", "r12", "r13", "r14", "r15", "rsp"};
 
   /* 
    * Grammar rules from now on.
@@ -83,7 +85,7 @@ namespace L1 {
       name
     > {};
 
-    struct function_name :
+  struct function_name :
     label {};
 
   struct argument_number :
@@ -208,8 +210,9 @@ namespace L1 {
       seps,
       pegtl::sor<register_rule, register_rsp_rule>,
       seps,
-      pegtl::digit 
+      number
     > {};
+    
 
   //struct register_rdi_rule:
   //     str_rdi {};
@@ -257,13 +260,13 @@ namespace L1 {
     > {};
   
   //------------------------ Comparison operations ------------------------
-  struct str_less : TAOCPP_PEGTL_STRING( "<" ) {};
+  // struct str_less : TAOCPP_PEGTL_STRING( "<" ) {};
   struct str_lessEqual : TAOCPP_PEGTL_STRING( "<=" ) {};
-  struct str_equal : TAOCPP_PEGTL_STRING( "=" ) {};
+  // struct str_equal : TAOCPP_PEGTL_STRING( "=" ) {};
 
   struct cmp_rule :
     pegtl::sor<
-      str_less,
+      peg,
       str_lessEqual,
       str_equal
     > {};
@@ -307,6 +310,7 @@ namespace L1 {
   //3. reg to mem
   //4. assign number
   //5. assign comparison
+  //6. mem <- ret_label
     pegtl::seq<
       pegtl::sor<
         register_rule,
@@ -319,7 +323,7 @@ namespace L1 {
         register_rule,
         mem_rule,
         number,
-        label
+        Label_rule
       >
     > {};
 
@@ -370,7 +374,7 @@ namespace L1 {
       seps,
       t_rule,
       seps,
-      label
+      Label_rule
     > {};
     
   struct Instruction_call_rule :
@@ -379,7 +383,7 @@ namespace L1 {
       seps,
       pegtl::sor<
         register_rule,
-        label,
+        Label_rule,
         runtime_op_rule
       >,
       seps,
@@ -404,6 +408,16 @@ namespace L1 {
       number
     > {};
 
+  struct Instruction_label_rule :
+    Label_rule {};
+
+  struct Instruction_goto_rule :
+    pegtl::seq<
+      str_goto,
+      seps,
+      Label_rule
+    > {};
+
   //============================ Umbrella Instruction Rule(s) ============================
   //1. return
   //2. assignment
@@ -419,9 +433,12 @@ namespace L1 {
       pegtl::seq< pegtl::at<Instruction_arithmetic_rule>  , Instruction_arithmetic_rule   >,
       pegtl::seq< pegtl::at<Instruction_crement_rule>     , Instruction_crement_rule      >,
       pegtl::seq< pegtl::at<Instruction_shift_rule>       , Instruction_shift_rule        >,
+      pegtl::seq< pegtl::at<Instruction_cmp_rule>         , Instruction_cmp_rule          >,
       pegtl::seq< pegtl::at<Instruction_cjump_rule>       , Instruction_cjump_rule        >,
       pegtl::seq< pegtl::at<Instruction_LEA_rule>         , Instruction_LEA_rule          >,
-      pegtl::seq< pegtl::at<Instruction_call_rule>        , Instruction_call_rule         >
+      pegtl::seq< pegtl::at<Instruction_call_rule>        , Instruction_call_rule         >,
+      pegtl::seq< pegtl::at<Instruction_label_rule>       , Instruction_label_rule        >,
+      pegtl::seq< pegtl::at<Instruction_goto_rule>        , Instruction_goto_rule         >
     > {};
 
   struct Instructions_rule:
@@ -541,49 +558,57 @@ namespace L1 {
     template< typename Input >
 	static void apply( const Input & in, Program & p){
       Item i;
-      i.isARegister = false;
-      i.isMem = false;
-      i.isNum = false;
       i.labelName = in.string();
+      i.isLabel = true;
       parsed_items.push_back(i);
     }
   };
-  
+
   // Register Actions all
   template<> struct action < register_rule > {
     template< typename Input >
     static void apply( const Input & in, Program & p){
       Item i;
       i.isARegister = true;
-      i.isMem = false;
-      i.isNum = false;
       i.Register = in.string();
       parsed_items.push_back(i);
     }
   };
 
-  // // Register Actions rsp
-  // template<> struct action < register_rsp_rule > {
-  //   template< typename Input >
-  //   static void apply( const Input & in, Program & p){
-  //     Item i;
-  //     i.isARegister = true;
-  //     i.isMem = false;
-  //     i.isNum = false;
-  //     i.Register = in.string();
-  //     parsed_items.push_back(i);
-  //   }
-  // };
+  // Register Actions rsp
+  template<> struct action < register_rsp_rule > {
+    template< typename Input >
+    static void apply( const Input & in, Program & p){
+      Item i;
+      i.isARegister = true;
+      i.Register = in.string();
+      parsed_items.push_back(i);
+    }
+  };
 
-  // // Register Actions rsp
-  // template<> struct action < register_rcx_rule > {
+  // Register Actions rcx
+  template<> struct action < register_rcx_rule > {
+    template< typename Input >
+    static void apply( const Input & in, Program & p){
+      Item i;
+      i.isARegister = true;
+      i.Register = in.string();
+      parsed_items.push_back(i);
+    }
+  };
+
+  // t-rule Actions all
+  // template<> struct action < t_rule > {
   //   template< typename Input >
   //   static void apply( const Input & in, Program & p){
   //     Item i;
-  //     i.isARegister = true;
-  //     i.isMem = false;
-  //     i.isNum = false;
-  //     i.Register = in.string();
+  //     if (std::find(std::begin(allRegisters), std::end(allRegisters), in.string()) != std::end(allRegisters)){
+  //       i.isARegister = true; 
+  //       i.Register = in.string();
+  //     } else {
+  //       i.isNum = true; 
+  //       i.offset = in.string();
+  //     }
   //     parsed_items.push_back(i);
   //   }
   // };
@@ -781,11 +806,9 @@ namespace L1 {
     template< typename Input >
     static void apply( const Input & in, Program & p){
       Item i;
-      i.isARegister = false;
       i.isMem = true;
-      i.isNum = false;
-      i.Register = in[2].string();
-      i.offset = in[4].string();
+      i.Register = in.string()[2];
+      i.offset = in.string()[4];
       parsed_items.push_back(i);
     }
   };
@@ -795,7 +818,7 @@ namespace L1 {
     static void apply( const Input & in, Program & p){
       operation i;
       i.op = in.string();
-      parsed_items.push_back(i);
+      parsed_ops.push_back(i);
     }
   };
 
@@ -805,7 +828,7 @@ namespace L1 {
     static void apply( const Input & in, Program & p){
       operation i;
       i.op = in.string();
-      parsed_items.push_back(i);
+      parsed_ops.push_back(i);
     }
   }; 
 
@@ -815,7 +838,7 @@ namespace L1 {
     static void apply( const Input & in, Program & p){
       operation i;
       i.op = in.string();
-      parsed_items.push_back(i);
+      parsed_ops.push_back(i);
     }
   };  
 
@@ -825,7 +848,7 @@ namespace L1 {
     static void apply( const Input & in, Program & p){
       operation i;
       i.op = in.string();
-      parsed_items.push_back(i);
+      parsed_ops.push_back(i);
     }
   };  
 
@@ -835,7 +858,7 @@ namespace L1 {
     static void apply( const Input & in, Program & p){
       operation i;
       i.op = in.string();
-      parsed_items.push_back(i);
+      parsed_ops.push_back(i);
     }
   };
 
@@ -881,8 +904,8 @@ namespace L1 {
       auto i = new Instruction_arithmetic();
       i->src = parsed_items.back();
       parsed_items.pop_back();
-      i->op = parsed_items.back();
-      parsed_items.pop_back();
+      i->op = parsed_ops.back();
+      parsed_ops.pop_back();
       i->dst = parsed_items.back();
       parsed_items.pop_back();
 
@@ -907,8 +930,8 @@ namespace L1 {
        * Create the instruction.
        */ 
       auto i = new Instruction_crement();
-      i->op = parsed_items.back();
-      parsed_items.pop_back();
+      i->op = parsed_ops.back();
+      parsed_ops.pop_back();
       i->dst = parsed_items.back();
       parsed_items.pop_back();
 
@@ -935,8 +958,8 @@ namespace L1 {
       auto i = new Instruction_shift();
       i->src = parsed_items.back();
       parsed_items.pop_back();
-      i->op = parsed_items.back();
-      parsed_items.pop_back();
+      i->op = parsed_ops.back();
+      parsed_ops.pop_back();
       i->dst = parsed_items.back();
       parsed_items.pop_back();
 
@@ -964,8 +987,8 @@ namespace L1 {
       auto i = new Instruction_cmp();
       i->arg2 = parsed_items.back();
       parsed_items.pop_back();
-      i->op = parsed_items.back();
-      parsed_items.pop_back();
+      i->op = parsed_ops.back();
+      parsed_ops.pop_back();
       i->arg1 = parsed_items.back();
       parsed_items.pop_back();
       i->dst = parsed_items.back();
@@ -996,8 +1019,8 @@ namespace L1 {
       parsed_items.pop_back();
       i->arg2 = parsed_items.back();
       parsed_items.pop_back();
-      i->op = parsed_items.back();
-      parsed_items.pop_back();
+      i->op = parsed_ops.back();
+      parsed_ops.pop_back();
       i->arg1 = parsed_items.back();
       parsed_items.pop_back();
 
@@ -1029,6 +1052,54 @@ namespace L1 {
       i->arg1 = parsed_items.back();
       parsed_items.pop_back();
       i->dst = parsed_items.back();
+      parsed_items.pop_back();
+
+      /* 
+       * Add the just-created instruction to the current function.
+       */ 
+      currentF->instructions.push_back(i);
+    }
+  };
+
+  // lea action
+  template<> struct action < Instruction_label_rule > {
+    template< typename Input >
+	static void apply( const Input & in, Program & p){
+
+      /* 
+       * Fetch the current function.
+       */ 
+      auto currentF = p.functions.back();
+
+      /* 
+       * Create the instruction.
+       */ 
+      auto i = new Instruction_label();
+      i->label = parsed_items.back();
+      parsed_items.pop_back();
+
+      /* 
+       * Add the just-created instruction to the current function.
+       */ 
+      currentF->instructions.push_back(i);
+    }
+  };
+  
+  // lea action
+  template<> struct action < Instruction_goto_rule > {
+    template< typename Input >
+	static void apply( const Input & in, Program & p){
+
+      /* 
+       * Fetch the current function.
+       */ 
+      auto currentF = p.functions.back();
+
+      /* 
+       * Create the instruction.
+       */ 
+      auto i = new Instruction_goto();
+      i->label = parsed_items.back();
       parsed_items.pop_back();
 
       /* 

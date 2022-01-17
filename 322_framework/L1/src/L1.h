@@ -6,7 +6,6 @@
 namespace L1 {
 
   //enum Register {rdi, rsi, rdx, rcx, r8, r9, rax, rbx, rbp, r10, r11, r12, r13, r14, r15, rsp};
-
   class Item {
     public:
       std::string labelName;
@@ -14,10 +13,10 @@ namespace L1 {
       std::string Register;
       std::string offset; // doubles as number
 
-      bool isARegister;
-      //allow mem to be an item
-      bool isMem;
-      bool isNum;
+      bool isARegister = false;
+      bool isMem = false;
+      bool isNum = false;
+      bool isLabel = false;
       //int offset;
   };
 
@@ -25,12 +24,6 @@ namespace L1 {
     public:
       std::string op;
   };
-
-  // class mem {
-  //   public:
-  //     Register r;
-  //     int num;
-  // };
 
   // //registers
   // class w {};
@@ -118,6 +111,16 @@ namespace L1 {
   class Instruction_calls : public Instruction{
     public:
       Item u, N; //call u N
+  };
+
+  class Instruction_label : public Instruction{
+    public:
+      Item label;
+  };
+
+  class Instruction_goto : public Instruction{
+    public:
+      Item label;
   };
 
   /*

@@ -15,7 +15,28 @@ namespace L1{
     std::ofstream outputFile;
     outputFile.open("prog.S");
 
+
+    //Create initial file
     outputFile << ".text\n";
+    outputFile << "\t.globl go\n";
+    outputFile << "go:\n";
+
+    //save callee_saved registers
+
+    const char *callee_reg[]
+
+    outputFile << "
+
+    outputFile << "pushq
+
+    //for (auto func : p.functions) {
+    //  outputFile << "\t_" << func->name << "\n";
+    //  for (auto i : func->instructions) {
+    //    outputFile << "" << "\n";
+    //  }
+    //}
+    
+    //outputFile << 
    
     /* 
      * Generate target code
