@@ -24,12 +24,12 @@ namespace L1{
     
     //check p.entryPointLabel
 
-    p.entryPointLabel;
+    //p.entryPointLabel;
 
-    p.
+    //p.
 
-    case (a):
-      if ("<<=") 
+    //case (a):
+      //if ("<<=") 
 
     /* 
      * Close the output file.

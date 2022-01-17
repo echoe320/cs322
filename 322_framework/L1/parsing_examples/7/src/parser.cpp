@@ -545,7 +545,7 @@ namespace L1 {
       i.isARegister = true;
       i.isMem = false;
       i.isNum = false;
-      i.r = in.string();
+      i.Register = in.string();
       parsed_items.push_back(i);
     }
   };
@@ -558,7 +558,7 @@ namespace L1 {
   //     i.isARegister = true;
   //     i.isMem = false;
   //     i.isNum = false;
-  //     i.r = in.string();
+  //     i.Register = in.string();
   //     parsed_items.push_back(i);
   //   }
   // };
@@ -571,7 +571,7 @@ namespace L1 {
   //     i.isARegister = true;
   //     i.isMem = false;
   //     i.isNum = false;
-  //     i.r = in.string();
+  //     i.Register = in.string();
   //     parsed_items.push_back(i);
   //   }
   // };
@@ -583,7 +583,7 @@ namespace L1 {
   //     Item i;
   //     i.isARegister = true;
   //     i.isMem = false;
-  //     i.r = rdi;
+  //     i.Register = rdi;
   //     parsed_items.push_back(i);
   //   }
   // };
@@ -605,7 +605,7 @@ namespace L1 {
   //     Item i;
   //     i.isARegister = true;
   //     i.isMem = false;
-  //     i.r = rdx;
+  //     i.Register = rdx;
   //     parsed_items.push_back(i);
   //   }
   // };
@@ -616,7 +616,7 @@ namespace L1 {
   //     Item i;
   //     i.isARegister = true;
   //     i.isMem = false;
-  //     i.r = rcx;
+  //     i.Register = rcx;
   //     parsed_items.push_back(i);
   //   }
   // };
