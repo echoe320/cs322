@@ -79,6 +79,13 @@ namespace L1 {
       //Operation a;
   };
 
+  class Instruction_crement : public Instruction{
+    public:
+      Item dst;
+      operation op;
+      //Operation a;
+  };
+
   class Instruction_shift : public Instruction{
     public:
       Item src, dst;
@@ -104,8 +111,8 @@ namespace L1 {
 
   class Instruction_lea : public Instruction{
     public:
-      Item src, dst, label;
-      operation op;
+      Item dst, arg1, arg2, multiple;
+      //operation op;
   };
 
   class Instruction_calls : public Instruction{

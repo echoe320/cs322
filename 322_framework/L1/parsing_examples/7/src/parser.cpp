@@ -870,6 +870,32 @@ namespace L1 {
     }
   };
 
+  //crement rule
+  template<> struct action < Instruction_crement_rule > {
+    template< typename Input >
+	static void apply( const Input & in, Program & p){
+
+      /* 
+       * Fetch the current function.
+       */ 
+      auto currentF = p.functions.back();
+
+      /* 
+       * Create the instruction.
+       */ 
+      auto i = new Instruction_crement();
+      i->op = parsed_items.back();
+      parsed_items.pop_back();
+      i->dst = parsed_items.back();
+      parsed_items.pop_back();
+
+      /* 
+       * Add the just-created instruction to the current function.
+       */ 
+      currentF->instructions.push_back(i);
+    }
+  };
+
   // Shift actions
   template<> struct action < Instruction_shift_rule > {
     template< typename Input >
@@ -900,8 +926,6 @@ namespace L1 {
 
   // cmp actions
 
-  
-
   template<> struct action < Instruction_cmp_rule > {
     template< typename Input >
 	static void apply( const Input & in, Program & p){
@@ -931,6 +955,7 @@ namespace L1 {
     }
   };
 
+  // cjump actions
   template<> struct action < Instruction_cjump_rule > {
     template< typename Input >
 	static void apply( const Input & in, Program & p){
@@ -944,38 +969,13 @@ namespace L1 {
        * Create the instruction.
        */ 
       auto i = new Instruction_cjump();
-      i->src = parsed_items.back();
+      i->label = parsed_items.back();
       parsed_items.pop_back();
-      i->s = parsed_items.back();
+      i->arg2 = parsed_items.back();
       parsed_items.pop_back();
-      i->dst = parsed_items.back();
+      i->op = parsed_items.back();
       parsed_items.pop_back();
-
-      /* 
-       * Add the just-created instruction to the current function.
-       */ 
-      currentF->instructions.push_back(i);
-    }
-  };
-
-  template<> struct action < Instruction_call_rule > {
-    template< typename Input >
-	static void apply( const Input & in, Program & p){
-
-      /* 
-       * Fetch the current function.
-       */ 
-      auto currentF = p.functions.back();
-
-      /* 
-       * Create the instruction.
-       */ 
-      auto i = new Instruction_shift();
-      i->src = parsed_items.back();
-      parsed_items.pop_back();
-      i->s = parsed_items.back();
-      parsed_items.pop_back();
-      i->dst = parsed_items.back();
+      i->arg1 = parsed_items.back();
       parsed_items.pop_back();
 
       /* 
@@ -985,33 +985,7 @@ namespace L1 {
     }
   };
 
-  template<> struct action < Instruction_crement_rule > {
-    template< typename Input >
-	static void apply( const Input & in, Program & p){
-
-      /* 
-       * Fetch the current function.
-       */ 
-      auto currentF = p.functions.back();
-
-      /* 
-       * Create the instruction.
-       */ 
-      auto i = new Instruction_shift();
-      i->src = parsed_items.back();
-      parsed_items.pop_back();
-      i->s = parsed_items.back();
-      parsed_items.pop_back();
-      i->dst = parsed_items.back();
-      parsed_items.pop_back();
-
-      /* 
-       * Add the just-created instruction to the current function.
-       */ 
-      currentF->instructions.push_back(i);
-    }
-  };
-
+  // lea action
   template<> struct action < Instruction_LEA_rule > {
     template< typename Input >
 	static void apply( const Input & in, Program & p){
@@ -1025,11 +999,39 @@ namespace L1 {
        * Create the instruction.
        */ 
       auto i = new Instruction_lea();
-      i->src = parsed_items.back();
+      i->multiple = parsed_items.back();
       parsed_items.pop_back();
-      i->s = parsed_items.back();
+      i->arg2 = parsed_items.back();
+      parsed_items.pop_back();
+      i->arg1 = parsed_items.back();
       parsed_items.pop_back();
       i->dst = parsed_items.back();
+      parsed_items.pop_back();
+
+      /* 
+       * Add the just-created instruction to the current function.
+       */ 
+      currentF->instructions.push_back(i);
+    }
+  };
+
+  //call action
+  template<> struct action < Instruction_call_rule > {
+    template< typename Input >
+	static void apply( const Input & in, Program & p){
+
+      /* 
+       * Fetch the current function.
+       */ 
+      auto currentF = p.functions.back();
+
+      /* 
+       * Create the instruction.
+       */ 
+      auto i = new Instruction_calls();
+      i->N = parsed_items.back();
+      parsed_items.pop_back();
+      i->u = parsed_items.back();
       parsed_items.pop_back();
 
       /* 
