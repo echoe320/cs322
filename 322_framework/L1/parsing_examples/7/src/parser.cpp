@@ -504,7 +504,7 @@ namespace L1 {
       Item i;
       i.isARegister = false;
       i.isMem = false;
-      i.isConst = true;
+      i.isNum = true;
       i.offset = in.string();
       parsed_items.push_back(i);
     }
@@ -525,6 +525,7 @@ namespace L1 {
       Item i;
       i.isARegister = false;
       i.isMem = false;
+      i.isNum = false;
       i.labelName = in.string();
       parsed_items.push_back(i);
     }
@@ -537,6 +538,7 @@ namespace L1 {
       Item i;
       i.isARegister = true;
       i.isMem = false;
+      i.isNum = false;
       i.r = in.string();
       parsed_items.push_back(i);
     }
@@ -549,6 +551,7 @@ namespace L1 {
       Item i;
       i.isARegister = true;
       i.isMem = false;
+      i.isNum = false;
       i.r = in.string();
       parsed_items.push_back(i);
     }
@@ -561,6 +564,7 @@ namespace L1 {
       Item i;
       i.isARegister = true;
       i.isMem = false;
+      i.isNum = false;
       i.r = in.string();
       parsed_items.push_back(i);
     }
@@ -761,6 +765,7 @@ namespace L1 {
       Item i;
       i.isARegister = false;
       i.isMem = true;
+      i.isNum = false;
       i.Register = in[2].string();
       i.offset = in[4].string();
       parsed_items.push_back(i);

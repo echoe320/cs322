@@ -21,6 +21,12 @@ namespace L1{
     //TODO
 
     //program p
+    
+    //check p.entryPointLabel
+
+    p.entryPointLabel;
+
+    p.
 
     case (a):
       if ("<<=") 
