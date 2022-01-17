@@ -498,6 +498,18 @@ namespace L1 {
     }
   };
 
+  template<> struct action < number > {
+    template< typename Input >
+	static void apply( const Input & in, Program & p){
+      Item i;
+      i.isARegister = false;
+      i.isMem = false;
+      i.isConst = true;
+      i.offset = in.string();
+      parsed_items.push_back(i);
+    }
+  };
+
   template<> struct action < str_return > {
     template< typename Input >
 	static void apply( const Input & in, Program & p){
@@ -520,6 +532,30 @@ namespace L1 {
   
   // Register Actions all
   template<> struct action < register_rule > {
+    template< typename Input >
+    static void apply( const Input & in, Program & p){
+      Item i;
+      i.isARegister = true;
+      i.isMem = false;
+      i.r = in.string();
+      parsed_items.push_back(i);
+    }
+  };
+
+  // Register Actions rsp
+  template<> struct action < register_rsp_rule > {
+    template< typename Input >
+    static void apply( const Input & in, Program & p){
+      Item i;
+      i.isARegister = true;
+      i.isMem = false;
+      i.r = in.string();
+      parsed_items.push_back(i);
+    }
+  };
+
+  // Register Actions rsp
+  template<> struct action < register_rcx_rule > {
     template< typename Input >
     static void apply( const Input & in, Program & p){
       Item i;
@@ -725,11 +761,60 @@ namespace L1 {
       Item i;
       i.isARegister = false;
       i.isMem = true;
-      i.r = in[2].string();
-      i.r = in[4].string();
+      i.Register = in[2].string();
+      i.offset = in[4].string();
       parsed_items.push_back(i);
     }
   };
+  // aop_rule -> push
+  template<> struct action < aop_rule > {
+    template< typename Input >
+    static void apply( const Input & in, Program & p){
+      operation i;
+      i.op = in.string();
+      parsed_items.push_back(i);
+    }
+  };
+
+  // crement_rule -> push
+  template<> struct action < crement_rule > {
+    template< typename Input >
+    static void apply( const Input & in, Program & p){
+      operation i;
+      i.op = in.string();
+      parsed_items.push_back(i);
+    }
+  }; 
+
+  // sop_rule -> push
+  template<> struct action < sop_rule > {
+    template< typename Input >
+    static void apply( const Input & in, Program & p){
+      operation i;
+      i.op = in.string();
+      parsed_items.push_back(i);
+    }
+  };  
+
+  // cmp_rule -> push
+  template<> struct action < cmp_rule > {
+    template< typename Input >
+    static void apply( const Input & in, Program & p){
+      operation i;
+      i.op = in.string();
+      parsed_items.push_back(i);
+    }
+  };  
+
+  // runtime_op_rule -> push
+  template<> struct action < runtime_op_rule > {
+    template< typename Input >
+    static void apply( const Input & in, Program & p){
+      operation i;
+      i.op = in.string();
+      parsed_items.push_back(i);
+    }
+  }; 
 
   // Instruction Actions -> pop
   template<> struct action < Instruction_assignment_rule > {
@@ -757,7 +842,8 @@ namespace L1 {
     }
   };
 
-  template<> struct action < pegtl::sor<Instruction_arithmetic_rule, Instruction_shift_rule>{}; > {
+  // Arithmetic actions
+  template<> struct action < Instruction_arithmetic_rule > {
     template< typename Input >
 	static void apply( const Input & in, Program & p){
 
@@ -769,10 +855,10 @@ namespace L1 {
       /* 
        * Create the instruction.
        */ 
-      auto i = new Instruction_arithmetic_shift();
+      auto i = new Instruction_arithmetic();
       i->src = parsed_items.back();
       parsed_items.pop_back();
-      i->a = parsed_items.back();
+      i->op = parsed_items.back();
       parsed_items.pop_back();
       i->dst = parsed_items.back();
       parsed_items.pop_back();
@@ -783,6 +869,38 @@ namespace L1 {
       currentF->instructions.push_back(i);
     }
   };
+
+  // Shift actions
+  template<> struct action < Instruction_shift_rule > {
+    template< typename Input >
+	static void apply( const Input & in, Program & p){
+
+      /* 
+       * Fetch the current function.
+       */ 
+      auto currentF = p.functions.back();
+
+      /* 
+       * Create the instruction.
+       */ 
+      auto i = new Instruction_shift();
+      i->src = parsed_items.back();
+      parsed_items.pop_back();
+      i->op = parsed_items.back();
+      parsed_items.pop_back();
+      i->dst = parsed_items.back();
+      parsed_items.pop_back();
+
+      /* 
+       * Add the just-created instruction to the current function.
+       */ 
+      currentF->instructions.push_back(i);
+    }
+  };
+
+  // cmp actions
+
+  
 
   template<> struct action < Instruction_cmp_rule > {
     template< typename Input >
@@ -799,7 +917,7 @@ namespace L1 {
       auto i = new Instruction_cmp();
       i->arg2 = parsed_items.back();
       parsed_items.pop_back();
-      i->cmp_rule = parsed_items.back();
+      i->op = parsed_items.back();
       parsed_items.pop_back();
       i->arg1 = parsed_items.back();
       parsed_items.pop_back();
@@ -813,7 +931,7 @@ namespace L1 {
     }
   };
 
-  template<> struct action < Instruction_shift_rule > {
+  template<> struct action < Instruction_cjump_rule > {
     template< typename Input >
 	static void apply( const Input & in, Program & p){
 
@@ -840,7 +958,7 @@ namespace L1 {
     }
   };
 
-  template<> struct action < Instruction_shift_rule > {
+  template<> struct action < Instruction_call_rule > {
     template< typename Input >
 	static void apply( const Input & in, Program & p){
 
@@ -867,7 +985,7 @@ namespace L1 {
     }
   };
 
-  template<> struct action < Instruction_shift_rule > {
+  template<> struct action < Instruction_crement_rule > {
     template< typename Input >
 	static void apply( const Input & in, Program & p){
 
@@ -880,6 +998,33 @@ namespace L1 {
        * Create the instruction.
        */ 
       auto i = new Instruction_shift();
+      i->src = parsed_items.back();
+      parsed_items.pop_back();
+      i->s = parsed_items.back();
+      parsed_items.pop_back();
+      i->dst = parsed_items.back();
+      parsed_items.pop_back();
+
+      /* 
+       * Add the just-created instruction to the current function.
+       */ 
+      currentF->instructions.push_back(i);
+    }
+  };
+
+  template<> struct action < Instruction_LEA_rule > {
+    template< typename Input >
+	static void apply( const Input & in, Program & p){
+
+      /* 
+       * Fetch the current function.
+       */ 
+      auto currentF = p.functions.back();
+
+      /* 
+       * Create the instruction.
+       */ 
+      auto i = new Instruction_lea();
       i->src = parsed_items.back();
       parsed_items.pop_back();
       i->s = parsed_items.back();

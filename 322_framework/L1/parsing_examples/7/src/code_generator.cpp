@@ -22,7 +22,8 @@ namespace L1{
 
     //program p
 
-    
+    case (a):
+      if ("<<=") 
 
     /* 
      * Close the output file.

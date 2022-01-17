@@ -47,6 +47,10 @@
 - function name
 - argument_number
 
-
+### Testing
+- cmp_rule
+- registers
+- arithmetic
+- 
 
 Code_generation:
