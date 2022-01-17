@@ -62,13 +62,54 @@ namespace L1 {
       >
     > {};
 
-  //===================== jacobie defined =====================
-  struct t_rule :
-    pegtl::sor<
-      register_rule,
-      register_rsp_rule,
-      number
+  // denoted as 'N' on L1 language slide
+  struct number:
+    pegtl::seq<
+      pegtl::opt<
+        pegtl::sor<
+          pegtl::one< '-' >,
+          pegtl::one< '+' >
+        >
+      >,
+      pegtl::plus< 
+        pegtl::digit
+      >
+    >{};
+  
+  struct label :
+    pegtl::seq<
+      pegtl::one<':'>,
+      name
     > {};
+
+    struct function_name :
+    label {};
+
+  struct argument_number :
+    number {};
+
+  struct local_number :
+    number {};
+
+  struct comment : 
+    pegtl::disable< 
+      TAOCPP_PEGTL_STRING( "//" ), 
+      pegtl::until< pegtl::eolf > 
+    > {};
+
+  struct Label_rule:
+    label {};
+
+  struct seps : 
+    pegtl::star< 
+      pegtl::sor< 
+        pegtl::ascii::space, 
+        comment 
+      > 
+    > {};
+
+  //===================== jacobie defined =====================
+  
 
   /* 
    * Keywords.
@@ -106,6 +147,7 @@ namespace L1 {
   //Result registers
 
   struct str_rax : TAOCPP_PEGTL_STRING( "rax" ) {};
+  struct register_rax_rule : str_rax {};
 
   //Caller save -> also includes rdi, rsi, rdx, rcx, r8, r9, rax
 
@@ -123,6 +165,13 @@ namespace L1 {
   struct str_r15 : TAOCPP_PEGTL_STRING( "r15" ) {};
   struct str_rbp : TAOCPP_PEGTL_STRING( "rbp" ) {};
   struct str_rbx : TAOCPP_PEGTL_STRING( "rbx" ) {};
+
+  struct register_r12_rule : str_r12 {};
+  struct register_r13_rule : str_r13 {};
+  struct register_r14_rule : str_r14 {};
+  struct register_r15_rule : str_r15 {};
+  struct register_rbp_rule : str_rbp {};
+  struct register_rbx_rule : str_rbx {};
 
   //Registers
   struct str_rsp : TAOCPP_PEGTL_STRING( "rsp" ) {};
@@ -142,10 +191,11 @@ namespace L1 {
       register_r15_rule
     > {};
 
-  struct label :
-    pegtl::seq<
-      pegtl::one<':'>,
-      name
+  struct t_rule :
+    pegtl::sor<
+      register_rule,
+      register_rsp_rule,
+      number
     > {};
 
   // mem rule aka memory offsets
@@ -171,46 +221,6 @@ namespace L1 {
   //     register_rdi_rule,
   //     register_rax_rule
   //   > {};
-  
-  // denoted as 'N' on L1 language slide
-  struct number:
-    pegtl::seq<
-      pegtl::opt<
-        pegtl::sor<
-          pegtl::one< '-' >,
-          pegtl::one< '+' >
-        >
-      >,
-      pegtl::plus< 
-        pegtl::digit
-      >
-    >{};
-
-  struct function_name :
-    label {};
-
-  struct argument_number :
-    number {};
-
-  struct local_number :
-    number {};
-
-  struct comment : 
-    pegtl::disable< 
-      TAOCPP_PEGTL_STRING( "//" ), 
-      pegtl::until< pegtl::eolf > 
-    > {};
-
-  struct seps : 
-    pegtl::star< 
-      pegtl::sor< 
-        pegtl::ascii::space, 
-        comment 
-      > 
-    > {};
-
-  struct Label_rule:
-    label {};
 
   //------------------------ Arithmetic operations ------------------------
 
@@ -246,9 +256,9 @@ namespace L1 {
     > {};
   
   //------------------------ Comparison operations ------------------------
-  struct str_less : TAOCPP_PEGTL_STRING( '<' ) {};
-  struct str_lessEqual : TAOCPP_PEGTL_STRING( '<=' ) {};
-  struct str_equal : TAOCPP_PEGTL_STRING( '=' ) {};
+  struct str_less : TAOCPP_PEGTL_STRING( "<" ) {};
+  struct str_lessEqual : TAOCPP_PEGTL_STRING( "<=" ) {};
+  struct str_equal : TAOCPP_PEGTL_STRING( "=" ) {};
 
   struct cmp_rule :
     pegtl::sor<

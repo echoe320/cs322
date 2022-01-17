@@ -10,6 +10,8 @@
 
     rax <- rdi
 
+    mem rdi 8 <- rax
+
     return 
   )
 

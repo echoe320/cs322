@@ -18,7 +18,8 @@ namespace L1{
     /* 
      * Generate target code
      */ 
-    //TODO
+    //TODO -- write to prog.S file
+
 
     /* 
      * Close the output file.

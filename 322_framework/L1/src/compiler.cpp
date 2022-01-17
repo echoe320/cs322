@@ -68,7 +68,7 @@ int main(
    */
   if (verbose){
     for (auto f : p.functions){
-      //TODO
+      //TODO -- creating prog.S file
     }
   }
 
