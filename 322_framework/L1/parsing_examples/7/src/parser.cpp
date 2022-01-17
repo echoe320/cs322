@@ -100,7 +100,7 @@ namespace L1 {
       register_rdx_rule,
       register_rcx_rule,
       register_r8_rule,
-      register_r9_rule,
+      register_r9_rule
     > {};
 
   //Result registers
@@ -139,7 +139,7 @@ namespace L1 {
       register_r12_rule,
       register_r13_rule,
       register_r14_rule,
-      register_r15_rule,
+      register_r15_rule
     > {};
 
   struct label :
@@ -193,7 +193,7 @@ namespace L1 {
     number {};
 
   struct local_number :
-    number {} ;
+    number {};
 
   struct comment : 
     pegtl::disable< 
@@ -230,7 +230,10 @@ namespace L1 {
     > {};
 
   struct crement_rule :
-    pegtl::sor<str_inc, str_dec> {};
+    pegtl::sor<
+      str_inc, 
+      str_dec
+    > {};
 
   //------------------------ Shift Operations ------------------------
   struct str_leftShift : TAOCPP_PEGTL_STRING( "<<=" ) {}; //!DO SOMETHIGN ABOUT THIS"
@@ -326,7 +329,10 @@ namespace L1 {
       seps,
       sop_rule,
       seps,
-      pegtl::sor<register_rcx_rule, number> //? why is sx only rcx?
+      pegtl::sor<
+        register_rcx_rule, 
+        number
+      > //? why is sx only rcx?
     > {};
 
   struct Instruction_cmp_rule :
@@ -362,7 +368,7 @@ namespace L1 {
       pegtl::sor<
         register_rule,
         label,
-        runtime_op_rule,
+        runtime_op_rule
       >,
       seps,
       number
@@ -404,7 +410,7 @@ namespace L1 {
       pegtl::seq< pegtl::at<Instruction_cjump_rule>       , Instruction_cjump_rule        >,
       pegtl::seq< pegtl::at<Instruction_LEA_rule>         , Instruction_LEA_rule          >,
       pegtl::seq< pegtl::at<Instruction_call_rule>        , Instruction_call_rule         >
-    > { };
+    > {};
 
   struct Instructions_rule:
     pegtl::plus<
@@ -413,7 +419,7 @@ namespace L1 {
         Instruction_rule,
         seps
       >
-    > { };
+    > {};
 
   struct Function_rule:
     pegtl::seq<
@@ -449,7 +455,7 @@ namespace L1 {
       seps,
       pegtl::one< ')' >,
       seps
-    > { };
+    > {};
 
   struct grammar : 
     pegtl::must< 
