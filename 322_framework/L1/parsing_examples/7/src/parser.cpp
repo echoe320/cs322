@@ -75,24 +75,6 @@ namespace L1 {
    */
   struct str_return : TAOCPP_PEGTL_STRING( "return" ) {};
   struct str_arrow : TAOCPP_PEGTL_STRING( "<-" ) {}; //!DO SOMETHIGN ABOUT THIS"
-
-  //Registers
-  struct str_rsp : TAOCPP_PEGTL_STRING( "rsp" ) {};
-  struct register_rsp_rule : str_rsp {};
-
-  struct register_rule :
-    pegtl::sor<
-      argRegister,
-      register_rax_rule,
-      register_rbx_rule,
-      register_rbp_rule,
-      register_r10_rule,
-      register_r11_rule,
-      register_r12_rule,
-      register_r13_rule,
-      register_r14_rule,
-      register_r15_rule,
-    > {};
   
   //Argument registers
   
@@ -142,6 +124,23 @@ namespace L1 {
   struct str_rbp : TAOCPP_PEGTL_STRING( "rbp" ) {};
   struct str_rbx : TAOCPP_PEGTL_STRING( "rbx" ) {};
 
+  //Registers
+  struct str_rsp : TAOCPP_PEGTL_STRING( "rsp" ) {};
+  struct register_rsp_rule : str_rsp {};
+
+  struct register_rule :
+    pegtl::sor<
+      argRegister,
+      register_rax_rule,
+      register_rbx_rule,
+      register_rbp_rule,
+      register_r10_rule,
+      register_r11_rule,
+      register_r12_rule,
+      register_r13_rule,
+      register_r14_rule,
+      register_r15_rule,
+    > {};
 
   struct label :
     pegtl::seq<
@@ -513,33 +512,226 @@ namespace L1 {
 	static void apply( const Input & in, Program & p){
       Item i;
       i.isARegister = false;
+      i.isMem = false;
       i.labelName = in.string();
       parsed_items.push_back(i);
     }
   };
-
-  template<> struct action < register_rdi_rule > {
+  
+  // Register Actions all
+  template<> struct action < register_rule > {
     template< typename Input >
     static void apply( const Input & in, Program & p){
       Item i;
       i.isARegister = true;
-      i.r = rdi;
+      i.isMem = false;
+      i.r = in.string();
       parsed_items.push_back(i);
     }
   };
 
-  template<> struct action < register_rax_rule > {
+  // Register Actions -> push
+  // template<> struct action < register_rdi_rule > {
+  //   template< typename Input >
+  //   static void apply( const Input & in, Program & p){
+  //     Item i;
+  //     i.isARegister = true;
+  //     i.isMem = false;
+  //     i.r = rdi;
+  //     parsed_items.push_back(i);
+  //   }
+  // };
+
+  // template<> struct action < register_rsi_rule > {
+  //   template< typename Input >
+  //   static void apply( const Input & in, Program & p){
+  //     Item i;
+  //     i.isARegister = true;
+  //     i.isMem = false;
+  //     i.r = rsi;
+  //     parsed_items.push_back(i);
+  //   }
+  // };
+
+  // template<> struct action < register_rdx_rule > {
+  //   template< typename Input >
+  //   static void apply( const Input & in, Program & p){
+  //     Item i;
+  //     i.isARegister = true;
+  //     i.isMem = false;
+  //     i.r = rdx;
+  //     parsed_items.push_back(i);
+  //   }
+  // };
+
+  // template<> struct action < register_rcx_rule > {
+  //   template< typename Input >
+  //   static void apply( const Input & in, Program & p){
+  //     Item i;
+  //     i.isARegister = true;
+  //     i.isMem = false;
+  //     i.r = rcx;
+  //     parsed_items.push_back(i);
+  //   }
+  // };
+
+  // template<> struct action < register_r8_rule > {
+  //   template< typename Input >
+  //   static void apply( const Input & in, Program & p){
+  //     Item i;
+  //     i.isARegister = true;
+  //     i.isMem = false;
+  //     i.r = r8;
+  //     parsed_items.push_back(i);
+  //   }
+  // };
+
+  // template<> struct action < register_r9_rule > {
+  //   template< typename Input >
+  //   static void apply( const Input & in, Program & p){
+  //     Item i;
+  //     i.isARegister = true;
+  //     i.isMem = false;
+  //     i.r = r9;
+  //     parsed_items.push_back(i);
+  //   }
+  // };
+
+  // template<> struct action < register_rax_rule > {
+  //   template< typename Input >
+  //   static void apply( const Input & in, Program & p){
+  //     Item i;
+  //     i.isARegister = true;
+  //     i.isMem = false;
+  //     i.r = rax;
+  //     parsed_items.push_back(i);
+  //   }
+  // };
+
+  // template<> struct action < register_rbx_rule > {
+  //   template< typename Input >
+  //   static void apply( const Input & in, Program & p){
+  //     Item i;
+  //     i.isARegister = true;
+  //     i.isMem = false;
+  //     i.r = rbx;
+  //     parsed_items.push_back(i);
+  //   }
+  // };
+
+  // template<> struct action < register_rdi_rule > {
+  //   template< typename Input >
+  //   static void apply( const Input & in, Program & p){
+  //     Item i;
+  //     i.isARegister = true;
+  //     i.isMem = false;
+  //     i.r = rdi;
+  //     parsed_items.push_back(i);
+  //   }
+  // };
+
+  // template<> struct action < register_rbp_rule > {
+  //   template< typename Input >
+  //   static void apply( const Input & in, Program & p){
+  //     Item i;
+  //     i.isARegister = true;
+  //     i.isMem = false;
+  //     i.r = rbp;
+  //     parsed_items.push_back(i);
+  //   }
+  // };
+
+  // template<> struct action < register_r10_rule > {
+  //   template< typename Input >
+  //   static void apply( const Input & in, Program & p){
+  //     Item i;
+  //     i.isARegister = true;
+  //     i.isMem = false;
+  //     i.r = r10;
+  //     parsed_items.push_back(i);
+  //   }
+  // };
+
+  // template<> struct action < register_r11_rule > {
+  //   template< typename Input >
+  //   static void apply( const Input & in, Program & p){
+  //     Item i;
+  //     i.isARegister = true;
+  //     i.isMem = false;
+  //     i.r = r11;
+  //     parsed_items.push_back(i);
+  //   }
+  // };
+
+  // template<> struct action < register_r12_rule > {
+  //   template< typename Input >
+  //   static void apply( const Input & in, Program & p){
+  //     Item i;
+  //     i.isARegister = true;
+  //     i.isMem = false;
+  //     i.r = r12;
+  //     parsed_items.push_back(i);
+  //   }
+  // };
+
+  // template<> struct action < register_r13_rule > {
+  //   template< typename Input >
+  //   static void apply( const Input & in, Program & p){
+  //     Item i;
+  //     i.isARegister = true;
+  //     i.isMem = false;
+  //     i.r = r13;
+  //     parsed_items.push_back(i);
+  //   }
+  // };
+
+  // template<> struct action < register_r14_rule > {
+  //   template< typename Input >
+  //   static void apply( const Input & in, Program & p){
+  //     Item i;
+  //     i.isARegister = true;
+  //     i.isMem = false;
+  //     i.r = r14;
+  //     parsed_items.push_back(i);
+  //   }
+  // };
+
+  // template<> struct action < register_r15_rule > {
+  //   template< typename Input >
+  //   static void apply( const Input & in, Program & p){
+  //     Item i;
+  //     i.isARegister = true;
+  //     i.isMem = false;
+  //     i.r = r15;
+  //     parsed_items.push_back(i);
+  //   }
+  // };
+
+  // template<> struct action < register_rsp_rule > {
+  //   template< typename Input >
+  //   static void apply( const Input & in, Program & p){
+  //     Item i;
+  //     i.isARegister = true;
+  //     i.isMem = false;
+  //     i.r = rsp;
+  //     parsed_items.push_back(i);
+  //   }
+  // };
+
+  //Mem action
+  template<> struct action < mem_rule > {
     template< typename Input >
     static void apply( const Input & in, Program & p){
       Item i;
-      i.isARegister = true;
-      i.r = rax;
+      i.isARegister = false;
+      i.isMem = true;
+      i.r = in[2].string();
+      i.r = in[4].string();
       parsed_items.push_back(i);
     }
   };
 
-
-
+  // Instruction Actions -> pop
   template<> struct action < Instruction_assignment_rule > {
     template< typename Input >
 	static void apply( const Input & in, Program & p){
@@ -565,7 +757,7 @@ namespace L1 {
     }
   };
 
-  template<> struct action < pegtl::sor<Instruction_arithmetic_rule, Instruction_shift_rule> > {
+  template<> struct action < pegtl::sor<Instruction_arithmetic_rule, Instruction_shift_rule>{}; > {
     template< typename Input >
 	static void apply( const Input & in, Program & p){
 
@@ -592,7 +784,7 @@ namespace L1 {
     }
   };
 
-  template<> struct action < Instruction_shift_rule > {
+  template<> struct action < Instruction_cmp_rule > {
     template< typename Input >
 	static void apply( const Input & in, Program & p){
 
@@ -604,10 +796,12 @@ namespace L1 {
       /* 
        * Create the instruction.
        */ 
-      auto i = new Instruction_shift();
-      i->src = parsed_items.back();
+      auto i = new Instruction_cmp();
+      i->arg2 = parsed_items.back();
       parsed_items.pop_back();
-      i->a = parsed_items.back();
+      i->cmp_rule = parsed_items.back();
+      parsed_items.pop_back();
+      i->arg1 = parsed_items.back();
       parsed_items.pop_back();
       i->dst = parsed_items.back();
       parsed_items.pop_back();

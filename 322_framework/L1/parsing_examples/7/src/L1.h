@@ -14,6 +14,7 @@ namespace L1 {
       bool isARegister;
       //allow mem to be an item
       bool isMem;
+      
       int offset;
   };
 
