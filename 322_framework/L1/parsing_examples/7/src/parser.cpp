@@ -461,7 +461,7 @@ namespace L1 {
     pegtl::must< 
       entry_point_rule
     > {};
-//*================================= ACTIONS =================================
+//================================= ACTIONS =================================
   /* 
    * Actions attached to grammar rules.
    */
@@ -550,31 +550,31 @@ namespace L1 {
     }
   };
 
-  // Register Actions rsp
-  template<> struct action < register_rsp_rule > {
-    template< typename Input >
-    static void apply( const Input & in, Program & p){
-      Item i;
-      i.isARegister = true;
-      i.isMem = false;
-      i.isNum = false;
-      i.r = in.string();
-      parsed_items.push_back(i);
-    }
-  };
+  // // Register Actions rsp
+  // template<> struct action < register_rsp_rule > {
+  //   template< typename Input >
+  //   static void apply( const Input & in, Program & p){
+  //     Item i;
+  //     i.isARegister = true;
+  //     i.isMem = false;
+  //     i.isNum = false;
+  //     i.r = in.string();
+  //     parsed_items.push_back(i);
+  //   }
+  // };
 
-  // Register Actions rsp
-  template<> struct action < register_rcx_rule > {
-    template< typename Input >
-    static void apply( const Input & in, Program & p){
-      Item i;
-      i.isARegister = true;
-      i.isMem = false;
-      i.isNum = false;
-      i.r = in.string();
-      parsed_items.push_back(i);
-    }
-  };
+  // // Register Actions rsp
+  // template<> struct action < register_rcx_rule > {
+  //   template< typename Input >
+  //   static void apply( const Input & in, Program & p){
+  //     Item i;
+  //     i.isARegister = true;
+  //     i.isMem = false;
+  //     i.isNum = false;
+  //     i.r = in.string();
+  //     parsed_items.push_back(i);
+  //   }
+  // };
 
   // Register Actions -> push
   // template<> struct action < register_rdi_rule > {
@@ -765,67 +765,67 @@ namespace L1 {
   // };
 
   //Mem action
-  template<> struct action < mem_rule > {
-    template< typename Input >
-    static void apply( const Input & in, Program & p){
-      Item i;
-      i.isARegister = false;
-      i.isMem = true;
-      i.isNum = false;
-      i.Register = in[2].string();
-      i.offset = in[4].string();
-      parsed_items.push_back(i);
-    }
-  };
-  // aop_rule -> push
-  template<> struct action < aop_rule > {
-    template< typename Input >
-    static void apply( const Input & in, Program & p){
-      operation i;
-      i.op = in.string();
-      parsed_items.push_back(i);
-    }
-  };
+  // template<> struct action < mem_rule > {
+  //   template< typename Input >
+  //   static void apply( const Input & in, Program & p){
+  //     Item i;
+  //     i.isARegister = false;
+  //     i.isMem = true;
+  //     i.isNum = false;
+  //     i.Register = in[2].string();
+  //     i.offset = in[4].string();
+  //     parsed_items.push_back(i);
+  //   }
+  // };
+  // // aop_rule -> push
+  // template<> struct action < aop_rule > {
+  //   template< typename Input >
+  //   static void apply( const Input & in, Program & p){
+  //     operation i;
+  //     i.op = in.string();
+  //     parsed_items.push_back(i);
+  //   }
+  // };
 
-  // crement_rule -> push
-  template<> struct action < crement_rule > {
-    template< typename Input >
-    static void apply( const Input & in, Program & p){
-      operation i;
-      i.op = in.string();
-      parsed_items.push_back(i);
-    }
-  }; 
+  // // crement_rule -> push
+  // template<> struct action < crement_rule > {
+  //   template< typename Input >
+  //   static void apply( const Input & in, Program & p){
+  //     operation i;
+  //     i.op = in.string();
+  //     parsed_items.push_back(i);
+  //   }
+  // }; 
 
-  // sop_rule -> push
-  template<> struct action < sop_rule > {
-    template< typename Input >
-    static void apply( const Input & in, Program & p){
-      operation i;
-      i.op = in.string();
-      parsed_items.push_back(i);
-    }
-  };  
+  // // sop_rule -> push
+  // template<> struct action < sop_rule > {
+  //   template< typename Input >
+  //   static void apply( const Input & in, Program & p){
+  //     operation i;
+  //     i.op = in.string();
+  //     parsed_items.push_back(i);
+  //   }
+  // };  
 
-  // cmp_rule -> push
-  template<> struct action < cmp_rule > {
-    template< typename Input >
-    static void apply( const Input & in, Program & p){
-      operation i;
-      i.op = in.string();
-      parsed_items.push_back(i);
-    }
-  };  
+  // // cmp_rule -> push
+  // template<> struct action < cmp_rule > {
+  //   template< typename Input >
+  //   static void apply( const Input & in, Program & p){
+  //     operation i;
+  //     i.op = in.string();
+  //     parsed_items.push_back(i);
+  //   }
+  // };  
 
-  // runtime_op_rule -> push
-  template<> struct action < runtime_op_rule > {
-    template< typename Input >
-    static void apply( const Input & in, Program & p){
-      operation i;
-      i.op = in.string();
-      parsed_items.push_back(i);
-    }
-  }; 
+  // // runtime_op_rule -> push
+  // template<> struct action < runtime_op_rule > {
+  //   template< typename Input >
+  //   static void apply( const Input & in, Program & p){
+  //     operation i;
+  //     i.op = in.string();
+  //     parsed_items.push_back(i);
+  //   }
+  // };
 
   // Instruction Actions -> pop
   template<> struct action < Instruction_assignment_rule > {
@@ -853,204 +853,204 @@ namespace L1 {
     }
   };
 
-  // Arithmetic actions
-  template<> struct action < Instruction_arithmetic_rule > {
-    template< typename Input >
-	static void apply( const Input & in, Program & p){
+  // // Arithmetic actions
+  // template<> struct action < Instruction_arithmetic_rule > {
+  //   template< typename Input >
+	// static void apply( const Input & in, Program & p){
 
-      /* 
-       * Fetch the current function.
-       */ 
-      auto currentF = p.functions.back();
+  //     /* 
+  //      * Fetch the current function.
+  //      */ 
+  //     auto currentF = p.functions.back();
 
-      /* 
-       * Create the instruction.
-       */ 
-      auto i = new Instruction_arithmetic();
-      i->src = parsed_items.back();
-      parsed_items.pop_back();
-      i->op = parsed_items.back();
-      parsed_items.pop_back();
-      i->dst = parsed_items.back();
-      parsed_items.pop_back();
+  //     /* 
+  //      * Create the instruction.
+  //      */ 
+  //     auto i = new Instruction_arithmetic();
+  //     i->src = parsed_items.back();
+  //     parsed_items.pop_back();
+  //     i->op = parsed_items.back();
+  //     parsed_items.pop_back();
+  //     i->dst = parsed_items.back();
+  //     parsed_items.pop_back();
 
-      /* 
-       * Add the just-created instruction to the current function.
-       */ 
-      currentF->instructions.push_back(i);
-    }
-  };
+  //     /* 
+  //      * Add the just-created instruction to the current function.
+  //      */ 
+  //     currentF->instructions.push_back(i);
+  //   }
+  // };
 
-  //crement rule
-  template<> struct action < Instruction_crement_rule > {
-    template< typename Input >
-	static void apply( const Input & in, Program & p){
+  // //crement rule
+  // template<> struct action < Instruction_crement_rule > {
+  //   template< typename Input >
+	// static void apply( const Input & in, Program & p){
 
-      /* 
-       * Fetch the current function.
-       */ 
-      auto currentF = p.functions.back();
+  //     /* 
+  //      * Fetch the current function.
+  //      */ 
+  //     auto currentF = p.functions.back();
 
-      /* 
-       * Create the instruction.
-       */ 
-      auto i = new Instruction_crement();
-      i->op = parsed_items.back();
-      parsed_items.pop_back();
-      i->dst = parsed_items.back();
-      parsed_items.pop_back();
+  //     /* 
+  //      * Create the instruction.
+  //      */ 
+  //     auto i = new Instruction_crement();
+  //     i->op = parsed_items.back();
+  //     parsed_items.pop_back();
+  //     i->dst = parsed_items.back();
+  //     parsed_items.pop_back();
 
-      /* 
-       * Add the just-created instruction to the current function.
-       */ 
-      currentF->instructions.push_back(i);
-    }
-  };
+  //     /* 
+  //      * Add the just-created instruction to the current function.
+  //      */ 
+  //     currentF->instructions.push_back(i);
+  //   }
+  // };
 
-  // Shift actions
-  template<> struct action < Instruction_shift_rule > {
-    template< typename Input >
-	static void apply( const Input & in, Program & p){
+  // // Shift actions
+  // template<> struct action < Instruction_shift_rule > {
+  //   template< typename Input >
+	// static void apply( const Input & in, Program & p){
 
-      /* 
-       * Fetch the current function.
-       */ 
-      auto currentF = p.functions.back();
+  //     /* 
+  //      * Fetch the current function.
+  //      */ 
+  //     auto currentF = p.functions.back();
 
-      /* 
-       * Create the instruction.
-       */ 
-      auto i = new Instruction_shift();
-      i->src = parsed_items.back();
-      parsed_items.pop_back();
-      i->op = parsed_items.back();
-      parsed_items.pop_back();
-      i->dst = parsed_items.back();
-      parsed_items.pop_back();
+  //     /* 
+  //      * Create the instruction.
+  //      */ 
+  //     auto i = new Instruction_shift();
+  //     i->src = parsed_items.back();
+  //     parsed_items.pop_back();
+  //     i->op = parsed_items.back();
+  //     parsed_items.pop_back();
+  //     i->dst = parsed_items.back();
+  //     parsed_items.pop_back();
 
-      /* 
-       * Add the just-created instruction to the current function.
-       */ 
-      currentF->instructions.push_back(i);
-    }
-  };
+  //     /* 
+  //      * Add the just-created instruction to the current function.
+  //      */ 
+  //     currentF->instructions.push_back(i);
+  //   }
+  // };
 
-  // cmp actions
+  // // cmp actions
 
-  template<> struct action < Instruction_cmp_rule > {
-    template< typename Input >
-	static void apply( const Input & in, Program & p){
+  // template<> struct action < Instruction_cmp_rule > {
+  //   template< typename Input >
+	// static void apply( const Input & in, Program & p){
 
-      /* 
-       * Fetch the current function.
-       */ 
-      auto currentF = p.functions.back();
+  //     /* 
+  //      * Fetch the current function.
+  //      */ 
+  //     auto currentF = p.functions.back();
 
-      /* 
-       * Create the instruction.
-       */ 
-      auto i = new Instruction_cmp();
-      i->arg2 = parsed_items.back();
-      parsed_items.pop_back();
-      i->op = parsed_items.back();
-      parsed_items.pop_back();
-      i->arg1 = parsed_items.back();
-      parsed_items.pop_back();
-      i->dst = parsed_items.back();
-      parsed_items.pop_back();
+  //     /* 
+  //      * Create the instruction.
+  //      */ 
+  //     auto i = new Instruction_cmp();
+  //     i->arg2 = parsed_items.back();
+  //     parsed_items.pop_back();
+  //     i->op = parsed_items.back();
+  //     parsed_items.pop_back();
+  //     i->arg1 = parsed_items.back();
+  //     parsed_items.pop_back();
+  //     i->dst = parsed_items.back();
+  //     parsed_items.pop_back();
 
-      /* 
-       * Add the just-created instruction to the current function.
-       */ 
-      currentF->instructions.push_back(i);
-    }
-  };
+  //     /* 
+  //      * Add the just-created instruction to the current function.
+  //      */ 
+  //     currentF->instructions.push_back(i);
+  //   }
+  // };
 
-  // cjump actions
-  template<> struct action < Instruction_cjump_rule > {
-    template< typename Input >
-	static void apply( const Input & in, Program & p){
+  // // cjump actions
+  // template<> struct action < Instruction_cjump_rule > {
+  //   template< typename Input >
+	// static void apply( const Input & in, Program & p){
 
-      /* 
-       * Fetch the current function.
-       */ 
-      auto currentF = p.functions.back();
+  //     /* 
+  //      * Fetch the current function.
+  //      */ 
+  //     auto currentF = p.functions.back();
 
-      /* 
-       * Create the instruction.
-       */ 
-      auto i = new Instruction_cjump();
-      i->label = parsed_items.back();
-      parsed_items.pop_back();
-      i->arg2 = parsed_items.back();
-      parsed_items.pop_back();
-      i->op = parsed_items.back();
-      parsed_items.pop_back();
-      i->arg1 = parsed_items.back();
-      parsed_items.pop_back();
+  //     /* 
+  //      * Create the instruction.
+  //      */ 
+  //     auto i = new Instruction_cjump();
+  //     i->label = parsed_items.back();
+  //     parsed_items.pop_back();
+  //     i->arg2 = parsed_items.back();
+  //     parsed_items.pop_back();
+  //     i->op = parsed_items.back();
+  //     parsed_items.pop_back();
+  //     i->arg1 = parsed_items.back();
+  //     parsed_items.pop_back();
 
-      /* 
-       * Add the just-created instruction to the current function.
-       */ 
-      currentF->instructions.push_back(i);
-    }
-  };
+  //     /* 
+  //      * Add the just-created instruction to the current function.
+  //      */ 
+  //     currentF->instructions.push_back(i);
+  //   }
+  // };
 
-  // lea action
-  template<> struct action < Instruction_LEA_rule > {
-    template< typename Input >
-	static void apply( const Input & in, Program & p){
+  // // lea action
+  // template<> struct action < Instruction_LEA_rule > {
+  //   template< typename Input >
+	// static void apply( const Input & in, Program & p){
 
-      /* 
-       * Fetch the current function.
-       */ 
-      auto currentF = p.functions.back();
+  //     /* 
+  //      * Fetch the current function.
+  //      */ 
+  //     auto currentF = p.functions.back();
 
-      /* 
-       * Create the instruction.
-       */ 
-      auto i = new Instruction_lea();
-      i->multiple = parsed_items.back();
-      parsed_items.pop_back();
-      i->arg2 = parsed_items.back();
-      parsed_items.pop_back();
-      i->arg1 = parsed_items.back();
-      parsed_items.pop_back();
-      i->dst = parsed_items.back();
-      parsed_items.pop_back();
+  //     /* 
+  //      * Create the instruction.
+  //      */ 
+  //     auto i = new Instruction_lea();
+  //     i->multiple = parsed_items.back();
+  //     parsed_items.pop_back();
+  //     i->arg2 = parsed_items.back();
+  //     parsed_items.pop_back();
+  //     i->arg1 = parsed_items.back();
+  //     parsed_items.pop_back();
+  //     i->dst = parsed_items.back();
+  //     parsed_items.pop_back();
 
-      /* 
-       * Add the just-created instruction to the current function.
-       */ 
-      currentF->instructions.push_back(i);
-    }
-  };
+  //     /* 
+  //      * Add the just-created instruction to the current function.
+  //      */ 
+  //     currentF->instructions.push_back(i);
+  //   }
+  // };
 
-  //call action
-  template<> struct action < Instruction_call_rule > {
-    template< typename Input >
-	static void apply( const Input & in, Program & p){
+  // //call action
+  // template<> struct action < Instruction_call_rule > {
+  //   template< typename Input >
+	// static void apply( const Input & in, Program & p){
 
-      /* 
-       * Fetch the current function.
-       */ 
-      auto currentF = p.functions.back();
+  //     /* 
+  //      * Fetch the current function.
+  //      */ 
+  //     auto currentF = p.functions.back();
 
-      /* 
-       * Create the instruction.
-       */ 
-      auto i = new Instruction_calls();
-      i->N = parsed_items.back();
-      parsed_items.pop_back();
-      i->u = parsed_items.back();
-      parsed_items.pop_back();
+  //     /* 
+  //      * Create the instruction.
+  //      */ 
+  //     auto i = new Instruction_calls();
+  //     i->N = parsed_items.back();
+  //     parsed_items.pop_back();
+  //     i->u = parsed_items.back();
+  //     parsed_items.pop_back();
 
-      /* 
-       * Add the just-created instruction to the current function.
-       */ 
-      currentF->instructions.push_back(i);
-    }
-  };
+  //     /* 
+  //      * Add the just-created instruction to the current function.
+  //      */ 
+  //     currentF->instructions.push_back(i);
+  //   }
+  // };
 
   Program parse_file (char *fileName){
 
