@@ -14,12 +14,24 @@ namespace L1{
      */ 
     std::ofstream outputFile;
     outputFile.open("prog.S");
+
+    outputFile << ".text\n";
    
     /* 
      * Generate target code
      */ 
-    //TODO -- write to prog.S file
+    //TODO
 
+    //program p
+    
+    //check p.entryPointLabel
+
+    //p.entryPointLabel;
+
+    //p.
+
+    //case (a):
+      //if ("<<=") 
 
     /* 
      * Close the output file.

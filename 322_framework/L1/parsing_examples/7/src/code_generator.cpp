@@ -14,6 +14,8 @@ namespace L1{
      */ 
     std::ofstream outputFile;
     outputFile.open("prog.S");
+
+    outputFile << ".text\n";
    
     /* 
      * Generate target code
