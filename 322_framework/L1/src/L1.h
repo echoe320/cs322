@@ -49,7 +49,11 @@ namespace L1 {
   /*
    * Instruction interface.
    */
+  enum iType {ret, assignment, arithmetic, crement, shift, cmp, cjump, lea, calls, _label, gotoo};
+  
   class Instruction{
+    public:
+      iType id;
   };
 
   /*

@@ -36,6 +36,7 @@ using namespace pegtl;
 using namespace std;
 
 namespace L1 {
+  bool shouldPrint = true;
 
   /* 
    * Data required to parse
@@ -110,10 +111,7 @@ namespace L1 {
         comment 
       > 
     > {};
-
-  //===================== jacobie defined =====================
   
-
   /* 
    * Keywords.
    */
@@ -204,6 +202,8 @@ namespace L1 {
   // mem rule aka memory offsets
   struct str_mem : TAOCPP_PEGTL_STRING( "mem" ) {};
 
+  struct offset : number {};
+
   struct mem_rule : 
     pegtl::seq<
       str_mem,
@@ -250,7 +250,7 @@ namespace L1 {
     > {};
 
   //------------------------ Shift Operations ------------------------
-  struct str_leftShift : TAOCPP_PEGTL_STRING( "<<=" ) {}; //!DO SOMETHIGN ABOUT THIS"
+  struct str_leftShift : TAOCPP_PEGTL_STRING( "<<=" ) {};
   struct str_rightShift : TAOCPP_PEGTL_STRING( ">>=" ) {};
 
   struct sop_rule : 
@@ -266,9 +266,9 @@ namespace L1 {
 
   struct cmp_rule :
     pegtl::sor<
-      peg,
       str_lessEqual,
-      str_equal
+      pegtl::one<'<'>,
+      pegtl::one<'='>
     > {};
     
   //------------------------ Conditional Jumps ------------------------------
@@ -357,10 +357,10 @@ namespace L1 {
       seps,
       str_arrow,
       seps,
-      t_rule, 
-      seps, 
-      cmp_rule, 
-      seps, 
+      t_rule,
+      seps,
+      cmp_rule,
+      seps,
       t_rule
     > {};
 
@@ -409,7 +409,10 @@ namespace L1 {
     > {};
 
   struct Instruction_label_rule :
-    Label_rule {};
+    pegtl::seq<
+      Label_rule,
+      pegtl::eol
+    > {};
 
   struct Instruction_goto_rule :
     pegtl::seq<
@@ -429,16 +432,16 @@ namespace L1 {
   struct Instruction_rule:
     pegtl::sor<
       pegtl::seq< pegtl::at<Instruction_return_rule>      , Instruction_return_rule       >,
+      pegtl::seq< pegtl::at<Instruction_cmp_rule>         , Instruction_cmp_rule          >,
       pegtl::seq< pegtl::at<Instruction_assignment_rule>  , Instruction_assignment_rule   >,
       pegtl::seq< pegtl::at<Instruction_arithmetic_rule>  , Instruction_arithmetic_rule   >,
       pegtl::seq< pegtl::at<Instruction_crement_rule>     , Instruction_crement_rule      >,
       pegtl::seq< pegtl::at<Instruction_shift_rule>       , Instruction_shift_rule        >,
-      pegtl::seq< pegtl::at<Instruction_cmp_rule>         , Instruction_cmp_rule          >,
       pegtl::seq< pegtl::at<Instruction_cjump_rule>       , Instruction_cjump_rule        >,
       pegtl::seq< pegtl::at<Instruction_LEA_rule>         , Instruction_LEA_rule          >,
       pegtl::seq< pegtl::at<Instruction_call_rule>        , Instruction_call_rule         >,
-      pegtl::seq< pegtl::at<Instruction_label_rule>       , Instruction_label_rule        >,
-      pegtl::seq< pegtl::at<Instruction_goto_rule>        , Instruction_goto_rule         >
+      pegtl::seq< pegtl::at<Instruction_goto_rule>        , Instruction_goto_rule         >,
+      pegtl::seq< pegtl::at<Instruction_label_rule>       , Instruction_label_rule        >
     > {};
 
   struct Instructions_rule:
@@ -536,12 +539,12 @@ namespace L1 {
   template<> struct action < number > {
     template< typename Input >
 	static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "number started\n";
       Item i;
-      i.isARegister = false;
-      i.isMem = false;
       i.isNum = true;
       i.offset = in.string();
       parsed_items.push_back(i);
+      if (shouldPrint) cout << "number ended\n";
     }
   };
 
@@ -557,10 +560,12 @@ namespace L1 {
   template<> struct action < Label_rule > {
     template< typename Input >
 	static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "label_rule started\n";
       Item i;
       i.labelName = in.string();
       i.isLabel = true;
       parsed_items.push_back(i);
+      if (shouldPrint) cout << "label_rule ended\n";
     }
   };
 
@@ -568,10 +573,12 @@ namespace L1 {
   template<> struct action < register_rule > {
     template< typename Input >
     static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "register_rule started\n";
       Item i;
       i.isARegister = true;
       i.Register = in.string();
       parsed_items.push_back(i);
+      if (shouldPrint) cout << "register_rule ended\n";
     }
   };
 
@@ -579,10 +586,12 @@ namespace L1 {
   template<> struct action < register_rsp_rule > {
     template< typename Input >
     static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "register_rsp_rule started\n";
       Item i;
       i.isARegister = true;
       i.Register = in.string();
       parsed_items.push_back(i);
+      if (shouldPrint) cout << "register_rsp_rule ended\n";
     }
   };
 
@@ -590,225 +599,30 @@ namespace L1 {
   template<> struct action < register_rcx_rule > {
     template< typename Input >
     static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "register_rcx_rule started\n";
       Item i;
       i.isARegister = true;
       i.Register = in.string();
       parsed_items.push_back(i);
+      if (shouldPrint) cout << "register_rcx_rule ended\n";
     }
   };
-
-  // t-rule Actions all
-  // template<> struct action < t_rule > {
-  //   template< typename Input >
-  //   static void apply( const Input & in, Program & p){
-  //     Item i;
-  //     if (std::find(std::begin(allRegisters), std::end(allRegisters), in.string()) != std::end(allRegisters)){
-  //       i.isARegister = true; 
-  //       i.Register = in.string();
-  //     } else {
-  //       i.isNum = true; 
-  //       i.offset = in.string();
-  //     }
-  //     parsed_items.push_back(i);
-  //   }
-  // };
-
-  // Register Actions -> push
-  // template<> struct action < register_rdi_rule > {
-  //   template< typename Input >
-  //   static void apply( const Input & in, Program & p){
-  //     Item i;
-  //     i.isARegister = true;
-  //     i.isMem = false;
-  //     i.Register = rdi;
-  //     parsed_items.push_back(i);
-  //   }
-  // };
-
-  // template<> struct action < register_rsi_rule > {
-  //   template< typename Input >
-  //   static void apply( const Input & in, Program & p){
-  //     Item i;
-  //     i.isARegister = true;
-  //     i.isMem = false;
-  //     i.r = rsi;
-  //     parsed_items.push_back(i);
-  //   }
-  // };
-
-  // template<> struct action < register_rdx_rule > {
-  //   template< typename Input >
-  //   static void apply( const Input & in, Program & p){
-  //     Item i;
-  //     i.isARegister = true;
-  //     i.isMem = false;
-  //     i.Register = rdx;
-  //     parsed_items.push_back(i);
-  //   }
-  // };
-
-  // template<> struct action < register_rcx_rule > {
-  //   template< typename Input >
-  //   static void apply( const Input & in, Program & p){
-  //     Item i;
-  //     i.isARegister = true;
-  //     i.isMem = false;
-  //     i.Register = rcx;
-  //     parsed_items.push_back(i);
-  //   }
-  // };
-
-  // template<> struct action < register_r8_rule > {
-  //   template< typename Input >
-  //   static void apply( const Input & in, Program & p){
-  //     Item i;
-  //     i.isARegister = true;
-  //     i.isMem = false;
-  //     i.r = r8;
-  //     parsed_items.push_back(i);
-  //   }
-  // };
-
-  // template<> struct action < register_r9_rule > {
-  //   template< typename Input >
-  //   static void apply( const Input & in, Program & p){
-  //     Item i;
-  //     i.isARegister = true;
-  //     i.isMem = false;
-  //     i.r = r9;
-  //     parsed_items.push_back(i);
-  //   }
-  // };
-
-  // template<> struct action < register_rax_rule > {
-  //   template< typename Input >
-  //   static void apply( const Input & in, Program & p){
-  //     Item i;
-  //     i.isARegister = true;
-  //     i.isMem = false;
-  //     i.r = rax;
-  //     parsed_items.push_back(i);
-  //   }
-  // };
-
-  // template<> struct action < register_rbx_rule > {
-  //   template< typename Input >
-  //   static void apply( const Input & in, Program & p){
-  //     Item i;
-  //     i.isARegister = true;
-  //     i.isMem = false;
-  //     i.r = rbx;
-  //     parsed_items.push_back(i);
-  //   }
-  // };
-
-  // template<> struct action < register_rdi_rule > {
-  //   template< typename Input >
-  //   static void apply( const Input & in, Program & p){
-  //     Item i;
-  //     i.isARegister = true;
-  //     i.isMem = false;
-  //     i.r = rdi;
-  //     parsed_items.push_back(i);
-  //   }
-  // };
-
-  // template<> struct action < register_rbp_rule > {
-  //   template< typename Input >
-  //   static void apply( const Input & in, Program & p){
-  //     Item i;
-  //     i.isARegister = true;
-  //     i.isMem = false;
-  //     i.r = rbp;
-  //     parsed_items.push_back(i);
-  //   }
-  // };
-
-  // template<> struct action < register_r10_rule > {
-  //   template< typename Input >
-  //   static void apply( const Input & in, Program & p){
-  //     Item i;
-  //     i.isARegister = true;
-  //     i.isMem = false;
-  //     i.r = r10;
-  //     parsed_items.push_back(i);
-  //   }
-  // };
-
-  // template<> struct action < register_r11_rule > {
-  //   template< typename Input >
-  //   static void apply( const Input & in, Program & p){
-  //     Item i;
-  //     i.isARegister = true;
-  //     i.isMem = false;
-  //     i.r = r11;
-  //     parsed_items.push_back(i);
-  //   }
-  // };
-
-  // template<> struct action < register_r12_rule > {
-  //   template< typename Input >
-  //   static void apply( const Input & in, Program & p){
-  //     Item i;
-  //     i.isARegister = true;
-  //     i.isMem = false;
-  //     i.r = r12;
-  //     parsed_items.push_back(i);
-  //   }
-  // };
-
-  // template<> struct action < register_r13_rule > {
-  //   template< typename Input >
-  //   static void apply( const Input & in, Program & p){
-  //     Item i;
-  //     i.isARegister = true;
-  //     i.isMem = false;
-  //     i.r = r13;
-  //     parsed_items.push_back(i);
-  //   }
-  // };
-
-  // template<> struct action < register_r14_rule > {
-  //   template< typename Input >
-  //   static void apply( const Input & in, Program & p){
-  //     Item i;
-  //     i.isARegister = true;
-  //     i.isMem = false;
-  //     i.r = r14;
-  //     parsed_items.push_back(i);
-  //   }
-  // };
-
-  // template<> struct action < register_r15_rule > {
-  //   template< typename Input >
-  //   static void apply( const Input & in, Program & p){
-  //     Item i;
-  //     i.isARegister = true;
-  //     i.isMem = false;
-  //     i.r = r15;
-  //     parsed_items.push_back(i);
-  //   }
-  // };
-
-  // template<> struct action < register_rsp_rule > {
-  //   template< typename Input >
-  //   static void apply( const Input & in, Program & p){
-  //     Item i;
-  //     i.isARegister = true;
-  //     i.isMem = false;
-  //     i.r = rsp;
-  //     parsed_items.push_back(i);
-  //   }
-  // };
 
   //Mem action
   template<> struct action < mem_rule > {
     template< typename Input >
     static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "mem_rule started\n";
       Item i;
       i.isMem = true;
-      i.Register = in.string()[2];
-      i.offset = in.string()[4];
+      // if (shouldPrint) cout << parsed_items.back();
+      i.offset = parsed_items.back().offset;
+      parsed_items.pop_back();
+      // if (shouldPrint) cout << parsed_items.back();
+      i.Register = parsed_items.back().Register;
+      parsed_items.pop_back();
+      if (shouldPrint) cout << "mem_rule ended\n";
+
       parsed_items.push_back(i);
     }
   };
@@ -816,9 +630,11 @@ namespace L1 {
   template<> struct action < aop_rule > {
     template< typename Input >
     static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "aop_rule started\n";
       operation i;
       i.op = in.string();
       parsed_ops.push_back(i);
+      if (shouldPrint) cout << "aop_rule ended\n";
     }
   };
 
@@ -826,9 +642,11 @@ namespace L1 {
   template<> struct action < crement_rule > {
     template< typename Input >
     static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "crement_rule started\n";
       operation i;
       i.op = in.string();
       parsed_ops.push_back(i);
+      if (shouldPrint) cout << "crement_rule ended\n";
     }
   }; 
 
@@ -836,9 +654,11 @@ namespace L1 {
   template<> struct action < sop_rule > {
     template< typename Input >
     static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "sop_rule started\n";
       operation i;
       i.op = in.string();
       parsed_ops.push_back(i);
+      if (shouldPrint) cout << "sop_rule ended\n";
     }
   };  
 
@@ -846,9 +666,11 @@ namespace L1 {
   template<> struct action < cmp_rule > {
     template< typename Input >
     static void apply( const Input & in, Program & p){
+      if (shouldPrint) std::cout << "cmp_rule started";
       operation i;
       i.op = in.string();
       parsed_ops.push_back(i);
+      if (shouldPrint) std::cout << "cmp_rule ended";
     }
   };  
 
@@ -856,9 +678,11 @@ namespace L1 {
   template<> struct action < runtime_op_rule > {
     template< typename Input >
     static void apply( const Input & in, Program & p){
-      operation i;
-      i.op = in.string();
-      parsed_ops.push_back(i);
+      if (shouldPrint) cout << "runtime_op_rule started\n";
+      Item i;
+      i.labelName = in.string();
+      parsed_items.push_back(i);
+      if (shouldPrint) cout << "runtime_op_rule ended\n";
     }
   };
 
@@ -866,6 +690,7 @@ namespace L1 {
   template<> struct action < Instruction_assignment_rule > {
     template< typename Input >
 	static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "Instruction_assignment_rule started\n";
 
       /* 
        * Fetch the current function.
@@ -880,11 +705,13 @@ namespace L1 {
       parsed_items.pop_back();
       i->dst = parsed_items.back();
       parsed_items.pop_back();
+      i->id = assignment;
 
       /* 
        * Add the just-created instruction to the current function.
        */ 
       currentF->instructions.push_back(i);
+      if (shouldPrint) cout << "Instruction_assignment_rule ended\n";
     }
   };
 
@@ -892,7 +719,7 @@ namespace L1 {
   template<> struct action < Instruction_arithmetic_rule > {
     template< typename Input >
 	static void apply( const Input & in, Program & p){
-
+      if (shouldPrint) cout << "Instruction_arithmetic_rule started\n";
       /* 
        * Fetch the current function.
        */ 
@@ -908,11 +735,13 @@ namespace L1 {
       parsed_ops.pop_back();
       i->dst = parsed_items.back();
       parsed_items.pop_back();
+      i->id = arithmetic;
 
       /* 
        * Add the just-created instruction to the current function.
        */ 
       currentF->instructions.push_back(i);
+      if (shouldPrint) cout << "Instruction_arithmetic_rule ended\n";
     }
   };
 
@@ -920,6 +749,7 @@ namespace L1 {
   template<> struct action < Instruction_crement_rule > {
     template< typename Input >
 	static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "Instruction_crement_rule started\n";
 
       /* 
        * Fetch the current function.
@@ -934,11 +764,13 @@ namespace L1 {
       parsed_ops.pop_back();
       i->dst = parsed_items.back();
       parsed_items.pop_back();
+      i->id = crement;
 
       /* 
        * Add the just-created instruction to the current function.
        */ 
       currentF->instructions.push_back(i);
+      if (shouldPrint) cout << "Instruction_crement_rule ended\n";
     }
   };
 
@@ -946,6 +778,7 @@ namespace L1 {
   template<> struct action < Instruction_shift_rule > {
     template< typename Input >
 	static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "Instruction_shift_rule started\n";
 
       /* 
        * Fetch the current function.
@@ -967,6 +800,7 @@ namespace L1 {
        * Add the just-created instruction to the current function.
        */ 
       currentF->instructions.push_back(i);
+      if (shouldPrint) cout << "Instruction_shift_rule ended\n";
     }
   };
 
@@ -975,6 +809,7 @@ namespace L1 {
   template<> struct action < Instruction_cmp_rule > {
     template< typename Input >
 	static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "Instruction_cmp_rule started\n";
 
       /* 
        * Fetch the current function.
@@ -998,6 +833,7 @@ namespace L1 {
        * Add the just-created instruction to the current function.
        */ 
       currentF->instructions.push_back(i);
+      if (shouldPrint) cout << "Instruction_cmp_rule ended\n";
     }
   };
 
@@ -1005,6 +841,7 @@ namespace L1 {
   template<> struct action < Instruction_cjump_rule > {
     template< typename Input >
 	static void apply( const Input & in, Program & p){
+      if (shouldPrint) std::cout << "Instruction_cjump_rule started";
 
       /* 
        * Fetch the current function.
@@ -1028,6 +865,7 @@ namespace L1 {
        * Add the just-created instruction to the current function.
        */ 
       currentF->instructions.push_back(i);
+      if (shouldPrint) std::cout << "Instruction_cjump_rule ended";
     }
   };
 
@@ -1035,6 +873,7 @@ namespace L1 {
   template<> struct action < Instruction_LEA_rule > {
     template< typename Input >
 	static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "Instruction_LEA_rule started\n";
 
       /* 
        * Fetch the current function.
@@ -1058,6 +897,7 @@ namespace L1 {
        * Add the just-created instruction to the current function.
        */ 
       currentF->instructions.push_back(i);
+      if (shouldPrint) cout << "Instruction_cmp_rule ended\n";
     }
   };
 
@@ -1065,6 +905,7 @@ namespace L1 {
   template<> struct action < Instruction_label_rule > {
     template< typename Input >
 	static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "Instruction_label_rule started\n";
 
       /* 
        * Fetch the current function.
@@ -1074,6 +915,7 @@ namespace L1 {
       /* 
        * Create the instruction.
        */ 
+      // cout << "This: " << parsed_items.back().labelName << endl;
       auto i = new Instruction_label();
       i->label = parsed_items.back();
       parsed_items.pop_back();
@@ -1082,6 +924,7 @@ namespace L1 {
        * Add the just-created instruction to the current function.
        */ 
       currentF->instructions.push_back(i);
+      if (shouldPrint) cout << "Instruction_label_rule ended\n";
     }
   };
   
@@ -1089,6 +932,7 @@ namespace L1 {
   template<> struct action < Instruction_goto_rule > {
     template< typename Input >
 	static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "Instruction_goto_rule started\n";
 
       /* 
        * Fetch the current function.
@@ -1106,6 +950,7 @@ namespace L1 {
        * Add the just-created instruction to the current function.
        */ 
       currentF->instructions.push_back(i);
+      if (shouldPrint) cout << "Instruction_goto_rule ended\n";
     }
   };
 
@@ -1113,6 +958,7 @@ namespace L1 {
   template<> struct action < Instruction_call_rule > {
     template< typename Input >
 	static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "Instruction_call_rule started\n";
 
       /* 
        * Fetch the current function.
@@ -1132,6 +978,7 @@ namespace L1 {
        * Add the just-created instruction to the current function.
        */ 
       currentF->instructions.push_back(i);
+      if (shouldPrint) cout << "Instruction_call_rule ended\n";
     }
   };
 
