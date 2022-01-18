@@ -36,7 +36,7 @@ using namespace pegtl;
 using namespace std;
 
 namespace L1 {
-  bool shouldPrint = true;
+  bool shouldPrint = false;
 
   /* 
    * Data required to parse
@@ -278,7 +278,7 @@ namespace L1 {
 
   //------------------------ LEA operation ------------------------------
 
-  struct str_at : TAOCPP_PEGTL_STRING ( "@" ) {};
+  // struct str_at : TAOCPP_PEGTL_STRING ( "@" ) {};
 
   //------------------------ Call operations ------------------------------
 
@@ -291,17 +291,21 @@ namespace L1 {
   struct str_call : TAOCPP_PEGTL_STRING( "call" ) {};
 
   struct runtime_op_rule :
-    pegtl::sor<
-      str_print,
-      str_input,
-      str_allocate,
-      str_tensor_error
+    pegtl::seq<
+      pegtl::sor<
+        str_print,
+        str_input,
+        str_allocate,
+        str_tensor_error
+      > 
     > {};
 
   //------------------------ Instruction rules ------------------------
   struct Instruction_return_rule :
     pegtl::seq<
-      str_return
+      seps,
+      str_return,
+      seps
     > { };
 
   struct Instruction_assignment_rule : // mem rsp 0 <- rdi
@@ -401,6 +405,8 @@ namespace L1 {
     pegtl::seq<
       register_rule,
       seps,
+      pegtl::one<'@'>,
+      seps,
       register_rule,
       seps,
       register_rule,
@@ -410,8 +416,9 @@ namespace L1 {
 
   struct Instruction_label_rule :
     pegtl::seq<
+      seps,
       Label_rule,
-      pegtl::eol
+      seps
     > {};
 
   struct Instruction_goto_rule :
@@ -466,14 +473,17 @@ namespace L1 {
       seps,
       Instructions_rule,
       seps,
-      pegtl::one< ')' >
+      pegtl::one< ')' >,
+      seps
     > {};
 
   struct Functions_rule: // covers multiple functions
     pegtl::plus<
-      seps,
-      Function_rule,
-      seps
+      pegtl::seq<
+        seps,
+        Function_rule,
+        seps
+      >
     > {};
 
   struct entry_point_rule:
@@ -514,6 +524,7 @@ namespace L1 {
   template<> struct action < function_name > {
     template< typename Input >
 	static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "function_name (no end)\n";
       auto newF = new Function();
       newF->name = in.string();
       p.functions.push_back(newF);
@@ -523,6 +534,7 @@ namespace L1 {
   template<> struct action < argument_number > {
     template< typename Input >
 	static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "argument_number (no end)\n";
       auto currentF = p.functions.back();
       currentF->arguments = std::stoll(in.string());
     }
@@ -531,6 +543,7 @@ namespace L1 {
   template<> struct action < local_number > {
     template< typename Input >
 	static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "local_number (no end)\n";
       auto currentF = p.functions.back();
       currentF->locals = std::stoll(in.string());
     }
@@ -548,14 +561,16 @@ namespace L1 {
     }
   };
 
-  template<> struct action < str_return > {
-    template< typename Input >
-	static void apply( const Input & in, Program & p){
-      auto currentF = p.functions.back();
-      auto i = new Instruction_ret();
-      currentF->instructions.push_back(i);
-    }
-  };
+  // template<> struct action < str_return > {
+  //   template< typename Input >
+	// static void apply( const Input & in, Program & p){
+  //     if (shouldPrint) cout << "return instruction (no end)\n";
+  //     auto currentF = p.functions.back();
+  //     auto i = new Instruction_ret();
+  //     i->id = ret;
+  //     currentF->instructions.push_back(i);
+  //   }
+  // };
 
   template<> struct action < Label_rule > {
     template< typename Input >
@@ -595,18 +610,18 @@ namespace L1 {
     }
   };
 
-  // Register Actions rcx
-  template<> struct action < register_rcx_rule > {
-    template< typename Input >
-    static void apply( const Input & in, Program & p){
-      if (shouldPrint) cout << "register_rcx_rule started\n";
-      Item i;
-      i.isARegister = true;
-      i.Register = in.string();
-      parsed_items.push_back(i);
-      if (shouldPrint) cout << "register_rcx_rule ended\n";
-    }
-  };
+  // // Register Actions rcx
+  // template<> struct action < register_rcx_rule > {
+  //   template< typename Input >
+  //   static void apply( const Input & in, Program & p){
+  //     if (shouldPrint) cout << "register_rcx_rule started\n";
+  //     Item i;
+  //     i.isARegister = true;
+  //     i.Register = in.string();
+  //     parsed_items.push_back(i);
+  //     if (shouldPrint) cout << "register_rcx_rule ended\n";
+  //   }
+  // };
 
   //Mem action
   template<> struct action < mem_rule > {
@@ -666,11 +681,11 @@ namespace L1 {
   template<> struct action < cmp_rule > {
     template< typename Input >
     static void apply( const Input & in, Program & p){
-      if (shouldPrint) std::cout << "cmp_rule started";
+      if (shouldPrint) std::cout << "cmp_rule started\n";
       operation i;
       i.op = in.string();
       parsed_ops.push_back(i);
-      if (shouldPrint) std::cout << "cmp_rule ended";
+      if (shouldPrint) std::cout << "cmp_rule ended\n";
     }
   };  
 
@@ -687,6 +702,18 @@ namespace L1 {
   };
 
   // Instruction Actions -> pop
+  template<> struct action < Instruction_return_rule > {
+    template< typename Input >
+	static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "return instruction started\n";
+      auto currentF = p.functions.back();
+      auto i = new Instruction_ret();
+      i->id = ret;
+      currentF->instructions.push_back(i);
+      if (shouldPrint) cout << "return instruction ended\n";
+    }
+  };
+
   template<> struct action < Instruction_assignment_rule > {
     template< typename Input >
 	static void apply( const Input & in, Program & p){
@@ -795,6 +822,7 @@ namespace L1 {
       parsed_ops.pop_back();
       i->dst = parsed_items.back();
       parsed_items.pop_back();
+      i->id = shift;
 
       /* 
        * Add the just-created instruction to the current function.
@@ -828,6 +856,7 @@ namespace L1 {
       parsed_items.pop_back();
       i->dst = parsed_items.back();
       parsed_items.pop_back();
+      i->id = cmp;
 
       /* 
        * Add the just-created instruction to the current function.
@@ -841,7 +870,7 @@ namespace L1 {
   template<> struct action < Instruction_cjump_rule > {
     template< typename Input >
 	static void apply( const Input & in, Program & p){
-      if (shouldPrint) std::cout << "Instruction_cjump_rule started";
+      if (shouldPrint) std::cout << "Instruction_cjump_rule started\n";
 
       /* 
        * Fetch the current function.
@@ -860,12 +889,13 @@ namespace L1 {
       parsed_ops.pop_back();
       i->arg1 = parsed_items.back();
       parsed_items.pop_back();
+      i->id = cjump;
 
       /* 
        * Add the just-created instruction to the current function.
        */ 
       currentF->instructions.push_back(i);
-      if (shouldPrint) std::cout << "Instruction_cjump_rule ended";
+      if (shouldPrint) std::cout << "Instruction_cjump_rule ended\n";
     }
   };
 
@@ -892,12 +922,13 @@ namespace L1 {
       parsed_items.pop_back();
       i->dst = parsed_items.back();
       parsed_items.pop_back();
+      i->id = lea;
 
       /* 
        * Add the just-created instruction to the current function.
        */ 
       currentF->instructions.push_back(i);
-      if (shouldPrint) cout << "Instruction_cmp_rule ended\n";
+      if (shouldPrint) cout << "Instruction_LEA_rule ended\n";
     }
   };
 
@@ -919,6 +950,7 @@ namespace L1 {
       auto i = new Instruction_label();
       i->label = parsed_items.back();
       parsed_items.pop_back();
+      i->id = _label;
 
       /* 
        * Add the just-created instruction to the current function.
@@ -945,6 +977,7 @@ namespace L1 {
       auto i = new Instruction_goto();
       i->label = parsed_items.back();
       parsed_items.pop_back();
+      i->id = gotoo;
 
       /* 
        * Add the just-created instruction to the current function.
@@ -973,6 +1006,7 @@ namespace L1 {
       parsed_items.pop_back();
       i->u = parsed_items.back();
       parsed_items.pop_back();
+      i->id = calls;
 
       /* 
        * Add the just-created instruction to the current function.
