@@ -401,6 +401,8 @@ namespace L1 {
     pegtl::seq<
       register_rule,
       seps,
+      pegtl::one<'@'>,
+      seps,
       register_rule,
       seps,
       register_rule,
@@ -551,9 +553,12 @@ namespace L1 {
   template<> struct action < str_return > {
     template< typename Input >
 	static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "return started\n";
       auto currentF = p.functions.back();
       auto i = new Instruction_ret();
+      i->id = ret;
       currentF->instructions.push_back(i);
+      if (shouldPrint) cout << "return ended\n";
     }
   };
 
@@ -795,6 +800,7 @@ namespace L1 {
       parsed_ops.pop_back();
       i->dst = parsed_items.back();
       parsed_items.pop_back();
+      i->id = shift;
 
       /* 
        * Add the just-created instruction to the current function.
@@ -828,6 +834,7 @@ namespace L1 {
       parsed_items.pop_back();
       i->dst = parsed_items.back();
       parsed_items.pop_back();
+      i->id = cmp;
 
       /* 
        * Add the just-created instruction to the current function.
@@ -860,6 +867,7 @@ namespace L1 {
       parsed_ops.pop_back();
       i->arg1 = parsed_items.back();
       parsed_items.pop_back();
+      i->id = cjump;
 
       /* 
        * Add the just-created instruction to the current function.
@@ -892,6 +900,7 @@ namespace L1 {
       parsed_items.pop_back();
       i->dst = parsed_items.back();
       parsed_items.pop_back();
+      i->id = lea;
 
       /* 
        * Add the just-created instruction to the current function.
@@ -919,6 +928,7 @@ namespace L1 {
       auto i = new Instruction_label();
       i->label = parsed_items.back();
       parsed_items.pop_back();
+      i->id = _label;
 
       /* 
        * Add the just-created instruction to the current function.
@@ -945,6 +955,7 @@ namespace L1 {
       auto i = new Instruction_goto();
       i->label = parsed_items.back();
       parsed_items.pop_back();
+      i->id = gotoo;
 
       /* 
        * Add the just-created instruction to the current function.
