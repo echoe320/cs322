@@ -72,5 +72,7 @@
         "version": "cpp",
         "list": "cpp",
         "*.ipp": "cpp"
-    }
+    },
+    "editor.tabSize": 2,
+    "editor.detectIndentation": false
 }
