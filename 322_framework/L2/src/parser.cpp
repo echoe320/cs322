@@ -659,7 +659,7 @@ namespace L2 {
       parsed_items.push_back(i);
     }
   };
-  
+
   template<> struct action < aop_rule > {
     template< typename Input >
     static void apply( const Input & in, Program & p){

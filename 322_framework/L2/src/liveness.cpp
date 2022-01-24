@@ -70,31 +70,31 @@ namespace L2 {
         }
         case assignment:
         {
-          if (f.instructions[i].src.isVar) gen_temp.insert(f.instructions[i].src);
-          if (f.instructions[i].dst.isVar) kill_temp.insert(f.instructions[i].dst);
+          if (f.instructions[i]->src.isVar) gen_temp.insert(f.instructions[i]->src);
+          if (f.instructions[i]->dst.isVar) kill_temp.insert(f.instructions[i]->dst);
         }
         case arithmetic:
         {
-          gen_temp.insert(f.instructions[i].dst);
-          kill_temp.insert(f.instructions[i].dst);
-          if (f.instructions[i].src.isVar) gen_temp.insert(f.instructions[i].src);
+          gen_temp.insert(f.instructions[i]->dst);
+          kill_temp.insert(f.instructions[i]->dst);
+          if (f.instructions[i]->src.isVar) gen_temp.insert(f.instructions[i]->src);
         }
         case crement:
         {
-          gen_temp.insert(f.instructions[i].dst);
-          kill_temp.insert(f.instructions[i].dst);
+          gen_temp.insert(f.instructions[i]->dst);
+          kill_temp.insert(f.instructions[i]->dst);
         }
         case shift:
         {
-          gen_temp.insert(f.instructions[i].dst);
-          kill_temp.insert(f.instructions[i].dst);
-          if (f.instructions[i].src.isVar) gen_temp.insert(f.instructions[i].src);
+          gen_temp.insert(f.instructions[i]->dst);
+          kill_temp.insert(f.instructions[i]->dst);
+          if (f.instructions[i]->src.isVar) gen_temp.insert(f.instructions[i]->src);
         }
         case cmp:
         {
           kill_temp.insert(f.instructions[i].dst);
-          if (f.instructions[i].arg1.isVar) gen_temp.insert(f.instructions[i].arg1);
-          if (f.instructions[i].arg2.isVar) gen_temp.insert(f.instructions[i].arg2);
+          if (f.instructions[i]->arg1.isVar) gen_temp.insert(f.instructions[i].arg1);
+          if (f.instructions[i]->arg2.isVar) gen_temp.insert(f.instructions[i].arg2);
         }
         case cjump:
         {
@@ -109,17 +109,17 @@ namespace L2 {
         }
         case calls:
         {
-          int numArgs = stoi(f.instructions[i].N.offset);
-          gen_temp = arg_registers[numArgs];
-          if (f.instructions[i].u.isVar) gen_temp.insert(f.instructions[i].u);
+          // int numArgs = stoi(f.instructions[i].N->offset);
+          // gen_temp = arg_registers[numArgs];
+          if (f.instructions[i].u->isVar) gen_temp.insert(f.instructions[i].u);
 
           kill_temp = caller_save_set{};
           //? more than six args?
         }
         case runtime:
         {
-          int numArgs = stoi(f.instructions[i].N.offset);
-          gen_temp = arg_registers[numArgs];
+          // int numArgs = stoi(f.instructions[i].N.offset);
+          // gen_temp = arg_registers[numArgs];
           kill_temp = caller_save_set{};
         }
         default: //gotoo, _label don't have anything in gen or kill sets

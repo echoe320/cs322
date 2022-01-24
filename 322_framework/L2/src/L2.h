@@ -3,6 +3,8 @@
 #include <vector>
 #include <string>
 
+#include <unordered_set>
+
 namespace L2 {
   class visitor;
 
@@ -16,7 +18,7 @@ namespace L2 {
 
   class Item {
     public:
-      virtual void print_obj = 0;
+      //virtual void print_obj = 0;
       std::string labelName;
       reg r;
       //std::string Register;
@@ -35,23 +37,23 @@ namespace L2 {
       
     private:
       reg r;
-  } 
+  };
 
   class Memory : public Item {
 
-  }
+  };
 
   class Number : public Item {
 
-  }
+  };
 
   class Label : public Item {
 
-  } 
+  };
 
   class Variable : public Item {
 
-  }
+  };
 
   class operation : public Item {
     public:
@@ -162,22 +164,22 @@ namespace L2 {
 
 
   //Callee save register items
-  Item reg_12 = new Item();
+  Item reg_12;
   reg_12->r = r12;
 
-  Item reg_13 = new Item();
+  Item reg_13;
   reg_13->r = r13;
 
-  Item reg_14 = new Item();
+  Item reg_14;
   reg_14->r = r14;
 
-  Item reg_15 = new Item();
+  Item reg_15;
   reg_15->r = r15;
 
-  Item reg_bp = new Item();
+  Item reg_bp;
   reg_bp->r = rbp;
 
-  Item reg_bx = new Item();
+  Item reg_bx;
   reg_bx->r = rbx;
 
   //Callee save register unordered-set
@@ -190,31 +192,31 @@ namespace L2 {
   callee_save_set.insert(reg_bx);
 
   //Caller save register items
-  Item reg_10 = new Item();
+  Item reg_10;
   reg_10->r = r10;
 
-  Item reg_11 = new Item();
+  Item reg_11;
   reg_11->r = r11;
 
-  Item reg_8 = new Item();
+  Item reg_8;
   reg_8->r = r8;
 
-  Item reg_9 = new Item();
+  Item reg_9;
   reg_9->r = r9;
 
-  Item reg_ax = new Item();
+  Item reg_ax;
   reg_ax->r = rax;
 
-  Item reg_cx = new Item();
+  Item reg_cx;
   reg_cx->r = rcx;
   
-  Item reg_di = new Item();
+  Item reg_di;
   reg_di->r = rdi;
 
-  Item reg_dx = new Item();
+  Item reg_dx;
   reg_dx->r = rdx;
 
-  Item reg_si = new Item();
+  Item reg_si;
   reg_si->r = rsi;
   
   
@@ -231,12 +233,12 @@ namespace L2 {
   caller_save_set.insert(reg_si);
 
   // arg register sets
-  std::vector<std::unordered_set<Item>> arg_registers[7];
-  arg_registers[0] = {};
-  arg_registers[1] = {reg_di};
-  arg_registers[2] = {reg_di, reg_si};
-  arg_registers[3] = {reg_di, reg_si, reg_dx};
-  arg_registers[4] = {reg_di, reg_si, reg_dx, reg_cx};
-  arg_registers[5] = {reg_di, reg_si, reg_dx, reg_cx, reg_8};
-  arg_registers[6] = {reg_di, reg_si, reg_dx, reg_cx, reg_8, reg_9};
+  // std::vector<std::unordered_set<Item>> arg_registers[7];
+  // arg_registers[0] = {};
+  // arg_registers[1] = {reg_di};
+  // arg_registers[2] = {reg_di, reg_si};
+  // arg_registers[3] = {reg_di, reg_si, reg_dx};
+  // arg_registers[4] = {reg_di, reg_si, reg_dx, reg_cx};
+  // arg_registers[5] = {reg_di, reg_si, reg_dx, reg_cx, reg_8};
+  // arg_registers[6] = {reg_di, reg_si, reg_dx, reg_cx, reg_8, reg_9};
 }
