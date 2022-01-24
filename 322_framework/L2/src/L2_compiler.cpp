@@ -79,6 +79,7 @@ int main(
    * Parse the input file.
    */
   L2::Program p;
+  L2::Function f;
   if (spill_only){
 
     /* 
@@ -91,14 +92,14 @@ int main(
     /*
      * Parse an L2 function.
      */
-    p = L2::parse_function_file(argv[optind]);
+    f = L2::parse_function_file(argv[optind]);
 
   } else if (interference_only){
 
     /*
      * Parse an L2 function.
      */
-    p = L2::parse_function_file(argv[optind]);
+    f = L2::parse_function_file(argv[optind]);
 
   } else {
 

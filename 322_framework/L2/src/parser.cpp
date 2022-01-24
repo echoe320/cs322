@@ -391,9 +391,19 @@ namespace L2 {
       seps,
       pegtl::sor<
         w_rule,
-        Label_rule,
-        runtime_op_rule
+        Label_rule
       >,
+      seps,
+      number,
+      seps
+    > {};
+
+  struct Instruction_runtime_rule :
+    pegtl::seq<
+      seps,
+      str_call,
+      seps,
+      runtime_op_rule,
       seps,
       number,
       seps
@@ -606,7 +616,13 @@ namespace L2 {
       Item i;
       i.isARegister = true;
       i.isVar = true;
-      i.Register = in.string();
+      //i.Register = in.string();
+      i.r = -1;
+
+      for (int i = 0; i < arg_registers.length; i++) {
+        if (arg_registers[i] == in.string()) i.r = i;
+      }
+
       parsed_items.push_back(i);
       if (shouldPrint) cout << "w_rule ended\n";
     }
@@ -621,6 +637,7 @@ namespace L2 {
       i.isARegister = true;
       i.isVar = false;
       i.Register = in.string();
+      i.r = rsp;
       parsed_items.push_back(i);
       if (shouldPrint) cout << "register_rsp_rule ended\n";
     }
@@ -642,6 +659,19 @@ namespace L2 {
       parsed_items.push_back(i);
     }
   };
+  
+  template<> struct action < aop_rule > {
+    template< typename Input >
+    static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "aop_rule started\n";
+      operation i;
+      i.op = in.string();
+      parsed_ops.push_back(i);
+      if (shouldPrint) cout << "aop_rule ended\n";
+    }
+  };
+
+  
   // aop_rule -> push
   template<> struct action < aop_rule > {
     template< typename Input >
@@ -1047,6 +1077,35 @@ namespace L2 {
     }
   };
 
+  //RUNTIME call action
+  template<> struct action < Instruction_runtime_rule > {
+    template< typename Input >
+	static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "Instruction_call_rule started\n";
+
+      /* 
+       * Fetch the current function.
+       */ 
+      auto currentF = p.functions.back();
+
+      /* 
+       * Create the instruction.
+       */ 
+      auto i = new Instruction_runtime();
+      i->N = parsed_items.back();
+      parsed_items.pop_back();
+      i->runtime = parsed_items.back();
+      parsed_items.pop_back();
+      i->id = calls;
+
+      /* 
+       * Add the just-created instruction to the current function.
+       */ 
+      currentF->instructions.push_back(i);
+      if (shouldPrint) cout << "Instruction_call_rule ended\n";
+    }
+  };
+
   Program parse_file (char *fileName){
 
     /* 
@@ -1064,7 +1123,7 @@ namespace L2 {
     return p;
   }
 
-  Program parse_function_file (char *fileName){
+  Function parse_function_file (char *fileName){
 
     /* 
      * Check the grammar for some possible issues.
@@ -1075,10 +1134,10 @@ namespace L2 {
      * Parse.
      */   
     file_input< > fileInput(fileName);
-    Program p;
-    parse< grammar, action >(fileInput, p);
+    Function f;
+    parse< grammar, action >(fileInput, f);
 
-    return p;
+    return f;
   }
 
   Program parse_spill_file (char *fileName){

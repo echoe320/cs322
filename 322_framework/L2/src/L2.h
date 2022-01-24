@@ -6,17 +6,20 @@
 namespace L2 {
   class visitor;
 
-  enum Register {rdi, rsi, rdx, rcx, r8, r9, rax, rbx, rbp, r10, r11, r12, r13, r14, r15, rsp};
+  enum reg {rdi, rsi, rdx, rcx, r8, r9, rax, rbx, rbp, r10, r11, r12, r13, r14, r15, rsp};
 
   enum Operation {op_add, op_minus, op_multiply, op_divide, op_lshift, op_rshift};
   
-  enum iType {ret, assignment, arithmetic, crement, shift, cmp, cjump, lea, calls, _label, gotoo, stackarg};
+  enum iType {ret, assignment, arithmetic, crement, shift, cmp, cjump, lea, calls, runtime, _label, gotoo, stackarg};
+
+  std::vector<std::string> arg_registers[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9", "rax"};
 
   class Item {
     public:
+      virtual void print_obj = 0;
       std::string labelName;
-      //Register r;
-      std::string Register;
+      reg r;
+      //std::string Register;
       std::string offset; // doubles as number
 
       bool isARegister = false;
@@ -27,9 +30,30 @@ namespace L2 {
       //int offset;
   };
 
-  //class 
+  class Register : public Item {
+    public:
+      
+    private:
+      reg r;
+  } 
 
-  class operation {
+  class Memory : public Item {
+
+  }
+
+  class Number : public Item {
+
+  }
+
+  class Label : public Item {
+
+  } 
+
+  class Variable : public Item {
+
+  }
+
+  class operation : public Item {
     public:
       std::string op;
   };
@@ -91,6 +115,12 @@ namespace L2 {
   class Instruction_calls : public Instruction{
     public:
       Item u, N; //call u N
+      // bool isRuntime = false;
+  };
+
+  class Instruction_runtime : public Instruction{
+    public:
+      Item runtime, N;
   };
 
   class Instruction_label : public Instruction{
@@ -127,4 +157,86 @@ namespace L2 {
       std::string entryPointLabel;
       std::vector<Function *> functions;
   };
+
+  //* LIVENESS SETS
+
+
+  //Callee save register items
+  Item reg_12 = new Item();
+  reg_12->r = r12;
+
+  Item reg_13 = new Item();
+  reg_13->r = r13;
+
+  Item reg_14 = new Item();
+  reg_14->r = r14;
+
+  Item reg_15 = new Item();
+  reg_15->r = r15;
+
+  Item reg_bp = new Item();
+  reg_bp->r = rbp;
+
+  Item reg_bx = new Item();
+  reg_bx->r = rbx;
+
+  //Callee save register unordered-set
+  std::unordered_set<Item> callee_save_set[6];
+  callee_save_set.insert(reg_12);
+  callee_save_set.insert(reg_13);
+  callee_save_set.insert(reg_14);
+  callee_save_set.insert(reg_15);
+  callee_save_set.insert(reg_bp);
+  callee_save_set.insert(reg_bx);
+
+  //Caller save register items
+  Item reg_10 = new Item();
+  reg_10->r = r10;
+
+  Item reg_11 = new Item();
+  reg_11->r = r11;
+
+  Item reg_8 = new Item();
+  reg_8->r = r8;
+
+  Item reg_9 = new Item();
+  reg_9->r = r9;
+
+  Item reg_ax = new Item();
+  reg_ax->r = rax;
+
+  Item reg_cx = new Item();
+  reg_cx->r = rcx;
+  
+  Item reg_di = new Item();
+  reg_di->r = rdi;
+
+  Item reg_dx = new Item();
+  reg_dx->r = rdx;
+
+  Item reg_si = new Item();
+  reg_si->r = rsi;
+  
+  
+  //Caller save register unordered-set
+  std::unordered_set<Item> caller_save_set[9];
+  caller_save_set.insert(reg_10);
+  caller_save_set.insert(reg_11);
+  caller_save_set.insert(reg_8);
+  caller_save_set.insert(reg_9);
+  caller_save_set.insert(reg_ax);
+  caller_save_set.insert(reg_cx);
+  caller_save_set.insert(reg_di);
+  caller_save_set.insert(reg_dx);
+  caller_save_set.insert(reg_si);
+
+  // arg register sets
+  std::vector<std::unordered_set<Item>> arg_registers[7];
+  arg_registers[0] = {};
+  arg_registers[1] = {reg_di};
+  arg_registers[2] = {reg_di, reg_si};
+  arg_registers[3] = {reg_di, reg_si, reg_dx};
+  arg_registers[4] = {reg_di, reg_si, reg_dx, reg_cx};
+  arg_registers[5] = {reg_di, reg_si, reg_dx, reg_cx, reg_8};
+  arg_registers[6] = {reg_di, reg_si, reg_dx, reg_cx, reg_8, reg_9};
 }
