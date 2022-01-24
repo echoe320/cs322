@@ -1064,7 +1064,7 @@ namespace L2 {
     return p;
   }
 
-  Function parse_function_file (char *fileName){
+  Program parse_function_file (char *fileName){
 
     /* 
      * Check the grammar for some possible issues.
@@ -1075,10 +1075,10 @@ namespace L2 {
      * Parse.
      */   
     file_input< > fileInput(fileName);
-    Function f;
-    parse< grammar, action >(fileInput, f);
+    Program p;
+    parse< grammar, action >(fileInput, p);
 
-    return f;
+    return p;
   }
 
   Program parse_spill_file (char *fileName){
