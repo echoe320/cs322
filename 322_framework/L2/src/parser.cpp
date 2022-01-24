@@ -144,7 +144,7 @@ namespace L2 {
   struct register_rax_rule : str_rax {};
 
 
-//! ======================= Some registers not used in L2?? =======================
+//* ======================= Some registers not used in L2 =======================
   // //Caller save -> also includes rdi, rsi, rdx, rcx, r8, r9, rax
 
   // struct str_r10 : TAOCPP_PEGTL_STRING( "r10" ) {};
@@ -190,14 +190,20 @@ namespace L2 {
       // register_r13_rule,
       // register_r14_rule,
       // register_r15_rule,
-      register_rsp_rule,
+      // register_rsp_rule, // i want to separate register rsp because its not included in w
       var
     > {};
 
   struct t_rule :
     pegtl::sor<
-      w_rule,
+      x_rule,
       number
+    > {};
+
+  struct x_rule :
+    pegtl::sor<
+      w_rule,
+      register_rsp_rule
     > {};
 
   // mem rule aka memory offsets
@@ -209,7 +215,7 @@ namespace L2 {
     pegtl::seq<
       str_mem,
       seps,
-      w_rule,
+      x_rule,
       seps,
       number
     > {};
@@ -580,6 +586,18 @@ namespace L2 {
     }
   };
 
+  // template<> struct action < var > {
+  //   template< typename Input >
+	// static void apply( const Input & in, Program & p){
+  //     if (shouldPrint) cout << "var started\n";
+  //     Item i;
+  //     i.isVar = true;
+  //     i.labelName = in.string();
+  //     parsed_items.push_back(i);
+  //     if (shouldPrint) cout << "var ended\n";
+  //   }
+  // };
+
   // Register Actions all
   template<> struct action < w_rule > {
     template< typename Input >
@@ -587,9 +605,24 @@ namespace L2 {
       if (shouldPrint) cout << "w_rule started\n";
       Item i;
       i.isARegister = true;
+      i.isVar = true;
       i.Register = in.string();
       parsed_items.push_back(i);
       if (shouldPrint) cout << "w_rule ended\n";
+    }
+  };
+
+  // rsp action because it's not included in above w_rule
+  template<> struct action < register_rsp_rule > {
+    template< typename Input >
+    static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "register_rsp_rule started\n";
+      Item i;
+      i.isARegister = true;
+      i.isVar = false;
+      i.Register = in.string();
+      parsed_items.push_back(i);
+      if (shouldPrint) cout << "register_rsp_rule ended\n";
     }
   };
 

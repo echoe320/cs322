@@ -4,6 +4,9 @@
 
 #include <liveness.h>
 
+// included libraries
+#include <unordered_set>
+
 using namespace std;
 
 namespace L2 {
@@ -19,10 +22,12 @@ namespace L2 {
 
     //* =========================== START OF LIVENESS ANALYSIS ===========================
     int numInstructions = f.instructions.size();
-    std::vector<std::unordered_set> GEN[numInstructions];
-    std::vector<std::unordered_set> KILL[numInstructions];
-    std::vector<std::unordered_set> IN[numInstructions];
-    std::vector<std::unordered_set> OUT[numInstructions];
+    
+    //? what type should the elements of the unordered_set be? i think Item is okay
+    std::vector<std::unordered_set<Item>> GEN[numInstructions]; //* GEN[i] = all variables read by instruction i
+    std::vector<std::unordered_set<Item>> KILL[numInstructions]; //* KILL[i] = all variables written/defined by instruction i
+    std::vector<std::unordered_set<Item>> IN[numInstructions];
+    std::vector<std::unordered_set<Item>> OUT[numInstructions];
 
     for (int i = 0; i < numInstructions; i++) {
       GEN[i] = {};

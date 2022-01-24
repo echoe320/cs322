@@ -23,10 +23,11 @@ namespace L2 {
       bool isMem = false;
       bool isNum = false;
       bool isLabel = false;
+      bool isVar = false;
       //int offset;
   };
 
-  class 
+  //class 
 
   class operation {
     public:
@@ -105,7 +106,7 @@ namespace L2 {
   class Instruction_stackarg : public Instruction {
     public:
       Item dst, M;
-  }
+  };
 
   /*
    * Function.
