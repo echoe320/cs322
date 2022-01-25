@@ -8,13 +8,11 @@
 namespace L2 {
   class visitor;
 
-  enum reg {rdi, rsi, rdx, rcx, r8, r9, rax, rbx, rbp, r10, r11, r12, r13, r14, r15, rsp};
+  enum reg {rdi, rsi, rdx, rcx, r8, r9, rax, rbx, rbp, r10, r11, r12, r13, r14, r15, rsp, empty};
 
   enum Operation {op_add, op_minus, op_multiply, op_divide, op_lshift, op_rshift};
   
   enum iType {ret, assignment, arithmetic, crement, shift, cmp, cjump, lea, calls, runtime, _label, gotoo, stackarg};
-
-  std::vector<std::string> arg_registers[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9", "rax"};
 
   class Item {
     public:
@@ -160,81 +158,10 @@ namespace L2 {
       std::vector<Function *> functions;
   };
 
-  //* LIVENESS SETS
-
-
-  //Callee save register items
-  Item reg_12;
-  reg_12->r = r12;
-
-  Item reg_13;
-  reg_13->r = r13;
-
-  Item reg_14;
-  reg_14->r = r14;
-
-  Item reg_15;
-  reg_15->r = r15;
-
-  Item reg_bp;
-  reg_bp->r = rbp;
-
-  Item reg_bx;
-  reg_bx->r = rbx;
-
-  //Callee save register unordered-set
-  std::unordered_set<Item> callee_save_set[6];
-  callee_save_set.insert(reg_12);
-  callee_save_set.insert(reg_13);
-  callee_save_set.insert(reg_14);
-  callee_save_set.insert(reg_15);
-  callee_save_set.insert(reg_bp);
-  callee_save_set.insert(reg_bx);
-
-  //Caller save register items
-  Item reg_10;
-  reg_10->r = r10;
-
-  Item reg_11;
-  reg_11->r = r11;
-
-  Item reg_8;
-  reg_8->r = r8;
-
-  Item reg_9;
-  reg_9->r = r9;
-
-  Item reg_ax;
-  reg_ax->r = rax;
-
-  Item reg_cx;
-  reg_cx->r = rcx;
-  
-  Item reg_di;
-  reg_di->r = rdi;
-
-  Item reg_dx;
-  reg_dx->r = rdx;
-
-  Item reg_si;
-  reg_si->r = rsi;
-  
-  
-  //Caller save register unordered-set
-  std::unordered_set<Item> caller_save_set[9];
-  caller_save_set.insert(reg_10);
-  caller_save_set.insert(reg_11);
-  caller_save_set.insert(reg_8);
-  caller_save_set.insert(reg_9);
-  caller_save_set.insert(reg_ax);
-  caller_save_set.insert(reg_cx);
-  caller_save_set.insert(reg_di);
-  caller_save_set.insert(reg_dx);
-  caller_save_set.insert(reg_si);
-
   // arg register sets
-  // std::vector<std::unordered_set<Item>> arg_registers[7];
-  // arg_registers[0] = {};
+  //std::vector<std::unordered_set<Item>> arg_registers(7);
+  //arg_registers.push_back({reg_di, reg_si, reg_dx, reg_cx, reg_8, reg_9});
+  //arg_registers.push_back();
   // arg_registers[1] = {reg_di};
   // arg_registers[2] = {reg_di, reg_si};
   // arg_registers[3] = {reg_di, reg_si, reg_dx};

@@ -13,7 +13,7 @@
 #include <iostream>
 
 #include <L2.h>
-#include <parser.h>
+#include <L2_parser.h>
 #include <liveness.h>
 
 using namespace std;
@@ -80,6 +80,7 @@ int main(
    */
   L2::Program p;
   L2::Function f;
+  //auto p,f;
   if (spill_only){
 
     /* 
@@ -121,8 +122,8 @@ int main(
    * Liveness test.
    */
   if (liveness_only){
-    // TODO
-    return 0;
+    L2::create_liveness_file(f);
+    //return 0;
   }
 
   /*

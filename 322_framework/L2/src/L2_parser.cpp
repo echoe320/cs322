@@ -28,7 +28,7 @@
 #include <tao/pegtl/contrib/raw_string.hpp>
 
 #include <L2.h>
-#include <parser.h>
+#include <L2_parser.h>
 
 namespace pegtl = tao::TAO_PEGTL_NAMESPACE;
 
@@ -45,7 +45,7 @@ namespace L2 {
   std::vector<operation> parsed_ops;
 
   std::vector<std::string> allRegisters = {"rdi", "rsi", "rdx", "rcx", "r8", "r9", "rax", "rbx", "rbp", "r10", "r11", "r12", "r13", "r14", "r15", "rsp"};
-
+  std::vector<std::string> arg_registers = {"rdi", "rsi", "rdx", "rcx", "r8", "r9", "rax"};
   /* 
    * Grammar rules from now on.
    */
@@ -193,17 +193,17 @@ namespace L2 {
       // register_rsp_rule, // i want to separate register rsp because its not included in w
       var
     > {};
+  
+  struct x_rule :
+    pegtl::sor<
+      w_rule,
+      register_rsp_rule
+    > {};
 
   struct t_rule :
     pegtl::sor<
       x_rule,
       number
-    > {};
-
-  struct x_rule :
-    pegtl::sor<
-      w_rule,
-      register_rsp_rule
     > {};
 
   // mem rule aka memory offsets
@@ -617,10 +617,12 @@ namespace L2 {
       i.isARegister = true;
       i.isVar = true;
       //i.Register = in.string();
-      i.r = -1;
+      i.r = empty;
 
-      for (int i = 0; i < arg_registers.length; i++) {
-        if (arg_registers[i] == in.string()) i.r = i;
+      for (int a = 0; a < arg_registers.length; a++) {
+        if (arg_registers[a] == in.string()) {
+          i.r = (reg)a;
+        } 
       }
 
       parsed_items.push_back(i);
@@ -636,7 +638,7 @@ namespace L2 {
       Item i;
       i.isARegister = true;
       i.isVar = false;
-      i.Register = in.string();
+      //i.r = in.string();
       i.r = rsp;
       parsed_items.push_back(i);
       if (shouldPrint) cout << "register_rsp_rule ended\n";
@@ -652,7 +654,7 @@ namespace L2 {
       i.isMem = true;
       i.offset = parsed_items.back().offset;
       parsed_items.pop_back();
-      i.Register = parsed_items.back().Register;
+      i.r = parsed_items.back().r;
       parsed_items.pop_back();
       if (shouldPrint) cout << "mem_rule ended\n";
 
@@ -660,16 +662,16 @@ namespace L2 {
     }
   };
 
-  template<> struct action < aop_rule > {
-    template< typename Input >
-    static void apply( const Input & in, Program & p){
-      if (shouldPrint) cout << "aop_rule started\n";
-      operation i;
-      i.op = in.string();
-      parsed_ops.push_back(i);
-      if (shouldPrint) cout << "aop_rule ended\n";
-    }
-  };
+  // template<> struct action < aop_rule > {
+  //   template< typename Input >
+  //   static void apply( const Input & in, Program & p){
+  //     if (shouldPrint) cout << "aop_rule started\n";
+  //     operation i;
+  //     i.op = in.string();
+  //     parsed_ops.push_back(i);
+  //     if (shouldPrint) cout << "aop_rule ended\n";
+  //   }
+  // };
 
   
   // aop_rule -> push
@@ -1033,7 +1035,7 @@ namespace L2 {
       /* 
        * Create the instruction.
        */ 
-      auto i = new Instruction_goto();
+      auto i = new Instruction_stackarg();
       i->M = parsed_items.back();
       parsed_items.pop_back();
       i->dst = parsed_items.back();
