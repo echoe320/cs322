@@ -41,11 +41,9 @@ namespace L2 {
   /* 
    * Data required to parse
    */ 
-  std::vector<Item> parsed_items;
-  std::vector<operation> parsed_ops;
+  std::vector<Item *> parsed_items;
+  std::vector<Operation *> parsed_ops;
 
-  std::vector<std::string> allRegisters = {"rdi", "rsi", "rdx", "rcx", "r8", "r9", "rax", "rbx", "rbp", "r10", "r11", "r12", "r13", "r14", "r15", "rsp"};
-  std::vector<std::string> arg_registers = {"rdi", "rsi", "rdx", "rcx", "r8", "r9", "rax"};
   /* 
    * Grammar rules from now on.
    */
@@ -138,39 +136,12 @@ namespace L2 {
   struct register_r9_rule : str_r9 {};
 
 
-  //Result registers
+  //Special registers
 
   struct str_rax : TAOCPP_PEGTL_STRING( "rax" ) {};
-  struct register_rax_rule : str_rax {};
-
-
-//* ======================= Some registers not used in L2 =======================
-  // //Caller save -> also includes rdi, rsi, rdx, rcx, r8, r9, rax
-
-  // struct str_r10 : TAOCPP_PEGTL_STRING( "r10" ) {};
-  // struct str_r11 : TAOCPP_PEGTL_STRING( "r11" ) {};
-
-  // struct register_r10_rule : str_r10 {};
-  // struct register_r11_rule : str_r11 {};
-  
-  // //Callee save -> also includes 
-  
-  // struct str_r12 : TAOCPP_PEGTL_STRING( "r12" ) {};
-  // struct str_r13 : TAOCPP_PEGTL_STRING( "r13" ) {};
-  // struct str_r14 : TAOCPP_PEGTL_STRING( "r14" ) {};
-  // struct str_r15 : TAOCPP_PEGTL_STRING( "r15" ) {};
-  // struct str_rbp : TAOCPP_PEGTL_STRING( "rbp" ) {};
-  // struct str_rbx : TAOCPP_PEGTL_STRING( "rbx" ) {};
-
-  // struct register_r12_rule : str_r12 {};
-  // struct register_r13_rule : str_r13 {};
-  // struct register_r14_rule : str_r14 {};
-  // struct register_r15_rule : str_r15 {};
-  // struct register_rbp_rule : str_rbp {};
-  // struct register_rbx_rule : str_rbx {};
-
-  //Registers
   struct str_rsp : TAOCPP_PEGTL_STRING( "rsp" ) {};
+
+  struct register_rax_rule : str_rax {};
   struct register_rsp_rule : str_rsp {};
 
   struct w_rule :
@@ -182,15 +153,6 @@ namespace L2 {
       register_r8_rule,
       register_r9_rule,
       register_rax_rule,
-      // register_rbx_rule,
-      // register_rbp_rule,
-      // register_r10_rule,
-      // register_r11_rule,
-      // register_r12_rule,
-      // register_r13_rule,
-      // register_r14_rule,
-      // register_r15_rule,
-      // register_rsp_rule, // i want to separate register rsp because its not included in w
       var
     > {};
   
@@ -228,41 +190,56 @@ namespace L2 {
   struct str_bitAND : TAOCPP_PEGTL_STRING( "&=" ) {};
   struct str_inc : TAOCPP_PEGTL_STRING( "++" ) {};
   struct str_dec : TAOCPP_PEGTL_STRING( "--" ) {};
+
+  struct plusEq_rule : str_plusEqual {};
+  struct minusEq_rule : str_minusEqual {};
+  struct multEq_rule : str_multEqual {};
+  struct bitAND_rule : str_bitAND {};
+  struct inc_rule : str_inc {};
+  struct dec_rule : str_dec {};
+
   
   struct aop_rule :
     pegtl::sor<
-      str_plusEqual,
-      str_minusEqual,
-      str_multEqual,
-      str_bitAND
+      plusEq_rule,
+      minusEq_rule,
+      multEq_rule,
+      bitAND_rule
     > {};
 
   struct crement_rule :
     pegtl::sor<
-      str_inc, 
-      str_dec
+      inc_rule,
+      dec_rule
     > {};
 
   //------------------------ Shift Operations ------------------------
   struct str_leftShift : TAOCPP_PEGTL_STRING( "<<=" ) {};
   struct str_rightShift : TAOCPP_PEGTL_STRING( ">>=" ) {};
 
+  struct Lshift_rule : str_leftShift {};
+  struct Rshift_rule : str_rightShift {};
+
   struct sop_rule : 
     pegtl::sor<
-      str_leftShift,
-      str_rightShift
+      Lshift_rule,
+      Rshift_rule
     > {};
   
   //------------------------ Comparison operations ------------------------
-  // struct str_less : TAOCPP_PEGTL_STRING( "<" ) {};
+  struct str_less : TAOCPP_PEGTL_STRING( "<" ) {};
   struct str_lessEqual : TAOCPP_PEGTL_STRING( "<=" ) {};
-  // struct str_equal : TAOCPP_PEGTL_STRING( "=" ) {};
+  struct str_equal : TAOCPP_PEGTL_STRING( "=" ) {};
+
+  struct less_rule : str_less {};
+  struct lessEq_rule : str_lessEqual {};
+  struct equal_rule : str_equal {};
 
   struct cmp_rule :
     pegtl::sor<
-      str_lessEqual,
-      pegtl::one<'<'>,
-      pegtl::one<'='>
+      less_rule,
+      lessEq_rule,
+      equal_rule
     > {};
     
   //------------------------ Conditional Jumps ------------------------------
@@ -576,10 +553,11 @@ namespace L2 {
     template< typename Input >
 	static void apply( const Input & in, Program & p){
       if (shouldPrint) cout << "number started\n";
-      Item i;
-      i.isNum = true;
-      i.offset = in.string();
-      parsed_items.push_back(i);
+      //Item *i;
+      Number n;
+      //i = &n;
+      n->num = std::stoi(in.string());
+      parsed_items.push_back(n);
       if (shouldPrint) cout << "number ended\n";
     }
   };
@@ -588,45 +566,125 @@ namespace L2 {
     template< typename Input >
 	static void apply( const Input & in, Program & p){
       if (shouldPrint) cout << "label_rule started\n";
-      Item i;
-      i.labelName = in.string();
-      i.isLabel = true;
+      Item *i;
+      Label l;
+      i = &l;
+      i->labelName = in.string();
       parsed_items.push_back(i);
       if (shouldPrint) cout << "label_rule ended\n";
     }
   };
 
-  // template<> struct action < var > {
-  //   template< typename Input >
-	// static void apply( const Input & in, Program & p){
-  //     if (shouldPrint) cout << "var started\n";
-  //     Item i;
-  //     i.isVar = true;
-  //     i.labelName = in.string();
-  //     parsed_items.push_back(i);
-  //     if (shouldPrint) cout << "var ended\n";
-  //   }
-  // };
-
-  // Register Actions all
-  template<> struct action < w_rule > {
+  // Register actions
+  template<> struct action < register_rdi_rule > {
     template< typename Input >
     static void apply( const Input & in, Program & p){
-      if (shouldPrint) cout << "w_rule started\n";
-      Item i;
-      i.isARegister = true;
-      i.isVar = true;
-      //i.Register = in.string();
-      i.r = empty;
-
-      for (int a = 0; a < arg_registers.length; a++) {
-        if (arg_registers[a] == in.string()) {
-          i.r = (reg)a;
-        } 
-      }
+      if (shouldPrint) cout << "register_rdi_rule started\n";
+      Item *i;
+      Register regi;
+      i = &regi;
+      i->r = rdi;
 
       parsed_items.push_back(i);
-      if (shouldPrint) cout << "w_rule ended\n";
+      if (shouldPrint) cout << "register_rdi_rule ended\n";
+    }
+  };
+
+  template<> struct action < register_rsi_rule > {
+    template< typename Input >
+    static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "register_rsi_rule started\n";
+      Item *i;
+      Register regi;
+      i = &regi;
+      i->r = rsi;
+
+      parsed_items.push_back(i);
+      if (shouldPrint) cout << "register_rsi_rule ended\n";
+    }
+  };
+
+  template<> struct action < register_rdx_rule > {
+    template< typename Input >
+    static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "register_rdx_rule started\n";
+      Item *i;
+      Register regi;
+      i = &regi;
+      i->r = rdx;
+
+      parsed_items.push_back(i);
+      if (shouldPrint) cout << "register_rdx_rule ended\n";
+    }
+  };
+
+  template<> struct action < register_rcx_rule > {
+    template< typename Input >
+    static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "register_rcx_rule started\n";
+      Item *i;
+      Register regi;
+      i = &regi;
+      i->r = rcx;
+
+      parsed_items.push_back(i);
+      if (shouldPrint) cout << "register_rcx_rule ended\n";
+    }
+  };
+
+  template<> struct action < register_r8_rule > {
+    template< typename Input >
+    static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "register_r8_rule started\n";
+      Item *i;
+      Register regi;
+      i = &regi;
+      i->r = r8;
+
+      parsed_items.push_back(i);
+      if (shouldPrint) cout << "register_r8_rule ended\n";
+    }
+  };
+
+  template<> struct action < register_r9_rule > {
+    template< typename Input >
+    static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "register_r9_rule started\n";
+      Item *i;
+      Register regi;
+      i = &regi;
+      i->r = r9;
+
+      parsed_items.push_back(i);
+      if (shouldPrint) cout << "register_r9_rule ended\n";
+    }
+  };
+
+  template<> struct action < register_rax_rule > {
+    template< typename Input >
+    static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "register_rax_rule started\n";
+      Item *i;
+      Register regi;
+      i = &regi;
+      i->r = rax;
+
+      parsed_items.push_back(i);
+      if (shouldPrint) cout << "register_rax_rule ended\n";
+    }
+  };
+
+  template<> struct action < var > {
+    template< typename Input >
+    static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "var started\n";
+      Item *i;
+      Variable v;
+      i = &v;
+      i->varName = in.string();
+
+      parsed_items.push_back(i);
+      if (shouldPrint) cout << "var ended\n";
     }
   };
 
@@ -635,11 +693,10 @@ namespace L2 {
     template< typename Input >
     static void apply( const Input & in, Program & p){
       if (shouldPrint) cout << "register_rsp_rule started\n";
-      Item i;
-      i.isARegister = true;
-      i.isVar = false;
-      //i.r = in.string();
-      i.r = rsp;
+      Item *i;
+      Register regi;
+      i = &regi;
+      i->r = rsp;
       parsed_items.push_back(i);
       if (shouldPrint) cout << "register_rsp_rule ended\n";
     }
@@ -650,86 +707,185 @@ namespace L2 {
     template< typename Input >
     static void apply( const Input & in, Program & p){
       if (shouldPrint) cout << "mem_rule started\n";
-      Item i;
-      i.isMem = true;
-      i.offset = parsed_items.back().offset;
+      Item *i;
+      Memory mem;
+      i = &mem;
+      i->offset = parsed_items.back()->num; //not sure if arrow or dot accessor
       parsed_items.pop_back();
-      i.r = parsed_items.back().r;
+      i->r = parsed_items.back()->r;
       parsed_items.pop_back();
       if (shouldPrint) cout << "mem_rule ended\n";
 
       parsed_items.push_back(i);
     }
   };
-
-  // template<> struct action < aop_rule > {
-  //   template< typename Input >
-  //   static void apply( const Input & in, Program & p){
-  //     if (shouldPrint) cout << "aop_rule started\n";
-  //     operation i;
-  //     i.op = in.string();
-  //     parsed_ops.push_back(i);
-  //     if (shouldPrint) cout << "aop_rule ended\n";
-  //   }
-  // };
-
   
   // aop_rule -> push
-  template<> struct action < aop_rule > {
+  template<> struct action < plusEq_rule > {
     template< typename Input >
     static void apply( const Input & in, Program & p){
-      if (shouldPrint) cout << "aop_rule started\n";
-      operation i;
-      i.op = in.string();
+      if (shouldPrint) cout << "plusEq_rule started\n";
+      Item *i;
+      Operation op;
+      i = &op;
+      i->opName = op_add;
       parsed_ops.push_back(i);
-      if (shouldPrint) cout << "aop_rule ended\n";
+      if (shouldPrint) cout << "plusEq_rule ended\n";
+    }
+  };
+
+  template<> struct action < minusEq_rule > {
+    template< typename Input >
+    static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "minusEq_rule started\n";
+      Item *i;
+      Operation op;
+      i = &op;
+      i->opName = op_minus;
+      parsed_ops.push_back(i);
+      if (shouldPrint) cout << "minnusEq_rule ended\n";
+    }
+  };
+
+  template<> struct action < multEq_rule > {
+    template< typename Input >
+    static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "plusEq_rule started\n";
+      Item *i;
+      Operation op;
+      i = &op;
+      i->opName = op_multiply;
+      parsed_ops.push_back(i);
+      if (shouldPrint) cout << "multEq_rule ended\n";
+    }
+  };
+
+  template<> struct action < bitAND_rule > {
+    template< typename Input >
+    static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "bitAND_rule started\n";
+      Item *i;
+      Operation op;
+      i = &op;
+      i->opName = op_AND;
+      parsed_ops.push_back(i);
+      if (shouldPrint) cout << "bitAND_rule ended\n";
     }
   };
 
   // crement_rule -> push
-  template<> struct action < crement_rule > {
+  template<> struct action < inc_rule > {
     template< typename Input >
     static void apply( const Input & in, Program & p){
-      if (shouldPrint) cout << "crement_rule started\n";
-      operation i;
-      i.op = in.string();
+      if (shouldPrint) cout << "inc_rule started\n";
+      Item *i;
+      Operation op;
+      i = &op;
+      i->opName = op_inc;
       parsed_ops.push_back(i);
-      if (shouldPrint) cout << "crement_rule ended\n";
+      if (shouldPrint) cout << "inc_rule ended\n";
+    }
+  };
+
+  template<> struct action < dec_rule > {
+    template< typename Input >
+    static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "dec_rule started\n";
+      Item *i;
+      Operation op;
+      i = &op;
+      i->opName = op_dec;
+      parsed_ops.push_back(i);
+      if (shouldPrint) cout << "dec_rule ended\n";
     }
   }; 
 
   // sop_rule -> push
-  template<> struct action < sop_rule > {
+  template<> struct action < Lshift_rule > {
     template< typename Input >
     static void apply( const Input & in, Program & p){
-      if (shouldPrint) cout << "sop_rule started\n";
-      operation i;
-      i.op = in.string();
+      if (shouldPrint) cout << "Lshift_rule started\n";
+      Item *i;
+      Operation op;
+      i = &op;
+      i->opName = op_lshift;
       parsed_ops.push_back(i);
-      if (shouldPrint) cout << "sop_rule ended\n";
+      if (shouldPrint) cout << "Lshift_rule ended\n";
     }
-  };  
+  };
+
+  template<> struct action < Rshift_rule > {
+    template< typename Input >
+    static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "Rshift_rule started\n";
+      Item *i;
+      Operation op;
+      i = &op;
+      i->opName = op_rshift;
+      parsed_ops.push_back(i);
+      if (shouldPrint) cout << "Rshift_rule ended\n";
+    }
+  };
 
   // cmp_rule -> push
-  template<> struct action < cmp_rule > {
+  template<> struct action < less_rule > {
     template< typename Input >
     static void apply( const Input & in, Program & p){
-      if (shouldPrint) std::cout << "cmp_rule started\n";
-      operation i;
-      i.op = in.string();
+      if (shouldPrint) std::cout << "cmp_less_rule started\n";
+      Item *i;
+      Operation op;
+      i = &op;
+      i->opName = cmp_less;
       parsed_ops.push_back(i);
-      if (shouldPrint) std::cout << "cmp_rule ended\n";
+      if (shouldPrint) std::cout << "cmp_less_rule ended\n";
     }
-  };  
+  };
+
+  template<> struct action < lessEq_rule > {
+    template< typename Input >
+    static void apply( const Input & in, Program & p){
+      if (shouldPrint) std::cout << "cmp_lessEq_rule started\n";
+      //Item *i;
+      Operation* op;
+      //i = &op;
+      op->opName = cmp_lesseq;
+      parsed_ops.push_back(op);
+      if (shouldPrint) std::cout << "cmp_lessEq_rule ended\n";
+    }
+  };
+
+  template<> struct action < equal_rule > {
+    template< typename Input >
+    static void apply( const Input & in, Program & p){
+      if (shouldPrint) std::cout << "cmp_equal_rule started\n";
+      //Item *i;
+      Operation* op;
+      //i = &op;
+      op->opName = cmp_equals;
+      parsed_ops.push_back(op);
+      if (shouldPrint) std::cout << "cmp_equal_rule ended\n";
+    }
+  };
 
   // runtime_op_rule -> push
   template<> struct action < runtime_op_rule > {
     template< typename Input >
     static void apply( const Input & in, Program & p){
       if (shouldPrint) cout << "runtime_op_rule started\n";
-      Item i;
-      i.labelName = in.string();
-      parsed_items.push_back(i);
+      //Item *i;
+      Runtime *rt;
+      //i = &rt;
+      if (in.string() == str_print) {
+        rt->runtime = rt_print;
+      } else if (in.string() == str_input) {
+        rt->runtime = rt_input;
+      } else if (in.string() == str_allocate) {
+        rt->runtime = rt_input;
+      } else if (in.string() == str_tensor_error) {
+        rt->runtime = rt_tensor_error;
+      }
+
+      parsed_items.push_back(rt);
       if (shouldPrint) cout << "runtime_op_rule ended\n";
     }
   };

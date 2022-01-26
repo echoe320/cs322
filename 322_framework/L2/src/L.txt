@@ -1,0 +1,7 @@
+LLLLLLLLLLLLLLLLLLLLLLLL
+
+Things to do for tmr
+1) issue: we have array of Item pointers, but can't access private fields
+2) test computation of GEN and KILL sets
+3) get our visitor to instantiate ('too few arguments' thing)
+4) compute IN and OUT sets from GEN, KILL, successor/predecessor

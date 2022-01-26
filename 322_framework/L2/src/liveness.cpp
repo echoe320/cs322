@@ -3,7 +3,7 @@
 #include <fstream>
 
 #include <liveness.h>
-//#include <L2.h>
+#include <L2.h>
 
 // included libraries
 #include <unordered_set>
@@ -11,214 +11,160 @@
 using namespace std;
 
 namespace L2 {
-  //string generate_liveness_list(Function f) {}
-
-  //different def for each instruction
-  //return gen item, kill item
-  
-
-  void create_liveness_file(Function f) {
-    /*
-     * Create variables
-     */
-    //Callee save register items
-    Item reg_12, reg_13, reg_14, reg_15, reg_bp, reg_bx;
-    // for (auto i: ) {
-
+  void Gen_Kill_Visitors::VisitInstruction(const Instruction_ret *element){
+    // gen = rax + callee save registers
+    int callee_list[] = [6, 7, 8, 11, 12, 13, 14, 15];
+    // reg callee_list[] = [rax, rbx, rbp, r12, r13, r14, r15];
+    // for (int ii = 6; i < 14; i++) {
+    //   Item *i;
+    //   auto regi = new Register();
+    //   i = &regi;
+    //   i->r = static_cast<reg>(ii);
+    //   element->reads.insert(i);
     // }
-    reg_12.r = r12; 
-    reg_13.r = r13; 
-    reg_14.r = r14; 
-    reg_15.r = r15; 
-    reg_bp.r = rbp; 
-    reg_bx.r = rbx;
+    for (auto count : callee_list) {
+      Item *i;
+      auto regi = new Register();
+      i = &regi;
+      i->r = (reg)count;
+      element->reads.insert(i);
+    }
+    element->writes.clear();
+  }
 
-    //Caller save register items
-    Item reg_10, reg_11, reg_8, reg_9, reg_ax, reg_cx, reg_di, reg_dx, reg_si;
-    reg_10.r = r10; 
-    reg_11.r = r11; 
-    reg_8.r = r8; 
-    reg_9.r = r9; 
-    reg_ax.r = rax; 
-    reg_cx.r = rcx; 
-    reg_di.r = rdi; 
-    reg_dx.r = rdx; 
-    reg_si.r = rsi;
+  void Gen_Kill_Visitors::VisitInstruction(const Instruction_assignment *element){
+    //check if src is a variable/register
+    if (dynamic_cast<Variable *>(element->src) != nullptr) element->reads.insert(element->src);
+    else if (dynamic_cast<Register *>(element->src) != nullptr) element->reads.insert(element->src);
+    else if (dynamic_cast<Memory *>(element->src) != nullptr) {
+      Item *i;
+      auto regi = new Register(); //create new Register object with Memory's reg r field
+      i = &regi;
+      i->r = element->src->r;
+      element->reads.insert(i);
+    }
+    //check if dst is a variable/register
+    if (dynamic_cast<Variable *>(element->dst) != nullptr) element->writes.insert(element->dst);
+    else if (dynamic_cast<Register *>(element->dst) != nullptr) element->writes.insert(element->dst);
+    else if (dynamic_cast<Memory *>(element->dst) != nullptr) {
+      Item *i;
+      auto regi = new Register(); //create new Register object with Memory's reg r field
+      i = &regi;
+      i->r = element->dst->r;
+      element->writes.insert(i);
+    }
+  }
 
-    class reg_var {
-      enum reg {regs, var}; //num -> string
-      string v; // reg string?
+  void Gen_Kill_Visitors::VisitInstruction(const Instruction_arithmetic *element){
+    element->reads.insert(element->dst);
+    element->writes.insert(element->dst);
+    if (dynamic_cast<Variable *>(element->src) != nullptr) element->reads.insert(element->src);
+    else if (dynamic_cast<Register *>(element->src) != nullptr) element->reads.insert(element->src);
+  }
+
+  void Gen_Kill_Visitors::VisitInstruction(const Instruction_crement *element){
+    element->reads.insert(element->dst);
+    element->writes.insert(element->dst);
+  }
+
+  void Gen_Kill_Visitors::VisitInstruction(const Instruction_shift *element){
+    element->reads.insert(element->dst);
+    element->writes.insert(element->dst);
+    if (dynamic_cast<Variable *>(element->src) != nullptr) element->reads.insert(element->src);
+    else if (dynamic_cast<Register *>(element->src) != nullptr) element->reads.insert(element->src);
+  }
+
+  void Gen_Kill_Visitors::VisitInstruction(const Instruction_cmp *element){
+    element->writes.insert(element->dst);
+    // check if arg1 is variable
+    if (dynamic_cast<Variable *>(element->arg1) != nullptr) element->reads.insert(element->arg1);
+    else if (dynamic_cast<Register *>(element->arg1) != nullptr) element->reads.insert(element->arg1);
+    // check if arg2 is variable
+    if (dynamic_cast<Variable *>(element->arg2) != nullptr) element->reads.insert(element->arg2);
+    else if (dynamic_cast<Register *>(element->arg2) != nullptr) element->reads.insert(element->arg2);
+  }
+
+  void Gen_Kill_Visitors::VisitInstruction(const Instruction_cjump *element){
+    // check if arg1 is variable
+    if (dynamic_cast<Variable *>(element->arg1) != nullptr) element->reads.insert(element->arg1);
+    else if (dynamic_cast<Register *>(element->arg1) != nullptr) element->reads.insert(element->arg1);
+    // check if arg2 is variable
+    if (dynamic_cast<Variable *>(element->arg2) != nullptr) element->reads.insert(element->arg2);
+    else if (dynamic_cast<Register *>(element->arg2) != nullptr) element->reads.insert(element->arg2);
+  }
+
+  void Gen_Kill_Visitors::VisitInstruction(const Instruction_lea *element){
+    element->writes.insert(element->dst);
+    // check if arg1 is variable
+    if (dynamic_cast<Variable *>(element->arg1) != nullptr) element->reads.insert(element->arg1);
+    else if (dynamic_cast<Register *>(element->arg1) != nullptr) element->reads.insert(element->arg1);
+    // check if arg2 is variable
+    if (dynamic_cast<Variable *>(element->arg2) != nullptr) element->reads.insert(element->arg2);
+    else if (dynamic_cast<Register *>(element->arg2) != nullptr) element->reads.insert(element->arg2);
+  }
+
+  void Gen_Kill_Visitors::VisitInstruction(const Instruction_calls *element){
+    // gen = u, args used
+    if (dynamic_cast<Register *>(element->u) != nullptr) element->reads.insert(element->u);
+    //element->reads.insert(element->u);
+    
+    int numArgs = element->N.get();
+    for (int i = 0; i < numArgs; i++){
+      Item *it;
+      auto
+      i->r = static_cast<reg>(ii);
     }
 
-    //Callee and caller sets
-    unordered_set<Item> callee_save_set = {reg_12, reg_13, reg_14, reg_15, reg_bp, reg_bx};
-    unordered_set<Item> caller_save_set = {reg_10, reg_11, reg_8, reg_9, reg_ax, reg_cx, reg_di, reg_dx, reg_si};
+    // kill = caller save registers
+    int caller_list[] = [0, 1, 2, 3];
+    for (auto count : callee_list) {
+      Item *i;
+      auto regi = new Register();
+      i = &regi;
+      i->r = (reg)count;
+      element->writes.insert(i);
+    }
+  }
 
-    //Arg Register set
-    //std::vector<std::string> arg_registers[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9", "rax"};
-    vector<unordered_set<Item>> arg_registers(7);
-    
+  void Gen_Kill_Visitors::VisitInstruction(const Instruction_runtime *element){
+    // gen = args used
+    // kill = caller save registers
 
-    /*
-     * Open output file
-     */
-    std::ofstream outputFile;
-    outputFile.open("liveness.out");
+  }
 
-    //* =========================== START OF LIVENESS ANALYSIS ===========================
+  void Gen_Kill_Visitors::VisitInstruction(const Instruction_label *element){
+    element->reads.clear();
+    element->writes.clear();
+  }
 
-    int numInstructions = f.instructions.size();
-    
-    //? what type should the elements of the unordered_set be? i think Item is okay
-    vector<unordered_set<Item>> GEN; //[numInstructions]; //* GEN[i] = all variables read by instruction i
-    vector<unordered_set<Item>> KILL; //[numInstructions]; //* KILL[i] = all variables written/defined by instruction i
-    vector<unordered_set<Item>> IN; //[numInstructions];
-    vector<unordered_set<Item>> OUT; //[numInstructions];
+  void Gen_Kill_Visitors::VisitInstruction(const Instruction_goto *element){
+    element->reads.clear();
+    element->writes.clear();
+  }
 
-    /*
-     * gen/kill creating vectors
-     */
+  void Gen_Kill_Visitors::VisitInstruction(const Instruction_stackarg *element){
+    element->writes.insert(element->dst);
+  }
 
-    // instructions to implement
-    // 
+  void create_liveness_file(Program p) {
 
-    //for (int i = 0; i < numInstructions; i++) {
+    //Initialize vectors
+    vector<unordered_set<Item *>> GEN; //[numInstructions]; //* GEN[i] = all variables read by instruction i
+    vector<unordered_set<Item *>> KILL; //[numInstructions]; //* KILL[i] = all variables written/defined by instruction i
+    vector<unordered_set<Item *>> IN; //[numInstructions];
+    vector<unordered_set<Item *>> OUT; //[numInstructions];
 
-    //int count = 0;
-    
-    for (auto i : f.instructions) {
-      unordered_set<Item> gen_temp;
-      unordered_set<Item> kill_temp;
-      //check for dst/src args
-      //if register or variable,
-      //send signal, 1,2,3 , for each instruction add gen and kill, gen, kill
-      //set a flag to say save x,y or just x or just y
-      //rdi++ 
+    //Gen and kill 
+    auto *gen_kill_visitor = new Gen_Kill_Visitors();
 
-      //lea: w @ w w E
-      //local values
-
-      //if (f.instruction[i].dst) {
-      //check if register or variable, gen[i].insert
-
-      //check itype
-
-      switch (i->id) {
-        case ret:
-        {
-          gen_temp = callee_save_set;
-          gen_temp.insert(reg_ax);
-
-          kill_temp = {};
-          break;
-        }
-        case assignment:
-        {
-          Instruction_assignment *inst = static_cast<Instruction_assignment *>(i);
-          if (inst->src.isVar) gen_temp.insert(inst->src);
-          if (inst->dst.isVar) kill_temp.insert(inst->dst);
-          break;
-        }
-        case arithmetic:
-        {
-          Instruction_arithmetic *inst = static_cast<Instruction_arithmetic *>(i);
-          gen_temp.insert(inst->dst);
-          kill_temp.insert(inst->dst);
-          if (inst->src.isVar) gen_temp.insert(inst->src);
-          break;
-        }
-        case crement:
-        {
-          Instruction_crement *inst = static_cast<Instruction_crement*>(i);
-          gen_temp.insert(inst->dst);
-          kill_temp.insert(inst->dst);
-          break;
-        }
-        case shift:
-        {
-          Instruction_shift *inst = static_cast<Instruction_shift*>(i);
-          gen_temp.insert(inst->dst);
-          kill_temp.insert(inst->dst);
-          if (inst->src.isVar) gen_temp.insert(inst->src);
-          break;
-        }
-        case cmp:
-        {
-          Instruction_cmp *inst = static_cast<Instruction_cmp*>(i);
-          kill_temp.insert(inst->dst);
-          if (inst->arg1.isVar) gen_temp.insert(inst->arg1);
-          if (inst->arg2.isVar) gen_temp.insert(inst->arg2);
-          break;
-        }
-        case cjump:
-        {
-          Instruction_cjump *inst = static_cast<Instruction_cjump*>(i);
-          if (inst->arg1.isVar) gen_temp.insert(inst->arg1);
-          if (inst->arg2.isVar) gen_temp.insert(inst->arg2);
-          break;
-        }
-        case lea:
-        {
-          Instruction_lea *inst = static_cast<Instruction_lea*>(i);
-          kill_temp.insert(inst->dst);
-          if (inst->arg1.isVar) gen_temp.insert(inst->arg1);
-          if (inst->arg2.isVar) gen_temp.insert(inst->arg2);
-          break;
-        }
-        case calls:
-        {
-          // int numArgs = stoi(f.instructions[i].N->offset);
-          // gen_temp = arg_registers[numArgs];
-          Instruction_calls *inst = static_cast<Instruction_calls*>(i);
-          if (inst->u.isVar) gen_temp.insert(inst->u);
-          kill_temp = caller_save_set;
-          //? more than six args?
-          break;
-        }
-        case runtime:
-        {
-          Instruction_runtime *inst = static_cast<Instruction_runtime*>(i);
-          // int numArgs = stoi(f.instructions[i].N.offset);
-          // gen_temp = arg_registers[numArgs];
-          kill_temp = caller_save_set;
-          break;
-        }
-        default: //gotoo, _label don't have anything in gen or kill sets
-        {
-          break;
-        }
+    for (auto f : p.functions) {
+      for (auto i : f->instructions) {
+        i->Accept(gen_kill_visitor);
+        GEN.push_back(i->reads); // not sure if arrow or dot accessor (should be arrow)
+        KILL.push_back(i->writes);
       }
-
-      // for (auto i : gen_temp) {
-      //   cout <<  << endl;
-      // }
-      
-      // cout << to_string(kill_temp) << endl;
-      
-      GEN.push_back(gen_temp);
-      KILL.push_back(kill_temp);
-      //count++;
     }
 
-    for (int i = 0; i < numInstructions; i++) {
-      IN[i] = {}; // IN[i] = {};
-      OUT[i] = {}; // OUT[i] = {};
-    }
-
-    // do {
-    //   for (int i = 0; i < numInstructions; i++) {
-    //     result
-    //   }
-    // }
-
-    //* =========================== END OF LIVENESS ANALYSIS ===========================
-
-    // Successors of an instruciton
-    
-    /*
-     *close output file
-     */
-    outputFile.close();
-    return ;
+    //Successor and predecessor
   }
 }
