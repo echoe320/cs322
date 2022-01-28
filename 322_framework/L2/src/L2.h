@@ -34,14 +34,15 @@ namespace L2 {
     #undef PROCESS_VAL
     return out << s;
   }
+
+    //cout << rdi <<
     //std::string reg [] = ["rdi", "rsi", ];
 
   enum opCode {op_add, op_minus, op_multiply, op_AND, op_lshift, op_rshift, op_inc, op_dec, cmp_equals, cmp_less, cmp_lesseq};
   
-  enum iType {ret, assignment, arithmetic, crement, shift, cmp, cjump, lea, calls, runtime, _label, gotoo, stackarg};
-
   enum runtimeCode {rt_print, rt_input, rt_allocate, rt_tensor_error};
 
+  //Item Class + subclasses
   class Item {
     public:
       // virtual void print_obj = 0;
@@ -58,30 +59,20 @@ namespace L2 {
       // i = &r;
       // i->r; // reg r inside of reg_temp
       // parsed_items.push_back(i);
-
-      // bool isARegister = false;
-      // bool isMem = false;
-      // bool isNum = false;
-      // bool isLabel = false;
-      // bool isVar = false;
-      // int offset;
   };
 
   class Register : public Item {
     public:
-      reg get(void) {
-        return this->r;
-      };
+      Register(reg regi);
+      reg get(void);
     private:
       reg r;
   };
 
   class Memory : public Item {
     public:
-      std::pair<L2::reg, int64_t> get(void){
-        std::pair<L2::reg, int64_t> res{this->r, this->offset};
-        return res; // res.first
-      };
+      Memory(reg regi, int64_t os);
+      std::pair<L2::reg, int64_t> get(void);
     private:
       reg r;
       int64_t offset;
@@ -89,75 +80,51 @@ namespace L2 {
 
   class Number : public Item {
     public:
-      int64_t get(void){
-        return this->num;
-      };
+      Number(int64_t n);
+      int64_t get(void);
     private:
       int64_t num;
   };
 
   class Label : public Item {
     public:
-      std::string get(void){
-        return this->labelName;
-      };
+      Label(std::string ln);
+      std::string get(void);
     private:
       std::string labelName;
   };
 
   class Variable : public Item {
     public:
-      std::string get(void){
-        return this->varName;
-      };
+      Variable(std::string vn);
+      std::string get(void);
     private:
       std::string varName;
   };
 
   class Operation : public Item {
     public:
-      opCode get(void){
-        return this->opName;
-      };
+      Operation(opCode on);
+      opCode get(void);
     private:
       opCode opName;
   };
 
   class Runtime : public Item {
     public:
-      runtimeCode get(void) {
-        return this->runtime;
-      };
+      Runtime(runtimeCode rt);
+      runtimeCode get(void);
     private:
       runtimeCode runtime;
   };
 
-  /*
-   * Instruction interface.
-   */
-  class Visitor {
-    public:
-      virtual void VisitInstruction(const Instruction_ret *element) = 0;
-      virtual void VisitInstruction(const Instruction_assignment *element) = 0;
-      virtual void VisitInstruction(const Instruction_arithmetic *element) = 0;
-      virtual void VisitInstruction(const Instruction_crement *element) = 0;
-      virtual void VisitInstruction(const Instruction_shift *element) = 0;
-      virtual void VisitInstruction(const Instruction_cmp *element) = 0;
-      virtual void VisitInstruction(const Instruction_cjump *element) = 0;
-      virtual void VisitInstruction(const Instruction_lea *element) = 0;
-      virtual void VisitInstruction(const Instruction_calls *element) = 0;
-      virtual void VisitInstruction(const Instruction_runtime *element) = 0;
-      virtual void VisitInstruction(const Instruction_label *element) = 0;
-      virtual void VisitInstruction(const Instruction_goto *element) = 0;
-      virtual void VisitInstruction(const Instruction_stackarg *element) = 0;
-  };
+  class Visitor;
 
   /*
    * Instructions.
    */
   class Instruction {
     public:
-      iType id;
       virtual void Accept(Visitor *visitor) = 0;
       //virtual std::string toString(void) = 0;
 
@@ -169,87 +136,125 @@ namespace L2 {
 
   class Instruction_ret : public Instruction{
     public:
+      Instruction_ret();
       void Accept(Visitor *visitor) override;
   };
 
   class Instruction_assignment : public Instruction{
     public:
+      Instruction_assignment(Item *source, Item *dest);
       void Accept(Visitor *visitor) override;
+    private:
       Item *src, *dst;
   };
 
   class Instruction_arithmetic : public Instruction{
     public:
+      Instruction_arithmetic(Item *source, Item *dest, Item *ope);
       void Accept(Visitor *visitor) override;
-      Item *src, *dst;
-      Operation op;
+    private:
+      Item *src, *dst, *op;
   };
 
   class Instruction_crement : public Instruction{
     public:
+      Instruction_crement(Item *dest, Item *ope);
       void Accept(Visitor *visitor) override;
-      Item *dst;
-      Operation op;
+    private:
+      Item *dst, *op;
   };
 
   class Instruction_shift : public Instruction{
     public:
+      Instruction_shift(Item *source, Item *dest, Item *ope);
       void Accept(Visitor *visitor) override;
-      Item *src, *dst;
-      Operation op;
+    private:
+      Item *src, *dst, *op;
   };
 
   class Instruction_cmp : public Instruction{
     public:
+      Instruction_cmp(Item *dest, Item *one, Item *two, Item *ope);
       void Accept(Visitor *visitor) override;
-      Item *dst, *arg1, *arg2;
-      Operation op;
+    private:
+      Item *dst, *arg1, *arg2, *op;
   };
 
   class Instruction_cjump : public Instruction{
     public:
+      Instruction_cjump(Item *one, Item *two, Item *target, Item *ope);
       void Accept(Visitor *visitor) override;
-      Item *arg1, *arg2, *label;
-      Operation op;
+    private:
+      Item *arg1, *arg2, *label, *op;
   };
 
   class Instruction_lea : public Instruction{
     public:
+      Instruction_lea(Item *dest, Item *one, Item *two, Item *multiple);
       void Accept(Visitor *visitor) override;
-      Item *dst, *arg1, *arg2, *multiple;
+    private:
+      Item *dst, *arg1, *arg2, *mult;
   };
 
   class Instruction_calls : public Instruction{
     public:
+      Instruction_calls(Item *target, Item *numArgs);
       void Accept(Visitor *visitor) override;
+    private:
       Item *u, *N; //call u N
   };
 
   class Instruction_runtime : public Instruction{
     public:
+      Instruction_runtime(Item *target, Item *numArgs);
       void Accept(Visitor *visitor) override;
+    private:
       Item *runtime, *N;
   };
 
   class Instruction_label : public Instruction{
     public:
+      Instruction_label(Item *target);
       void Accept(Visitor *visitor) override;
+    private:
       Item *label;
   };
 
   class Instruction_goto : public Instruction{
     public:
+      Instruction_goto(Item *target);
       void Accept(Visitor *visitor) override;
+    private:
       Item *label;
   };
 
   class Instruction_stackarg : public Instruction {
     public:
+      Instruction_stackarg(Item *dest, Item *offset);
       void Accept(Visitor *visitor) override;
+    private:
       Item *dst, *M;
   };
 
-
+  /*
+   * Instruction interface.
+   */
+  class Visitor {
+    public:
+      virtual void VisitInstruction(Instruction_ret *element) = 0;
+      virtual void VisitInstruction(Instruction_assignment *element) = 0;
+      virtual void VisitInstruction(Instruction_arithmetic *element) = 0;
+      virtual void VisitInstruction(Instruction_crement *element) = 0;
+      virtual void VisitInstruction(Instruction_shift *element) = 0;
+      virtual void VisitInstruction(Instruction_cmp *element) = 0;
+      virtual void VisitInstruction(Instruction_cjump *element) = 0;
+      virtual void VisitInstruction(Instruction_lea *element) = 0;
+      virtual void VisitInstruction(Instruction_calls *element) = 0;
+      virtual void VisitInstruction(Instruction_runtime *element) = 0;
+      virtual void VisitInstruction(Instruction_label *element) = 0;
+      virtual void VisitInstruction(Instruction_goto *element) = 0;
+      virtual void VisitInstruction(Instruction_stackarg *element) = 0;
+  };
 
   // class Visitor_Liveness : public Visitor {
   //   public:

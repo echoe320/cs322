@@ -42,7 +42,6 @@ namespace L2 {
    * Data required to parse
    */ 
   std::vector<Item *> parsed_items;
-  std::vector<Operation *> parsed_ops;
 
   /* 
    * Grammar rules from now on.
@@ -260,14 +259,17 @@ namespace L2 {
   struct str_tensor_error : TAOCPP_PEGTL_STRING( "tensor-error" ) {};
   struct str_call : TAOCPP_PEGTL_STRING( "call" ) {};
 
+  struct rt_print_rule : str_print {};
+  struct rt_input_rule : str_input {};
+  struct rt_allocate_rule : str_allocate {};
+  struct rt_tensor_error_rule : str_tensor_error {};
+
   struct runtime_op_rule :
-    pegtl::seq<
-      pegtl::sor<
-        str_print,
-        str_input,
-        str_allocate,
-        str_tensor_error
-      > 
+    pegtl::sor<
+      rt_print_rule,
+      rt_input_rule,
+      rt_allocate_rule,
+      rt_tensor_error_rule
     > {};
 
   //------------------------ Instruction rules ------------------------
@@ -278,7 +280,7 @@ namespace L2 {
       seps
     > { };
 
-  struct Instruction_assignment_rule : // mem rsp 0 <- rdi
+  struct Instruction_assignment_rule : 
   //1. register <- register
   //2. mem to reg
   //3. reg to mem
@@ -553,11 +555,10 @@ namespace L2 {
     template< typename Input >
 	static void apply( const Input & in, Program & p){
       if (shouldPrint) cout << "number started\n";
-      //Item *i;
-      Number n;
-      //i = &n;
-      n->num = std::stoi(in.string());
-      parsed_items.push_back(n);
+      Item *i;
+      Number n(std::stoi(in.string()));
+      i = &n;
+      parsed_items.push_back(i);
       if (shouldPrint) cout << "number ended\n";
     }
   };
@@ -567,9 +568,8 @@ namespace L2 {
 	static void apply( const Input & in, Program & p){
       if (shouldPrint) cout << "label_rule started\n";
       Item *i;
-      Label l;
+      Label l(in.string());
       i = &l;
-      i->labelName = in.string();
       parsed_items.push_back(i);
       if (shouldPrint) cout << "label_rule ended\n";
     }
@@ -581,10 +581,8 @@ namespace L2 {
     static void apply( const Input & in, Program & p){
       if (shouldPrint) cout << "register_rdi_rule started\n";
       Item *i;
-      Register regi;
+      Register regi(rdi);
       i = &regi;
-      i->r = rdi;
-
       parsed_items.push_back(i);
       if (shouldPrint) cout << "register_rdi_rule ended\n";
     }
@@ -595,10 +593,8 @@ namespace L2 {
     static void apply( const Input & in, Program & p){
       if (shouldPrint) cout << "register_rsi_rule started\n";
       Item *i;
-      Register regi;
+      Register regi(rsi);
       i = &regi;
-      i->r = rsi;
-
       parsed_items.push_back(i);
       if (shouldPrint) cout << "register_rsi_rule ended\n";
     }
@@ -609,10 +605,8 @@ namespace L2 {
     static void apply( const Input & in, Program & p){
       if (shouldPrint) cout << "register_rdx_rule started\n";
       Item *i;
-      Register regi;
+      Register regi(rdx);
       i = &regi;
-      i->r = rdx;
-
       parsed_items.push_back(i);
       if (shouldPrint) cout << "register_rdx_rule ended\n";
     }
@@ -623,10 +617,8 @@ namespace L2 {
     static void apply( const Input & in, Program & p){
       if (shouldPrint) cout << "register_rcx_rule started\n";
       Item *i;
-      Register regi;
+      Register regi(rcx);
       i = &regi;
-      i->r = rcx;
-
       parsed_items.push_back(i);
       if (shouldPrint) cout << "register_rcx_rule ended\n";
     }
@@ -637,10 +629,8 @@ namespace L2 {
     static void apply( const Input & in, Program & p){
       if (shouldPrint) cout << "register_r8_rule started\n";
       Item *i;
-      Register regi;
+      Register regi(r8);
       i = &regi;
-      i->r = r8;
-
       parsed_items.push_back(i);
       if (shouldPrint) cout << "register_r8_rule ended\n";
     }
@@ -651,10 +641,8 @@ namespace L2 {
     static void apply( const Input & in, Program & p){
       if (shouldPrint) cout << "register_r9_rule started\n";
       Item *i;
-      Register regi;
+      Register regi(r9);
       i = &regi;
-      i->r = r9;
-
       parsed_items.push_back(i);
       if (shouldPrint) cout << "register_r9_rule ended\n";
     }
@@ -665,10 +653,8 @@ namespace L2 {
     static void apply( const Input & in, Program & p){
       if (shouldPrint) cout << "register_rax_rule started\n";
       Item *i;
-      Register regi;
+      Register regi(rax);
       i = &regi;
-      i->r = rax;
-
       parsed_items.push_back(i);
       if (shouldPrint) cout << "register_rax_rule ended\n";
     }
@@ -679,10 +665,8 @@ namespace L2 {
     static void apply( const Input & in, Program & p){
       if (shouldPrint) cout << "var started\n";
       Item *i;
-      Variable v;
+      Variable v(in.string());
       i = &v;
-      i->varName = in.string();
-
       parsed_items.push_back(i);
       if (shouldPrint) cout << "var ended\n";
     }
@@ -694,9 +678,8 @@ namespace L2 {
     static void apply( const Input & in, Program & p){
       if (shouldPrint) cout << "register_rsp_rule started\n";
       Item *i;
-      Register regi;
+      Register regi(rsp);
       i = &regi;
-      i->r = rsp;
       parsed_items.push_back(i);
       if (shouldPrint) cout << "register_rsp_rule ended\n";
     }
@@ -708,12 +691,14 @@ namespace L2 {
     static void apply( const Input & in, Program & p){
       if (shouldPrint) cout << "mem_rule started\n";
       Item *i;
-      Memory mem;
+      Number* n = (Number *) &parsed_items.back();
+      int64_t os = n->get();
+      parsed_items.pop_back();
+      Register* regis = (Register *) &parsed_items.back();
+      reg regi = regis->get();
+      parsed_items.pop_back();
+      Memory mem(regi, os);
       i = &mem;
-      i->offset = parsed_items.back()->num; //not sure if arrow or dot accessor
-      parsed_items.pop_back();
-      i->r = parsed_items.back()->r;
-      parsed_items.pop_back();
       if (shouldPrint) cout << "mem_rule ended\n";
 
       parsed_items.push_back(i);
@@ -726,10 +711,9 @@ namespace L2 {
     static void apply( const Input & in, Program & p){
       if (shouldPrint) cout << "plusEq_rule started\n";
       Item *i;
-      Operation op;
+      Operation op(op_add);
       i = &op;
-      i->opName = op_add;
-      parsed_ops.push_back(i);
+      parsed_items.push_back(i);
       if (shouldPrint) cout << "plusEq_rule ended\n";
     }
   };
@@ -739,10 +723,9 @@ namespace L2 {
     static void apply( const Input & in, Program & p){
       if (shouldPrint) cout << "minusEq_rule started\n";
       Item *i;
-      Operation op;
+      Operation op(op_minus);
       i = &op;
-      i->opName = op_minus;
-      parsed_ops.push_back(i);
+      parsed_items.push_back(i);
       if (shouldPrint) cout << "minnusEq_rule ended\n";
     }
   };
@@ -752,10 +735,9 @@ namespace L2 {
     static void apply( const Input & in, Program & p){
       if (shouldPrint) cout << "plusEq_rule started\n";
       Item *i;
-      Operation op;
+      Operation op(op_multiply);
       i = &op;
-      i->opName = op_multiply;
-      parsed_ops.push_back(i);
+      parsed_items.push_back(i);
       if (shouldPrint) cout << "multEq_rule ended\n";
     }
   };
@@ -765,10 +747,9 @@ namespace L2 {
     static void apply( const Input & in, Program & p){
       if (shouldPrint) cout << "bitAND_rule started\n";
       Item *i;
-      Operation op;
+      Operation op(op_AND);
       i = &op;
-      i->opName = op_AND;
-      parsed_ops.push_back(i);
+      parsed_items.push_back(i);
       if (shouldPrint) cout << "bitAND_rule ended\n";
     }
   };
@@ -779,10 +760,9 @@ namespace L2 {
     static void apply( const Input & in, Program & p){
       if (shouldPrint) cout << "inc_rule started\n";
       Item *i;
-      Operation op;
+      Operation op(op_inc);
       i = &op;
-      i->opName = op_inc;
-      parsed_ops.push_back(i);
+      parsed_items.push_back(i);
       if (shouldPrint) cout << "inc_rule ended\n";
     }
   };
@@ -792,10 +772,9 @@ namespace L2 {
     static void apply( const Input & in, Program & p){
       if (shouldPrint) cout << "dec_rule started\n";
       Item *i;
-      Operation op;
+      Operation op(op_dec);
       i = &op;
-      i->opName = op_dec;
-      parsed_ops.push_back(i);
+      parsed_items.push_back(i);
       if (shouldPrint) cout << "dec_rule ended\n";
     }
   }; 
@@ -806,10 +785,9 @@ namespace L2 {
     static void apply( const Input & in, Program & p){
       if (shouldPrint) cout << "Lshift_rule started\n";
       Item *i;
-      Operation op;
+      Operation op(op_lshift);
       i = &op;
-      i->opName = op_lshift;
-      parsed_ops.push_back(i);
+      parsed_items.push_back(i);
       if (shouldPrint) cout << "Lshift_rule ended\n";
     }
   };
@@ -819,10 +797,9 @@ namespace L2 {
     static void apply( const Input & in, Program & p){
       if (shouldPrint) cout << "Rshift_rule started\n";
       Item *i;
-      Operation op;
+      Operation op(op_rshift);
       i = &op;
-      i->opName = op_rshift;
-      parsed_ops.push_back(i);
+      parsed_items.push_back(i);
       if (shouldPrint) cout << "Rshift_rule ended\n";
     }
   };
@@ -833,10 +810,9 @@ namespace L2 {
     static void apply( const Input & in, Program & p){
       if (shouldPrint) std::cout << "cmp_less_rule started\n";
       Item *i;
-      Operation op;
+      Operation op(cmp_less);
       i = &op;
-      i->opName = cmp_less;
-      parsed_ops.push_back(i);
+      parsed_items.push_back(i);
       if (shouldPrint) std::cout << "cmp_less_rule ended\n";
     }
   };
@@ -845,11 +821,10 @@ namespace L2 {
     template< typename Input >
     static void apply( const Input & in, Program & p){
       if (shouldPrint) std::cout << "cmp_lessEq_rule started\n";
-      //Item *i;
-      Operation* op;
-      //i = &op;
-      op->opName = cmp_lesseq;
-      parsed_ops.push_back(op);
+      Item *i;
+      Operation op(cmp_lesseq);
+      i = &op;
+      parsed_items.push_back(i);
       if (shouldPrint) std::cout << "cmp_lessEq_rule ended\n";
     }
   };
@@ -858,35 +833,60 @@ namespace L2 {
     template< typename Input >
     static void apply( const Input & in, Program & p){
       if (shouldPrint) std::cout << "cmp_equal_rule started\n";
-      //Item *i;
-      Operation* op;
-      //i = &op;
-      op->opName = cmp_equals;
-      parsed_ops.push_back(op);
+      Item *i;
+      Operation op(cmp_equals);
+      i = &op;
+      parsed_items.push_back(i);
       if (shouldPrint) std::cout << "cmp_equal_rule ended\n";
     }
   };
 
   // runtime_op_rule -> push
-  template<> struct action < runtime_op_rule > {
+  template<> struct action < rt_print_rule > {
     template< typename Input >
     static void apply( const Input & in, Program & p){
-      if (shouldPrint) cout << "runtime_op_rule started\n";
-      //Item *i;
-      Runtime *rt;
-      //i = &rt;
-      if (in.string() == str_print) {
-        rt->runtime = rt_print;
-      } else if (in.string() == str_input) {
-        rt->runtime = rt_input;
-      } else if (in.string() == str_allocate) {
-        rt->runtime = rt_input;
-      } else if (in.string() == str_tensor_error) {
-        rt->runtime = rt_tensor_error;
-      }
+      if (shouldPrint) std::cout << "rt_print_rule started\n";
+      Item *i;
+      Runtime rt(rt_print);
+      i = &rt;
+      parsed_items.push_back(i);
+      if (shouldPrint) std::cout << "rt_print_rule ended\n";
+    }
+  };
 
-      parsed_items.push_back(rt);
-      if (shouldPrint) cout << "runtime_op_rule ended\n";
+  template<> struct action < rt_input_rule > {
+    template< typename Input >
+    static void apply( const Input & in, Program & p){
+      if (shouldPrint) std::cout << "rt_input_rule started\n";
+      Item *i;
+      Runtime rt(rt_input);
+      i = &rt;
+      parsed_items.push_back(i);
+      if (shouldPrint) std::cout << "rt_input_rule ended\n";
+    }
+  };
+
+  template<> struct action < rt_allocate_rule > {
+    template< typename Input >
+    static void apply( const Input & in, Program & p){
+      if (shouldPrint) std::cout << "rt_allocate_rule started\n";
+      Item *i;
+      Runtime rt(rt_allocate);
+      i = &rt;
+      parsed_items.push_back(i);
+      if (shouldPrint) std::cout << "rt_allocate_rule ended\n";
+    }
+  };
+
+  template<> struct action < rt_tensor_error_rule > {
+    template< typename Input >
+    static void apply( const Input & in, Program & p){
+      if (shouldPrint) std::cout << "rt_tensor_error_rule started\n";
+      Item *i;
+      Runtime rt(rt_tensor_error);
+      i = &rt;
+      parsed_items.push_back(i);
+      if (shouldPrint) std::cout << "rt_tensor_error_rule ended\n";
     }
   };
 
@@ -897,7 +897,6 @@ namespace L2 {
       if (shouldPrint) cout << "return instruction started\n";
       auto currentF = p.functions.back();
       auto i = new Instruction_ret();
-      i->id = ret;
       currentF->instructions.push_back(i);
       if (shouldPrint) cout << "return instruction ended\n";
     }
@@ -916,12 +915,11 @@ namespace L2 {
       /* 
        * Create the instruction.
        */ 
-      auto i = new Instruction_assignment();
-      i->src = parsed_items.back(); //mem
+      Item* src = parsed_items.back();
       parsed_items.pop_back();
-      i->dst = parsed_items.back();
+      Item* dst = parsed_items.back();
       parsed_items.pop_back();
-      i->id = assignment;
+      auto i = new Instruction_assignment(src, dst);
 
       /* 
        * Add the just-created instruction to the current function.
@@ -944,14 +942,13 @@ namespace L2 {
       /* 
        * Create the instruction.
        */ 
-      auto i = new Instruction_arithmetic();
-      i->src = parsed_items.back();
+      Item* src = parsed_items.back();
       parsed_items.pop_back();
-      i->op = parsed_ops.back();
-      parsed_ops.pop_back();
-      i->dst = parsed_items.back();
+      Item* op = parsed_items.back();
       parsed_items.pop_back();
-      i->id = arithmetic;
+      Item* dst = parsed_items.back();
+      parsed_items.pop_back();
+      auto i = new Instruction_arithmetic(src, dst, op);
 
       /* 
        * Add the just-created instruction to the current function.
@@ -975,12 +972,11 @@ namespace L2 {
       /* 
        * Create the instruction.
        */ 
-      auto i = new Instruction_crement();
-      i->op = parsed_ops.back();
-      parsed_ops.pop_back();
-      i->dst = parsed_items.back();
+      Item *op = parsed_items.back();
       parsed_items.pop_back();
-      i->id = crement;
+      Item *dst = parsed_items.back();
+      parsed_items.pop_back();
+      auto i = new Instruction_crement(dst, op);
 
       /* 
        * Add the just-created instruction to the current function.
@@ -1004,14 +1000,13 @@ namespace L2 {
       /* 
        * Create the instruction.
        */ 
-      auto i = new Instruction_shift();
-      i->src = parsed_items.back();
+      Item* src = parsed_items.back();
       parsed_items.pop_back();
-      i->op = parsed_ops.back();
-      parsed_ops.pop_back();
-      i->dst = parsed_items.back();
+      Item* op = parsed_items.back();
       parsed_items.pop_back();
-      i->id = shift;
+      Item* dst = parsed_items.back();
+      parsed_items.pop_back();
+      auto i = new Instruction_shift(src, dst, op);
 
       /* 
        * Add the just-created instruction to the current function.
@@ -1035,17 +1030,16 @@ namespace L2 {
 
       /* 
        * Create the instruction.
-       */ 
-      auto i = new Instruction_cmp();
-      i->arg2 = parsed_items.back();
+       */
+      Item *arg2 = parsed_items.back();
       parsed_items.pop_back();
-      i->op = parsed_ops.back();
-      parsed_ops.pop_back();
-      i->arg1 = parsed_items.back();
+      Item *op = parsed_items.back();
       parsed_items.pop_back();
-      i->dst = parsed_items.back();
+      Item *arg1 = parsed_items.back();
       parsed_items.pop_back();
-      i->id = cmp;
+      Item *dst = parsed_items.back();
+      parsed_items.pop_back();
+      auto i = new Instruction_cmp(dst, arg1, arg2, op);
 
       /* 
        * Add the just-created instruction to the current function.
@@ -1069,16 +1063,15 @@ namespace L2 {
       /* 
        * Create the instruction.
        */ 
-      auto i = new Instruction_cjump();
-      i->label = parsed_items.back();
+      Item* label = parsed_items.back();
       parsed_items.pop_back();
-      i->arg2 = parsed_items.back();
+      Item* arg2 = parsed_items.back();
       parsed_items.pop_back();
-      i->op = parsed_ops.back();
-      parsed_ops.pop_back();
-      i->arg1 = parsed_items.back();
+      Item* op = parsed_items.back();
       parsed_items.pop_back();
-      i->id = cjump;
+      Item* arg1 = parsed_items.back();
+      parsed_items.pop_back();
+      auto i = new Instruction_cjump(arg1, arg2, label, op);
 
       /* 
        * Add the just-created instruction to the current function.
@@ -1102,16 +1095,15 @@ namespace L2 {
       /* 
        * Create the instruction.
        */ 
-      auto i = new Instruction_lea();
-      i->multiple = parsed_items.back();
+      Item* multiple = parsed_items.back();
       parsed_items.pop_back();
-      i->arg2 = parsed_items.back();
+      Item* arg2 = parsed_items.back();
       parsed_items.pop_back();
-      i->arg1 = parsed_items.back();
+      Item* arg1 = parsed_items.back();
       parsed_items.pop_back();
-      i->dst = parsed_items.back();
+      Item* dst = parsed_items.back();
       parsed_items.pop_back();
-      i->id = lea;
+      auto i = new Instruction_lea(dst, arg1, arg2, multiple);
 
       /* 
        * Add the just-created instruction to the current function.
@@ -1136,10 +1128,9 @@ namespace L2 {
        * Create the instruction.
        */ 
       // cout << "This: " << parsed_items.back().labelName << endl;
-      auto i = new Instruction_label();
-      i->label = parsed_items.back();
+      Item* label = parsed_items.back();
       parsed_items.pop_back();
-      i->id = _label;
+      auto i = new Instruction_label(label);
 
       /* 
        * Add the just-created instruction to the current function.
@@ -1163,10 +1154,9 @@ namespace L2 {
       /* 
        * Create the instruction.
        */ 
-      auto i = new Instruction_goto();
-      i->label = parsed_items.back();
+      Item *label = parsed_items.back();
       parsed_items.pop_back();
-      i->id = gotoo;
+      auto i = new Instruction_goto(label);
 
       /* 
        * Add the just-created instruction to the current function.
@@ -1177,7 +1167,6 @@ namespace L2 {
   };
 
   // stackarg action
-    // lea action
   template<> struct action < Instruction_stackarg_rule > {
     template< typename Input >
 	static void apply( const Input & in, Program & p){
@@ -1191,12 +1180,11 @@ namespace L2 {
       /* 
        * Create the instruction.
        */ 
-      auto i = new Instruction_stackarg();
-      i->M = parsed_items.back();
+      Item* M = parsed_items.back();
       parsed_items.pop_back();
-      i->dst = parsed_items.back();
+      Item* dst = parsed_items.back();
       parsed_items.pop_back();
-      i->id = stackarg;
+      auto i = new Instruction_stackarg(dst, M);
 
       /* 
        * Add the just-created instruction to the current function.
@@ -1220,12 +1208,11 @@ namespace L2 {
       /* 
        * Create the instruction.
        */ 
-      auto i = new Instruction_calls();
-      i->N = parsed_items.back();
+      Item *N = parsed_items.back();
       parsed_items.pop_back();
-      i->u = parsed_items.back();
+      Item *u = parsed_items.back();
       parsed_items.pop_back();
-      i->id = calls;
+      auto i = new Instruction_calls(u, N);
 
       /* 
        * Add the just-created instruction to the current function.
@@ -1249,12 +1236,11 @@ namespace L2 {
       /* 
        * Create the instruction.
        */ 
-      auto i = new Instruction_runtime();
-      i->N = parsed_items.back();
+      Item *N = parsed_items.back();
       parsed_items.pop_back();
-      i->runtime = parsed_items.back();
+      Item *runtime = parsed_items.back();
       parsed_items.pop_back();
-      i->id = calls;
+      auto i = new Instruction_runtime(runtime, N);
 
       /* 
        * Add the just-created instruction to the current function.
@@ -1281,7 +1267,7 @@ namespace L2 {
     return p;
   }
 
-  Function parse_function_file (char *fileName){
+  Program parse_function_file (char *fileName){
 
     /* 
      * Check the grammar for some possible issues.
@@ -1292,10 +1278,10 @@ namespace L2 {
      * Parse.
      */   
     file_input< > fileInput(fileName);
-    Function f;
-    parse< grammar, action >(fileInput, f);
+    Program p;
+    parse< grammar, action >(fileInput, p);
 
-    return f;
+    return p;
   }
 
   Program parse_spill_file (char *fileName){

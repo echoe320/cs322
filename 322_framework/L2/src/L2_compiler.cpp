@@ -122,7 +122,7 @@ int main(
    * Liveness test.
    */
   if (liveness_only){
-    L2::create_liveness_file(p);
+    L2::create_liveness_list(p);
     //return 0;
   }
 

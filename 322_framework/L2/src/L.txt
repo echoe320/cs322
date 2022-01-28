@@ -5,3 +5,8 @@ Things to do for tmr
 2) test computation of GEN and KILL sets
 3) get our visitor to instantiate ('too few arguments' thing)
 4) compute IN and OUT sets from GEN, KILL, successor/predecessor
+
+
+NEW TODO:
+- toString
+- get methods for each class field?
