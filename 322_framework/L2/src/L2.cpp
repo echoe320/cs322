@@ -194,4 +194,10 @@ namespace L2 {
     this->M = offset;
   }
 
+  /*
+   * defining enum to string
+   */
+  std::string get_enum_string (int enum_value) {
+    return (reg_enum_str[enum_value]);
+
 }

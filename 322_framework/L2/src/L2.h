@@ -10,33 +10,7 @@ namespace L2 {
 
   enum reg {rdi, rsi, rdx, rcx, r8, r9, rax, rbx, rbp, r10, r11, r12, r13, r14, r15, rsp};
 
-  std::ostream& operator<<(std::ostream& out, const Errors value){
-    const char* s = 0;
-    #define PROCESS_VAL(p) case(p): s = #p; break;
-    switch(value){
-      PROCESS_VAL(rdi);     
-      PROCESS_VAL(rsi);     
-      PROCESS_VAL(rdx);
-      PROCESS_VAL(rcx);     
-      PROCESS_VAL(r8);     
-      PROCESS_VAL(r9);
-      PROCESS_VAL(rax);     
-      PROCESS_VAL(rbx);     
-      PROCESS_VAL(rbp);
-      PROCESS_VAL(r10);     
-      PROCESS_VAL(r11);     
-      PROCESS_VAL(r12);
-      PROCESS_VAL(r13);
-      PROCESS_VAL(r14);     
-      PROCESS_VAL(r15);     
-      PROCESS_VAL(rsp);
-    }
-    #undef PROCESS_VAL
-    return out << s;
-  }
-
-    //cout << rdi <<
-    //std::string reg [] = ["rdi", "rsi", ];
+  static const char* reg_enum_str[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9", "rax", "rbx", "rbp", "r10", "r11", "r12", "r13", "r14", "r15", "rsp"};
 
   enum opCode {op_add, op_minus, op_multiply, op_AND, op_lshift, op_rshift, op_inc, op_dec, cmp_equals, cmp_less, cmp_lesseq};
   
