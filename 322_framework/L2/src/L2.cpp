@@ -17,6 +17,7 @@ namespace L2 {
    * Constructor/Member Functions
    */
   
+  //* ============================= ITEMS =============================
   //Register
   Register::Register(reg regi) {
     this->r = regi;
@@ -34,6 +35,9 @@ namespace L2 {
     std::pair<L2::reg, int64_t> res{this->r, this->offset};
     return res; // res.first
   }
+  std::string Memory::toString(void) {
+    return "";
+  }
 
   //Number
   Number::Number(int64_t n){
@@ -41,6 +45,9 @@ namespace L2 {
   }
   int64_t Number::get(void){
     return this->num;
+  }
+  std::string Memory::toString(void) {
+    return "";
   }
 
   //Label
@@ -50,6 +57,9 @@ namespace L2 {
   std::string Label::get(void){
     return this->labelName;
   }
+  std::string Memory::toString(void) {
+    return "";
+  }
 
   //Variable
   Variable::Variable(std::string vn){
@@ -57,6 +67,9 @@ namespace L2 {
   }
   std::string Variable::get(void){
     return this->varName;
+  }
+  std::string Memory::toString(void) {
+    return "";
   }
 
   //Operation
@@ -66,6 +79,9 @@ namespace L2 {
   opCode Operation::get(void){
     return this->opName;
   }
+  std::string Memory::toString(void) {
+    return "";
+  }
 
   //Runtime
   Runtime::Runtime(runtimeCode rt) {
@@ -74,7 +90,12 @@ namespace L2 {
   runtimeCode Runtime::get(void) {
     return this->runtime;
   };
+  std::string Memory::toString(void) {
+    return "";
+  }
 
+
+  //* ============================= INSTRUCTIONS =============================
   // RETURN INSTRUCTION
   void Instruction_ret::Accept (Visitor *visitor) {
     visitor->VisitInstruction(this);

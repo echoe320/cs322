@@ -19,26 +19,14 @@ namespace L2 {
   //Item Class + subclasses
   class Item {
     public:
-      // virtual void print_obj = 0;
-      // std::string labelName;
-      // reg r;
-      // std::string Register;
-      // std::string offset; // doubles as number
-      //virtual void get(void) = 0;
-      // virtual void get(void);
-      //virtual std::string to_String(void);
-      // std::vector<Item *> parsed_items;
-      // Item *i; // <- add this to parser
-      // reg reg_temp;
-      // i = &r;
-      // i->r; // reg r inside of reg_temp
-      // parsed_items.push_back(i);
+      virtual std::string toString(void) = 0;
   };
 
   class Register : public Item {
     public:
       Register(reg regi);
       reg get(void);
+      std::string toString(void) override;
     private:
       reg r;
   };
@@ -47,6 +35,7 @@ namespace L2 {
     public:
       Memory(reg regi, int64_t os);
       std::pair<L2::reg, int64_t> get(void);
+      std::string toString(void) override;
     private:
       reg r;
       int64_t offset;
@@ -56,6 +45,7 @@ namespace L2 {
     public:
       Number(int64_t n);
       int64_t get(void);
+      std::string toString(void) override;
     private:
       int64_t num;
   };
@@ -64,6 +54,7 @@ namespace L2 {
     public:
       Label(std::string ln);
       std::string get(void);
+      std::string toString(void) override;
     private:
       std::string labelName;
   };
@@ -72,6 +63,7 @@ namespace L2 {
     public:
       Variable(std::string vn);
       std::string get(void);
+      std::string toString(void) override;
     private:
       std::string varName;
   };
@@ -80,6 +72,7 @@ namespace L2 {
     public:
       Operation(opCode on);
       opCode get(void);
+      std::string toString(void) override;
     private:
       opCode opName;
   };
@@ -88,6 +81,7 @@ namespace L2 {
     public:
       Runtime(runtimeCode rt);
       runtimeCode get(void);
+      std::string toString(void) override;
     private:
       runtimeCode runtime;
   };
@@ -118,9 +112,9 @@ namespace L2 {
     public:
       Instruction_assignment(Item *source, Item *dest);
       void Accept(Visitor *visitor) override;
-      std::tuple<Item*, Item*> get();
+      std::tuple<Item*, Item*> get(); //access individual fields by std::get<idx>(element.get())
     private:
-      Item *src, *dst;
+      Item *src, *dst; // src = std::get<0>(element.get());
   };
 
   class Instruction_arithmetic : public Instruction{

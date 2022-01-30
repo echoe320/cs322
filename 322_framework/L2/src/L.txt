@@ -1,17 +1,22 @@
 LLLLLLLLLLLLLLLLLLLLLLLL
 
-Things to do for tmr
-1) issue: we have array of Item pointers, but can't access private fields
+TODO:
+1) figure out how to access Memory's reg r and Number's int64_t num fields
+  - right now they're set as constants
 2) test computation of GEN and KILL sets
-3) get our visitor to instantiate ('too few arguments' thing)
-4) compute IN and OUT sets from GEN, KILL, successor/predecessor
+3) compute IN and OUT sets from GEN, KILL, successor/predecessor
 
+#################### CHANGELOG ASYNCRONOUS ##################### (new entries go to top of stack)
 
-NEW TODO:
-- toString
-- get methods for each class field?
-
-################ CHANGELOG ASYNCRONOUS #####################
+01/29/2021 (Jacob):
+- change VisitInstruction() methods to use get() instead of directly accessing fields
+- remove 'using namespace std;' from liveness.cpp
+  -> to avoid confusion between std::get<idx>(myTuple) and myClass.get()
+- add toString method to parent Item class to allow dynamic_cast
+  -> if there is no virtual function to override, you can't use dynamic_cast because the class isn't polymorphic 
+  -> add toString override methods to Item's children
+    -> none of the toString methods actually work lmao they just return empty string (i just needed it so the classes are recognized as polymorphic)
+- updated our TODO list
 
 Update Eugene Jan 29, 2021:
 - added reg_list for callee, caller, arg 
