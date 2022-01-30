@@ -21,4 +21,5 @@ Update Eugene Jan 29, 2021:
   -> arg_reg_list for arg registers
 - started creating get() for each instruction class
   -> changed L2.h to include get functions in the each instruction class
-  -> finished implementing get() functions for Instruction_assignment, Instruction_arithmetic, Instruction_crement, Instruction_shift, Instruction_cmp, Instruction_lea, 
+  -> finished implementing get() functions for Instruction_assignment, Instruction_arithmetic, Instruction_crement, Instruction_shift, Instruction_cmp, Instruction_lea, Instruction_calls, Instruction_runtime, Instruction_label, Instruction_goto, Instruction_stackarg -> all Instruction classes have get()
+  -> used i.e. std::tuple<Item*, Item*, Item*> get() -> access the fields using indexing?

@@ -118,7 +118,7 @@ namespace L2 {
     this->op = ope;
   }
   std::tuple<Item*, Item*> Instruction_crement::get() {
-    return std::make_tuple(this->src, this->dst);
+    return std::make_tuple(this->dst, this->op);
   }
 
   // SHIFT INSTRUCTION
