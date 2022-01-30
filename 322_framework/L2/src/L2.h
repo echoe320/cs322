@@ -118,6 +118,7 @@ namespace L2 {
     public:
       Instruction_assignment(Item *source, Item *dest);
       void Accept(Visitor *visitor) override;
+      std::tuple<Item*, Item*> get();
     private:
       Item *src, *dst;
   };
@@ -126,6 +127,8 @@ namespace L2 {
     public:
       Instruction_arithmetic(Item *source, Item *dest, Item *ope);
       void Accept(Visitor *visitor) override;
+      std::tuple<Item*, Item*, Item*> get();
+
     private:
       Item *src, *dst, *op;
   };
@@ -134,6 +137,7 @@ namespace L2 {
     public:
       Instruction_crement(Item *dest, Item *ope);
       void Accept(Visitor *visitor) override;
+      std::tuple<Item*, Item*> get();
     private:
       Item *dst, *op;
   };
@@ -142,6 +146,7 @@ namespace L2 {
     public:
       Instruction_shift(Item *source, Item *dest, Item *ope);
       void Accept(Visitor *visitor) override;
+      std::tuple<Item*, Item*, Item*> get();
     private:
       Item *src, *dst, *op;
   };
@@ -150,6 +155,7 @@ namespace L2 {
     public:
       Instruction_cmp(Item *dest, Item *one, Item *two, Item *ope);
       void Accept(Visitor *visitor) override;
+      std::tuple<Item*, Item*, Item*, Item*> get();
     private:
       Item *dst, *arg1, *arg2, *op;
   };
@@ -158,6 +164,7 @@ namespace L2 {
     public:
       Instruction_cjump(Item *one, Item *two, Item *target, Item *ope);
       void Accept(Visitor *visitor) override;
+      std::tuple<Item*, Item*, Item*, Item*> get();
     private:
       Item *arg1, *arg2, *label, *op;
   };
@@ -166,6 +173,7 @@ namespace L2 {
     public:
       Instruction_lea(Item *dest, Item *one, Item *two, Item *multiple);
       void Accept(Visitor *visitor) override;
+      std::tuple<Item*, Item*, Item*, Item*> get();
     private:
       Item *dst, *arg1, *arg2, *mult;
   };
@@ -174,6 +182,7 @@ namespace L2 {
     public:
       Instruction_calls(Item *target, Item *numArgs);
       void Accept(Visitor *visitor) override;
+      std::tuple<Item*, Item*> get();
     private:
       Item *u, *N; //call u N
   };
@@ -182,6 +191,7 @@ namespace L2 {
     public:
       Instruction_runtime(Item *target, Item *numArgs);
       void Accept(Visitor *visitor) override;
+      std::tuple<Item*, Item*> get();
     private:
       Item *runtime, *N;
   };
@@ -190,6 +200,7 @@ namespace L2 {
     public:
       Instruction_label(Item *target);
       void Accept(Visitor *visitor) override;
+      std::tuple<Item*> get();
     private:
       Item *label;
   };
@@ -198,6 +209,7 @@ namespace L2 {
     public:
       Instruction_goto(Item *target);
       void Accept(Visitor *visitor) override;
+      std::tuple<Item*> get();
     private:
       Item *label;
   };
@@ -206,6 +218,7 @@ namespace L2 {
     public:
       Instruction_stackarg(Item *dest, Item *offset);
       void Accept(Visitor *visitor) override;
+      std::tuple<Item*, Item*> get();
     private:
       Item *dst, *M;
   };

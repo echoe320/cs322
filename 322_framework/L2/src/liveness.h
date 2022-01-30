@@ -8,6 +8,10 @@ namespace L2{
   //   int enum_reg;
   //   string v; // reg string also?
   // };
+  int caller_reg_list[] = {reg::r10, reg::r11, reg::r8, reg::r9, reg::rax, reg::rcx, reg::rdi, reg::rdx, reg::rsi};
+  int callee_reg_list[] = {reg::r12, reg::r13, reg::r14, reg::r15, reg::rbp, reg::rbx};
+  int arg_reg_list[] = {reg::rdi, reg::rsi, reg::rdx, reg::rcx, reg::r8, reg::r9};
+
   class Gen_Kill_Visitors : public Visitor {
     void VisitInstruction (Instruction_ret *element) override;
     void VisitInstruction (Instruction_assignment *element) override;

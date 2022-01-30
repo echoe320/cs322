@@ -10,3 +10,15 @@ Things to do for tmr
 NEW TODO:
 - toString
 - get methods for each class field?
+
+################ CHANGELOG ASYNCRONOUS #####################
+
+Update Eugene Jan 29, 2021:
+- added reg_list for callee, caller, arg 
+  -> used reg::rdi to get the int value for reg enum values
+- fixed loops creating callee, caller, arg 
+  -> used static_cast<reg>(count) instead of reg(count)
+  -> arg_reg_list for arg registers
+- started creating get() for each instruction class
+  -> changed L2.h to include get functions in the each instruction class
+  -> finished implementing get() functions for Instruction_assignment, Instruction_arithmetic, Instruction_crement, Instruction_shift, Instruction_cmp, Instruction_lea, 

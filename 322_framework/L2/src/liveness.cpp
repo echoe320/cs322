@@ -11,21 +11,13 @@
 using namespace std;
 
 namespace L2 {
+  
+
   void Gen_Kill_Visitors::VisitInstruction(Instruction_ret *element){
     // gen = rax + callee save registers
-    int callee_list[] = {6, 7, 8, 11, 12, 13, 14, 15};
-    // reg callee_list[] = [rax, rbx, rbp, r12, r13, r14, r15];
-    // for (int ii = 6; i < 14; i++) {
-    //   Item *i;
-    //   auto regi = new Register();
-    //   i = &regi;
-    //   i->r = static_cast<reg>(ii);
-    //   element->reads.insert(i);
-    // }
-    for (auto count : callee_list) {
+    for (auto count : callee_reg_list) {
       Item *i;
-      Register regi((reg)count);
-      // regi.set((reg)count);
+      Register regi(static_cast<reg>(count));
       i = &regi;
       element->reads.insert(i);
     }
@@ -38,9 +30,9 @@ namespace L2 {
     else if (dynamic_cast<Register *>(element->src) != nullptr) element->reads.insert(element->src);
     else if (dynamic_cast<Memory *>(element->src) != nullptr) {
       Item *i;
-      auto regi = new Register(); //create new Register object with Memory's reg r field
+      Register regi(rdi); //create new Register object with Memory's reg r field
       i = &regi;
-      i->r = element->src->r;
+      // i->r = element->src->r;
       element->reads.insert(i);
     }
     //check if dst is a variable/register
@@ -108,26 +100,35 @@ namespace L2 {
     if (dynamic_cast<Register *>(element->u) != nullptr) element->reads.insert(element->u);
     //element->reads.insert(element->u);
     
+    //adding 
     int numArgs = element->N.get();
     for (int i = 0; i < numArgs; i++){
-      Item *it;
-      auto
-      i->r = static_cast<reg>(ii);
+      Item* it;
+      int arg_reg = arg_reg_list[i];
+      Register regi(static_cast<reg>(arg_reg));
+      it = &regi;
+      element->reads.insert(it);
     }
 
     // kill = caller save registers
-    int caller_list[] = [0, 1, 2, 3];
-    for (auto count : callee_list) {
+    for (auto count : caller_reg_list) {
       Item *i;
-      auto regi = new Register();
+      Register regi(static_cast<reg>(count));
       i = &regi;
-      i->r = (reg)count;
       element->writes.insert(i);
     }
   }
 
   void Gen_Kill_Visitors::VisitInstruction(Instruction_runtime *element){
     // gen = args used
+    int numArgs = element->N.get(); // get number of args
+    for (int i = 0; i < numArgs; i++){
+      Item* it;
+      int arg_reg = arg_reg_list[i];
+      Register regi(static_cast<reg>(arg_reg));
+      it = &regi;
+      element->reads.insert(it);
+    }
     // kill = caller save registers
 
   }
@@ -143,6 +144,7 @@ namespace L2 {
   }
 
   void Gen_Kill_Visitors::VisitInstruction(Instruction_stackarg *element){
+    
     element->writes.insert(element->dst);
   }
 
