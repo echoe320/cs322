@@ -275,6 +275,8 @@ namespace L2 {
       std::vector<Function *> functions;
   };
 
+  std::string get_enum_string (int enum_value);
+
   // arg register sets
   //std::vector<std::unordered_set<Item>> arg_registers(7);
   //arg_registers.push_back({reg_di, reg_si, reg_dx, reg_cx, reg_8, reg_9});

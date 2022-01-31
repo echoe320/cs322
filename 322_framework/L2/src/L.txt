@@ -8,6 +8,13 @@ TODO:
 
 #################### CHANGELOG ASYNCRONOUS ##################### (new entries go to top of stack)
 
+01/30/2021 Eugene:
+- debugging
+  -> fixed the toString method for all item classes
+  -> added constructor for Instruction_ret -> seems to error without
+  -> fixed getting the reg from Mem r field
+  -> fixed getting the number from N field for Instruction_calls and Instruction_runtime
+
 01/29/2021 (Jacob):
 - change VisitInstruction() methods to use get() instead of directly accessing fields
 - remove 'using namespace std;' from liveness.cpp

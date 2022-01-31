@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 
-#include <liveness.h>
+// #include <liveness.h>
 #include <L2.h>
 
 // included libraries
@@ -24,6 +24,9 @@ namespace L2 {
   }
   reg Register::get(void) {
     return this->r;
+  }
+  std::string Register::toString(void) {
+    return "";
   }
 
   //Memory
@@ -46,7 +49,7 @@ namespace L2 {
   int64_t Number::get(void){
     return this->num;
   }
-  std::string Memory::toString(void) {
+  std::string Number::toString(void) {
     return "";
   }
 
@@ -57,7 +60,7 @@ namespace L2 {
   std::string Label::get(void){
     return this->labelName;
   }
-  std::string Memory::toString(void) {
+  std::string Label::toString(void) {
     return "";
   }
 
@@ -68,7 +71,7 @@ namespace L2 {
   std::string Variable::get(void){
     return this->varName;
   }
-  std::string Memory::toString(void) {
+  std::string Variable::toString(void) {
     return "";
   }
 
@@ -79,7 +82,7 @@ namespace L2 {
   opCode Operation::get(void){
     return this->opName;
   }
-  std::string Memory::toString(void) {
+  std::string Operation::toString(void) {
     return "";
   }
 
@@ -89,8 +92,8 @@ namespace L2 {
   }
   runtimeCode Runtime::get(void) {
     return this->runtime;
-  };
-  std::string Memory::toString(void) {
+  }
+  std::string Runtime::toString(void) {
     return "";
   }
 
@@ -100,6 +103,7 @@ namespace L2 {
   void Instruction_ret::Accept (Visitor *visitor) {
     visitor->VisitInstruction(this);
   }
+  Instruction_ret::Instruction_ret(){} // empty constructor? doesn't throw errors now   
 
   // ASSIGNMENT INSTRUCTION
   void Instruction_assignment::Accept (Visitor *visitor) {

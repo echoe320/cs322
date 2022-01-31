@@ -725,7 +725,7 @@ namespace L1 {
   };
 
   // Instruction Actions -> pop
-  template<> struct action < Instruction_return_rule > {
+template<> struct action < Instruction_return_rule > {
     template< typename Input >
 	static void apply( const Input & in, Program & p){
       if (shouldPrint) cout << "return instruction started\n";
