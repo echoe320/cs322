@@ -199,10 +199,11 @@ namespace L2 {
 void create_liveness_list(Program p) { 
 
     //Initialize vectors
-    std::vector<std::unordered_set<Item *>> GEN; //[numInstructions]; //* GEN[i] = all variables read by instruction i
-    std::vector<std::unordered_set<Item *>> KILL; //[numInstructions]; //* KILL[i] = all variables written/defined by instruction i
-    std::vector<std::unordered_set<Item *>> IN; //[numInstructions];
-    std::vector<std::unordered_set<Item *>> OUT; //[numInstructions];
+    //! PROBLEM: these sets (GEN, KILL, IN, OUT) are unique to each function, but we only have one of each for a program
+    std::vector<std::unordered_set<Item *>> GEN; //* GEN[i] = all variables read by instruction i
+    std::vector<std::unordered_set<Item *>> KILL;//* KILL[i] = all variables written/defined by instruction i
+    std::vector<std::unordered_set<Item *>> IN;
+    std::vector<std::unordered_set<Item *>> OUT;
 
     //Gen and kill 
     auto *gen_kill_visitor = new Gen_Kill_Visitors();
@@ -220,15 +221,25 @@ void create_liveness_list(Program p) {
       for(auto item: i){
         if (dynamic_cast<Variable *>(item) != nullptr){
           Variable* var_temp = (Variable*)item;
-          std::cout >> var_temp->get() >> std::endl;
+          std::cout << var_temp->toString() << std::endl;
         } else if (dynamic_cast<Register *>(item) != nullptr) {
           Register* reg_temp = (Register*)item;
-          std::cout >> get_enum_string(reg_temp->get()) >> std::endl;
+          std::cout << reg_temp->toString() << std::endl;
+          // std::cout << get_enum_string(reg_temp->get()) << std::endl;
         }
       }
     }
 
 
     //Successor and predecessor
+    for (auto f : p.functions) {
+      f->findSuccessorsPredecessors();
+    }
+
+    //Compute IN and OUT sets
+    bool didChange = false;
+    do {
+      continue;
+    } while (didChange);
   }
 }

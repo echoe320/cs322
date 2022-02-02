@@ -10,7 +10,7 @@
 // included libraries
 #include <unordered_set>
 
-using namespace std;
+// using namespace std;
 
 namespace L2 {
   /*
@@ -26,7 +26,8 @@ namespace L2 {
     return this->r;
   }
   std::string Register::toString(void) {
-    return "";
+    // use enum as an index to access the string version of register
+    return reg_enum_str[this->r];
   }
 
   //Memory
@@ -50,7 +51,7 @@ namespace L2 {
     return this->num;
   }
   std::string Number::toString(void) {
-    return "";
+    return std::to_string(this->num);
   }
 
   //Label
@@ -61,7 +62,7 @@ namespace L2 {
     return this->labelName;
   }
   std::string Label::toString(void) {
-    return "";
+    return this->labelName;
   }
 
   //Variable
@@ -72,7 +73,7 @@ namespace L2 {
     return this->varName;
   }
   std::string Variable::toString(void) {
-    return "";
+    return "%" + this->varName;
   }
 
   //Operation
@@ -261,8 +262,59 @@ namespace L2 {
 
   /*
    * defining enum to string
+   * don't think we need this because i defined a Register.toString() method
    */
   std::string get_enum_string (int enum_value) {
     return (reg_enum_str[enum_value]);
+  }
+
+
+  //* FUNCTION - setting successors and predecessors
+  void Function::findSuccessorsPredecessors() {
+    int instructions_len = this->instructions.size();
+    for (int ii = 0; ii < instructions_len; ii++) {
+      // return instruction has no successors
+      if (dynamic_cast<Instruction_ret *>(this->instructions[ii]) != nullptr) continue;
+
+      // call tensor_error has no successors
+      else if (dynamic_cast<Instruction_runtime *>(this->instructions[ii]) != nullptr) {
+        auto inst_temp = static_cast<Instruction_runtime *>(this->instructions[ii]);
+        auto rt = static_cast<Runtime *>(std::get<0>(inst_temp->get()));
+        auto rt_code = rt->get();
+        if (rt_code == rt_tensor_error) continue;
+      }
+
+      // goto instruction's successor is the target (label)
+      else if (dynamic_cast<Instruction_goto *>(this->instructions[ii]) != nullptr) {
+        // have to check every instruction to find the target
+        auto inst_temp = dynamic_cast<Instruction_label *>(this->instructions[ii]);
+        auto target = static_cast<Label *>(std::get<0>(inst_temp->get()));
+        for (int jj = 0; jj < instructions_len; jj++) {
+          if (dynamic_cast<Instruction_label *>(this->instructions[jj]) != nullptr) {
+            auto inst_temp2 = dynamic_cast<Instruction_label *>(this->instructions[jj]);
+            auto target2 = static_cast<Label *>(std::get<0>(inst_temp2->get()));
+            if (target == target2) this->instructions[ii]->successor_idx.insert(jj);
+          }
+        }
+      }
+      
+      //cjump has two successors: target + instruction right after
+      else if (dynamic_cast<Instruction_cjump *>(this->instructions[ii]) != nullptr) {
+        this->instructions[ii]->successor_idx.insert(ii + 1);
+        // have to check every instruction to find the target
+        auto inst_temp = dynamic_cast<Instruction_label *>(this->instructions[ii]);
+        auto target = static_cast<Label *>(std::get<2>(inst_temp->get()));
+        for (int jj = 0; jj < instructions_len; jj++) {
+          if (dynamic_cast<Instruction_label *>(this->instructions[jj]) != nullptr) {
+            auto inst_temp2 = dynamic_cast<Instruction_label *>(this->instructions[jj]);
+            auto target2 = static_cast<Label *>(std::get<0>(inst_temp2->get()));
+            if (target == target2) this->instructions[ii]->successor_idx.insert(jj);
+          }
+        }
+      }
+
+      // if not a special case, successor is the instruction right after
+      else this->instructions[ii]->successor_idx.insert(ii + 1);
+    }
   }
 }

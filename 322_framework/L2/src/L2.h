@@ -4,6 +4,7 @@
 #include <string>
 
 #include <unordered_set>
+#include <set>
 
 namespace L2 {
   // class visitor;
@@ -96,8 +97,8 @@ namespace L2 {
       virtual void Accept(Visitor *visitor) = 0;
       //virtual std::string toString(void) = 0;
 
-      std::unordered_set<Instruction *> predecessors;
-      std::unordered_set<Instruction *> successors;
+      std::set<int> predecessor_idx;
+      std::set<int> successor_idx;
       std::unordered_set<Item *> reads; // Gen
       std::unordered_set<Item *> writes; // Kill
   };
@@ -264,6 +265,7 @@ namespace L2 {
       int64_t arguments;
       //int64_t locals; //! FUNCTION DOES NOT HAVE LOCALS IN L2
       std::vector<Instruction *> instructions;
+      void findSuccessorsPredecessors();
   };
 
   /*

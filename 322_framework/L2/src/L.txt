@@ -1,12 +1,23 @@
 LLLLLLLLLLLLLLLLLLLLLLLL
 
 TODO:
-1) figure out how to access Memory's reg r and Number's int64_t num fields
-  - right now they're set as constants
+1) rework liveness.cpp::create_liveness_list() (see comment i made above set vector initialization)
 2) test computation of GEN and KILL sets
-3) compute IN and OUT sets from GEN, KILL, successor/predecessor
+3) test findSuccessorsPredecessors()
+4) compute IN and OUT sets from GEN, KILL, successor/predecessor
 
 #################### CHANGELOG ASYNCRONOUS ##################### (new entries go to top of stack)
+
+02/01/2021 Jacob:
+- implemented ACTUAL toString() methods for Register, Number, Label, Variable
+  -> don't see any need for the other Item subclasses yet
+- added a findSuccessorsPredecessors() method to function class
+  -> only implemented successors, not predecessors
+    -> successors are represented as integers, since we only need the indices (i.e. we can access successors with f.instructions[successor_idx])
+    -> changed Instruction fields successor_idx and predecessor_idx to reflect this semantic
+    -> code is not the prettiest, but it should work, DID NOT TEST yet (im not sure how to test it lmao)
+- added a section in liveness.cpp::create_liveness_list() for computing IN and OUT sets
+- updated our TODO list
 
 01/30/2021 Eugene:
 - debugging
