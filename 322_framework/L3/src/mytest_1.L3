@@ -20,6 +20,39 @@ define :main(){
   %result2 <- %arg1 << 1
   %result2 <- %result2 + 1
   call print(%result2)
+
+  %arr_len <- 6 << 1
+  %arr_len <- %arr_len + 1
+  %arr_init <- 1
+  %arr <- call allocate(%arr_len, %arr_init)
+  %arr1 <- %arr + 8
+  %arr2 <- %arr + 16
+  %arr3 <- %arr + 24
+  %arr4 <- %arr + 32
+  %arr5 <- %arr + 40
+  %arr6 <- %arr + 48
+  store %arr1 <- 1
+  store %arr2 <- 2
+  store %arr3 <- 3
+  store %arr4 <- 4
+  store %arr5 <- 5
+  store %arr6 <- 6
+
+  %iter <- 8
+  %sum <- 1
+  :loop
+  %load_addr <- %arr + %iter
+  %load_var <- load %load_addr
+  // %load_var <- %load_var << 1
+  // %load_var <- %load_var + 1
+  // call print(%load_var)
+  %sum <- %sum + %load_var
+  %iter <- %iter + 8
+  %cmp <- %iter <= 48
+  br %cmp :loop
+  %sum <- %sum << 1
+  %sum <- %sum + 1
+  call print(%sum)
   return
 }
 define :firsttest_helper(%a1,%a2,%a3,%a4,%a5,%a6){

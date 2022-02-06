@@ -22,10 +22,10 @@
     r8 <- %arg5
     r9 <- %arg6
     mem rsp -8 <- 
-:call_label0
+:call_label1
     call :firsttest_helper 6
     
-:call_label0
+:call_label1
     %fthres <- rax
     %result <- %fthres
     %result <<= 1
@@ -38,6 +38,52 @@
     %result2 <- %result2
     %result2 += 1
     rdi <- %result2
+    call print 1
+    %arr_len <- 6
+    %arr_len <<= 1
+    %arr_len <- %arr_len
+    %arr_len += 1
+    %arr_init <- 1
+    rdi <- %arr_len
+    rsi <- %arr_init
+    call allocate 2
+    %arr <- rax
+    %arr1 <- %arr
+    %arr1 += 8
+    %arr2 <- %arr
+    %arr2 += 16
+    %arr3 <- %arr
+    %arr3 += 24
+    %arr4 <- %arr
+    %arr4 += 32
+    %arr5 <- %arr
+    %arr5 += 40
+    %arr6 <- %arr
+    %arr6 += 48
+    mem %arr1 0  <- 1
+    mem %arr2 0  <- 2
+    mem %arr3 0  <- 3
+    mem %arr4 0  <- 4
+    mem %arr5 0  <- 5
+    mem %arr6 0  <- 6
+    %iter <- 8
+    %sum <- 1
+    :call_label0
+    %load_addr <- %arr
+    %load_addr += %iter
+    %load_var <- mem %load_addr 0 
+    %sum <- %sum
+    %sum += %load_var
+    %iter <- %iter
+    %iter += 8
+    %cmp <- %iter <= 48
+    
+    cjump %cmp = 1 :call_label0
+    %sum <- %sum
+    %sum <<= 1
+    %sum <- %sum
+    %sum += 1
+    rdi <- %sum
     call print 1
     return
   )

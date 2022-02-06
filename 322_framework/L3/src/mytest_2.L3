@@ -12,17 +12,35 @@ define :main() {
 
   %res <- call :quadrupleInt(%input)
 
-  %res <- %res << 1
-  %res <- %res + 1
-  call print(%res)
+  %res1 <- %res << 1
+  %res1 <- %res1 + 1
+  call print(%res1)
 
-  %res <- %var1
-  %res <- %res << 1
-  %res <- %res + 1
-  call print(%res)
+  %res2 <- %var1
+  %res2 <- %res2 << 1
+  %res2 <- %res2 + 1
+  call print(%res2)
+
+  %res3 <- call :encode(%res)
+  call print(%res3)
+
+  %i <- 0
+  :loop
+  %i <- %i + 1
+  %cond <- %i < 4
+  call print(%cond)
+  br %cond :loop
+
+  call print(%i)
 
   return
 }
 define :quadrupleInt(%var1) {
-
+  %res <- %var1 * 4
+  return %res
+}
+define :encode(%x) {
+  %x <- %x << 1
+  %x <- %x + 1
+  return %x
 }
