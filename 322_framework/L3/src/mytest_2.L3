@@ -28,9 +28,11 @@ define :main() {
   :loop
   %i <- %i + 1
   %cond <- %i < 4
+  %cond <- call :encode(%cond)
   call print(%cond)
   br %cond :loop
 
+  %i <- call :encode(%i)
   call print(%i)
 
   return
