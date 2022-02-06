@@ -1,0 +1,33 @@
+define :main(){
+  %arg1 <- 1
+  %arg2 <- 2
+  %arg3 <- 3
+  %arg4 <- 4
+  %arg5 <- 5
+  %arg6 <- 6
+
+  %test <- %arg1 * 2
+  %test <- %test << 1
+  %test <- %test + 1
+  call print(%test)
+
+  %fthres <- call :firsttest_helper(%arg1,%arg2,%arg3,%arg4,%arg5,%arg6)
+
+  %result <- %fthres << 1
+  %result <- %result + 1
+  call print(%result)
+
+  %result2 <- %arg1 << 1
+  %result2 <- %result2 + 1
+  call print(%result2)
+  return
+}
+define :firsttest_helper(%a1,%a2,%a3,%a4,%a5,%a6){
+  %a1 <- %a1 + 1
+  %a23 <- %a2 + %a3
+  %a45 <- %a4 + %a5
+  %temp <- %a23 + %a45
+  %temp <- %temp + %a6
+  %result <- %a1 + %temp
+  return %result
+}

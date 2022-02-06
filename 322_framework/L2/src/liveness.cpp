@@ -197,49 +197,54 @@ namespace L2 {
   }
 
 void create_liveness_list(Program p) { 
-
-    //Initialize vectors
-    //! PROBLEM: these sets (GEN, KILL, IN, OUT) are unique to each function, but we only have one of each for a program
-    std::vector<std::unordered_set<Item *>> GEN; //* GEN[i] = all variables read by instruction i
-    std::vector<std::unordered_set<Item *>> KILL;//* KILL[i] = all variables written/defined by instruction i
-    std::vector<std::unordered_set<Item *>> IN;
-    std::vector<std::unordered_set<Item *>> OUT;
-
     //Gen and kill 
     auto *gen_kill_visitor = new Gen_Kill_Visitors();
+
 
     for (auto f : p.functions) {
       for (auto i : f->instructions) {
         i->Accept(gen_kill_visitor);
-        GEN.push_back(i->reads); // not sure if arrow or dot accessor (should be arrow)
-        KILL.push_back(i->writes);
+        f->GEN.push_back(i->reads); // not sure if arrow or dot accessor (should be arrow)
+        f->KILL.push_back(i->writes);
       }
-    }
 
     //Print gen & kill methods
-    for (auto i: GEN) {
-      for(auto item: i){
-        if (dynamic_cast<Variable *>(item) != nullptr){
-          Variable* var_temp = (Variable*)item;
-          std::cout << var_temp->toString() << std::endl;
-        } else if (dynamic_cast<Register *>(item) != nullptr) {
-          Register* reg_temp = (Register*)item;
-          std::cout << reg_temp->toString() << std::endl;
-          // std::cout << get_enum_string(reg_temp->get()) << std::endl;
-        }
+      for (auto i: f->GEN) {
+        for(auto item: i){
+          if (dynamic_cast<Variable *>(item) != nullptr){
+            Variable* var_temp = (Variable*)item;
+            std::cout << var_temp->toString() << std::endl;
+          } else if (dynamic_cast<Register *>(item) != nullptr) {
+            Register* reg_temp = (Register*)item;
+            std::cout << reg_temp->toString() << std::endl;
+            // std::cout << get_enum_string(reg_temp->get()) << std::endl;
+          }
+        } 
       }
+
+      for (auto i: f->KILL) {
+        for(auto item: i){
+          if (dynamic_cast<Variable *>(item) != nullptr){
+            Variable* var_temp = (Variable*)item;
+            std::cout << var_temp->toString() << std::endl;
+          } else if (dynamic_cast<Register *>(item) != nullptr) {
+            Register* reg_temp = (Register*)item;
+            std::cout << reg_temp->toString() << std::endl;
+            // std::cout << get_enum_string(reg_temp->get()) << std::endl;
+          }
+        } 
+      }
+
+      // Successor and predecessor
+      for (auto f : p.functions) {
+        f->findSuccessorsPredecessors();
+      }
+
+      //Compute IN and OUT sets
+      bool didChange = false;
+      do {
+        continue;
+      } while (didChange);
     }
-
-
-    //Successor and predecessor
-    for (auto f : p.functions) {
-      f->findSuccessorsPredecessors();
-    }
-
-    //Compute IN and OUT sets
-    bool didChange = false;
-    do {
-      continue;
-    } while (didChange);
   }
 }

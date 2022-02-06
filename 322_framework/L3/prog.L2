@@ -1,0 +1,67 @@
+(:main
+  (:main
+    0
+    %arg1 <- 1
+    %arg2 <- 2
+    %arg3 <- 3
+    %arg4 <- 4
+    %arg5 <- 5
+    %arg6 <- 6
+    %test <- %arg1
+    %test *= 2
+    %test <- %test
+    %test <<= 1
+    %test <- %test
+    %test += 1
+    rdi <- %test
+    call print 1
+    rdi <- %arg1
+    rsi <- %arg2
+    rdx <- %arg3
+    rcx <- %arg4
+    r8 <- %arg5
+    r9 <- %arg6
+    mem rsp -8 <- 
+:call_label0
+    call :firsttest_helper 6
+    
+:call_label0
+    %fthres <- rax
+    %result <- %fthres
+    %result <<= 1
+    %result <- %result
+    %result += 1
+    rdi <- %result
+    call print 1
+    %result2 <- %arg1
+    %result2 <<= 1
+    %result2 <- %result2
+    %result2 += 1
+    rdi <- %result2
+    call print 1
+    return
+  )
+  (:firsttest_helper
+    6
+    %a1 <- rdi
+    %a2 <- rsi
+    %a3 <- rdx
+    %a4 <- rcx
+    %a5 <- r8
+    %a6 <- r9
+    %a1 <- %a1
+    %a1 += 1
+    %a23 <- %a2
+    %a23 += %a3
+    %a45 <- %a4
+    %a45 += %a5
+    %temp <- %a23
+    %temp += %a45
+    %temp <- %temp
+    %temp += %a6
+    %result <- %a1
+    %result += %temp
+    rax <- %result
+    return
+  )
+)

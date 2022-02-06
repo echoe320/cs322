@@ -8,6 +8,11 @@ TODO:
 
 #################### CHANGELOG ASYNCRONOUS ##################### (new entries go to top of stack)
 
+02/01/2021 Eugene:
+- Change from program to function for parse_function_file
+- Test gen/kill sets
+
+
 02/01/2021 Jacob:
 - implemented ACTUAL toString() methods for Register, Number, Label, Variable
   -> don't see any need for the other Item subclasses yet

@@ -1,0 +1,69 @@
+(:main
+(:main
+	0 6
+	mem rsp 40 <- rbx
+	mem rsp 32 <- rbp
+	mem rsp 24 <- r15
+	mem rsp 16 <- r14
+	mem rsp 8 <- r13
+	mem rsp 0 <- r12
+	r15 <- 1
+	rbp <- 2
+	r14 <- 3
+	r13 <- 4
+	r12 <- 5
+	rbx <- 6
+	rdi <- r15
+	rdi *= 2
+	rdi <<= 1
+	rdi += 1
+	rdi <- rdi
+	call print 1
+	rdi <- r15
+	rsi <- rbp
+	rdx <- r14
+	rcx <- r13
+	r8 <- r12
+	r9 <- rbx
+	mem rsp -8 <- :call_label0
+	call :firsttest_helper 6
+	:call_label0
+	rdi <- rax
+	rdi <<= 1
+	rdi += 1
+	rdi <- rdi
+	call print 1
+	rdi <- r15
+	rdi <<= 1
+	rdi += 1
+	rdi <- rdi
+	call print 1
+	r12 <- mem rsp 0
+	r13 <- mem rsp 8
+	r14 <- mem rsp 16
+	r15 <- mem rsp 24
+	rbp <- mem rsp 32
+	rbx <- mem rsp 40
+	return
+)
+
+(:firsttest_helper
+	6 0
+	rax <- rdi
+	rsi <- rsi
+	r10 <- rdx
+	rdi <- rcx
+	rdx <- r8
+	rcx <- r9
+	rax += 1
+	rsi += r10
+	rdi += rdx
+	rsi += rdi
+	rsi += rcx
+	rdi <- rax
+	rdi += rsi
+	rax <- rdi
+	return
+)
+
+)

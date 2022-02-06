@@ -12,7 +12,7 @@
 #include <unistd.h>
 #include <iostream>
 
-#include <L2.h>
+// #include <L2.h>
 #include <L2_parser.h>
 #include <liveness.h>
 
@@ -79,7 +79,7 @@ int main(
    * Parse the input file.
    */
   L2::Program p;
-  //L2::Function f;
+  // L2::Function f;
   //auto p,f;
   if (spill_only){
 

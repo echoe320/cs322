@@ -302,7 +302,7 @@ namespace L2 {
       else if (dynamic_cast<Instruction_cjump *>(this->instructions[ii]) != nullptr) {
         this->instructions[ii]->successor_idx.insert(ii + 1);
         // have to check every instruction to find the target
-        auto inst_temp = dynamic_cast<Instruction_label *>(this->instructions[ii]);
+        auto inst_temp = dynamic_cast<Instruction_cjump *>(this->instructions[ii]);
         auto target = static_cast<Label *>(std::get<2>(inst_temp->get()));
         for (int jj = 0; jj < instructions_len; jj++) {
           if (dynamic_cast<Instruction_label *>(this->instructions[jj]) != nullptr) {

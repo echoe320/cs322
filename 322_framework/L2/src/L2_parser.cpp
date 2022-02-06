@@ -498,21 +498,35 @@ namespace L2 {
     > {};
 
   struct entry_point_rule:
-    pegtl::seq<
-      seps,
-      pegtl::one< '(' >,
-      seps,
-      label,
-      seps,
-      Functions_rule,
-      seps,
-      pegtl::one< ')' >,
-      seps
+    pegtl::sor<
+      pegtl::seq<
+        seps,
+        pegtl::one< '(' >,
+        seps,
+        label,
+        seps,
+        Functions_rule,
+        seps,
+        pegtl::one< ')' >,
+        seps
+      >
+
     > {};
 
   struct grammar : 
-    pegtl::must< 
+    pegtl::must<
       entry_point_rule
+    > {};
+    // pegtl::sor< 
+    //   pegtl::seq< pegtl::at<entry_point_rule>, 
+    //   entry_point_rule>,
+    //   pegtl::seq< pegtl::at<Function_rule>, 
+    //   Function_rule>
+    // > {};
+
+  struct function_file_grammer :
+    pegtl::must< 
+      Function_rule
     > {};
 //================================= ACTIONS =================================
   /* 
@@ -1272,14 +1286,14 @@ namespace L2 {
     /* 
      * Check the grammar for some possible issues.
      */
-    pegtl::analyze< grammar >();
+    pegtl::analyze< function_file_grammer >();
 
     /*
      * Parse.
      */   
     file_input< > fileInput(fileName);
     Program p;
-    parse< grammar, action >(fileInput, p);
+    parse< function_file_grammer, action >(fileInput, p);
 
     return p;
   }
