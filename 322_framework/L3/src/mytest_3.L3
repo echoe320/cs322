@@ -1,0 +1,12 @@
+define :main() {
+
+}
+
+define :calculateHE(%kills, %errors, %numAttempts) {
+  %res <- %kills - %errors
+
+}
+
+define :divide(%x, %y) {
+  
+}
