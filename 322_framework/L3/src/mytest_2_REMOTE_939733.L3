@@ -46,11 +46,3 @@ define :encode(%x) {
   %x <- %x + 1
   return %x
 }
-<<<<<<< HEAD
-define :decode(%x) {
-  %x <- %x >> 1
-  %x <- %x - 1
-  return %x
-}
-=======
->>>>>>> a3bd5afe33211dfa1cc517d33cf7d29e47e62e57
