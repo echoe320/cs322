@@ -21,13 +21,15 @@ namespace L2 {
   //Register
   Register::Register(reg regi) {
     this->r = regi;
+    std::cout << "set register " << get_enum_string(regi) << "\n";
   }
   reg Register::get(void) {
     return this->r;
   }
   std::string Register::toString(void) {
     // use enum as an index to access the string version of register
-    return reg_enum_str[this->r];
+    std::cout << "toString\n";
+    return get_enum_string(this->r);
   }
 
   //Memory
@@ -104,7 +106,10 @@ namespace L2 {
   void Instruction_ret::Accept (Visitor *visitor) {
     visitor->VisitInstruction(this);
   }
-  Instruction_ret::Instruction_ret(){} // empty constructor? doesn't throw errors now   
+  Instruction_ret::Instruction_ret(){} // empty constructor? doesn't throw errors now
+  std::string Instruction_ret::typeAsString() {
+    return "return instruction";
+  }
 
   // ASSIGNMENT INSTRUCTION
   void Instruction_assignment::Accept (Visitor *visitor) {
@@ -119,7 +124,12 @@ namespace L2 {
     // src_dst.first = this->src;
     // src_dst.second = this->dst;
     // return std::pair<Item*, Item*>{this->src, this->dst};
-    return std::make_tuple(this->src, this->dst);
+    // return std::make_tuple(this->src, this->dst);
+    std::tuple<Item*, Item*> tup(this->src, this->dst);
+    return tup;
+  }
+  std::string Instruction_assignment::typeAsString() {
+    return "assignment instruction";
   }
 
   // ARITHMETIC INSTRUCTION
@@ -134,6 +144,9 @@ namespace L2 {
   std::tuple<Item*, Item*, Item*> Instruction_arithmetic::get() {
     return std::make_tuple(this->src, this->dst, this->op);
   }
+  std::string Instruction_arithmetic::typeAsString() {
+    return "arithmetic instruction";
+  }
 
   // CREMENT INSTRUCTION
   void Instruction_crement::Accept (Visitor *visitor) {
@@ -145,6 +158,9 @@ namespace L2 {
   }
   std::tuple<Item*, Item*> Instruction_crement::get() {
     return std::make_tuple(this->dst, this->op);
+  }
+  std::string Instruction_crement::typeAsString() {
+    return "crement instruction";
   }
 
   // SHIFT INSTRUCTION
@@ -158,6 +174,9 @@ namespace L2 {
   }
   std::tuple<Item*, Item*, Item*> Instruction_shift::get() {
     return std::make_tuple(this->src, this->dst, this->op);
+  }
+  std::string Instruction_shift::typeAsString() {
+    return "shift instruction";
   }
 
   // COMPARE INSTRUCTION
@@ -173,6 +192,9 @@ namespace L2 {
   std::tuple<Item*, Item*, Item*, Item*> Instruction_cmp::get() {
     return std::make_tuple(this->dst, this->arg1, this->arg2, this->op);
   }
+  std::string Instruction_cmp::typeAsString() {
+    return "compare instruction";
+  }
 
   // CONDITIONAL JUMP INSTRUCTION
   void Instruction_cjump::Accept (Visitor *visitor) {
@@ -186,6 +208,9 @@ namespace L2 {
   }
   std::tuple<Item*, Item*, Item*, Item*> Instruction_cjump::get() {
     return std::make_tuple(this->arg1, this->arg2, this->label, this->op);
+  }
+  std::string Instruction_cjump::typeAsString() {
+    return "conditional jump instruction";
   }
 
   // LEA INSTRUCTION
@@ -201,6 +226,9 @@ namespace L2 {
   std::tuple<Item*, Item*, Item*, Item*> Instruction_lea::get() {
     return std::make_tuple(this->dst, this->arg1, this->arg2, this->mult);
   }
+  std::string Instruction_lea::typeAsString() {
+    return "lea instruction";
+  }
 
   // CALL INSTRUCTION
   void Instruction_calls::Accept (Visitor *visitor) {
@@ -212,6 +240,9 @@ namespace L2 {
   }
   std::tuple<Item*, Item*> Instruction_calls::get() {
     return std::make_tuple(this->u, this->N);
+  }
+  std::string Instruction_calls::typeAsString() {
+    return "calls instruction";
   }
 
   // RUNTIME INSTRUCTION
@@ -225,6 +256,9 @@ namespace L2 {
   std::tuple<Item*, Item*> Instruction_runtime::get() {
     return std::make_tuple(this->runtime, this->N);
   }
+  std::string Instruction_runtime::typeAsString() {
+    return "runtime call instruction";
+  }
 
   // LABEL INSTRUCTION
   void Instruction_label::Accept (Visitor *visitor) {
@@ -235,6 +269,9 @@ namespace L2 {
   }
   std::tuple<Item*> Instruction_label::get(){
     return std::make_tuple(this->label);
+  }
+  std::string Instruction_label::typeAsString() {
+    return "label instruction";
   }
 
   // GOTO INSTRUCTION
@@ -247,6 +284,9 @@ namespace L2 {
   std::tuple<Item*> Instruction_goto::get(){
     return std::make_tuple(this->label);
   }
+  std::string Instruction_goto::typeAsString() {
+    return "goto instruction";
+  }
 
   // STACK-ARG INSTRUCTION
   void Instruction_stackarg::Accept (Visitor *visitor) {
@@ -258,6 +298,9 @@ namespace L2 {
   }
   std::tuple<Item*, Item*> Instruction_stackarg::get(){
     return std::make_tuple(this->dst, this->M);
+  }
+  std::string Instruction_stackarg::typeAsString() {
+    return "stackarg instruction";
   }
 
   /*

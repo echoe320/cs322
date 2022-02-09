@@ -17,6 +17,10 @@ namespace L2 {
   
   enum runtimeCode {rt_print, rt_input, rt_allocate, rt_tensor_error};
 
+  // static const int* caller_reg_list[] = {reg::r10, reg::r11, reg::r8, reg::r9, reg::rax, reg::rcx, reg::rdi, reg::rdx, reg::rsi};
+  // static const int* callee_reg_list[] = {reg::r12, reg::r13, reg::r14, reg::r15, reg::rbp, reg::rbx};
+  // static const int* arg_reg_list[] = {reg::rdi, reg::rsi, reg::rdx, reg::rcx, reg::r8, reg::r9};
+
   //Item Class + subclasses
   class Item {
     public:
@@ -87,6 +91,7 @@ namespace L2 {
       runtimeCode runtime;
   };
 
+  // Declare Visitor first
   class Visitor;
 
   /*
@@ -95,6 +100,7 @@ namespace L2 {
   class Instruction {
     public:
       virtual void Accept(Visitor *visitor) = 0;
+      virtual std::string typeAsString(void) = 0;
       //virtual std::string toString(void) = 0;
 
       std::set<int> predecessor_idx;
@@ -107,6 +113,7 @@ namespace L2 {
     public:
       Instruction_ret();
       void Accept(Visitor *visitor) override;
+      std::string typeAsString(void) override;
   };
 
   class Instruction_assignment : public Instruction{
@@ -114,6 +121,7 @@ namespace L2 {
       Instruction_assignment(Item *source, Item *dest);
       void Accept(Visitor *visitor) override;
       std::tuple<Item*, Item*> get(); //access individual fields by std::get<idx>(element.get())
+      std::string typeAsString(void) override;
     private:
       Item *src, *dst; // src = std::get<0>(element.get());
   };
@@ -123,6 +131,7 @@ namespace L2 {
       Instruction_arithmetic(Item *source, Item *dest, Item *ope);
       void Accept(Visitor *visitor) override;
       std::tuple<Item*, Item*, Item*> get();
+      std::string typeAsString(void) override;
 
     private:
       Item *src, *dst, *op;
@@ -133,6 +142,7 @@ namespace L2 {
       Instruction_crement(Item *dest, Item *ope);
       void Accept(Visitor *visitor) override;
       std::tuple<Item*, Item*> get();
+      std::string typeAsString(void) override;
     private:
       Item *dst, *op;
   };
@@ -142,6 +152,7 @@ namespace L2 {
       Instruction_shift(Item *source, Item *dest, Item *ope);
       void Accept(Visitor *visitor) override;
       std::tuple<Item*, Item*, Item*> get();
+      std::string typeAsString(void) override;
     private:
       Item *src, *dst, *op;
   };
@@ -151,6 +162,7 @@ namespace L2 {
       Instruction_cmp(Item *dest, Item *one, Item *two, Item *ope);
       void Accept(Visitor *visitor) override;
       std::tuple<Item*, Item*, Item*, Item*> get();
+      std::string typeAsString(void) override;
     private:
       Item *dst, *arg1, *arg2, *op;
   };
@@ -160,6 +172,7 @@ namespace L2 {
       Instruction_cjump(Item *one, Item *two, Item *target, Item *ope);
       void Accept(Visitor *visitor) override;
       std::tuple<Item*, Item*, Item*, Item*> get();
+      std::string typeAsString(void) override;
     private:
       Item *arg1, *arg2, *label, *op;
   };
@@ -169,6 +182,7 @@ namespace L2 {
       Instruction_lea(Item *dest, Item *one, Item *two, Item *multiple);
       void Accept(Visitor *visitor) override;
       std::tuple<Item*, Item*, Item*, Item*> get();
+      std::string typeAsString(void) override;
     private:
       Item *dst, *arg1, *arg2, *mult;
   };
@@ -178,6 +192,7 @@ namespace L2 {
       Instruction_calls(Item *target, Item *numArgs);
       void Accept(Visitor *visitor) override;
       std::tuple<Item*, Item*> get();
+      std::string typeAsString(void) override;
     private:
       Item *u, *N; //call u N
   };
@@ -187,6 +202,7 @@ namespace L2 {
       Instruction_runtime(Item *target, Item *numArgs);
       void Accept(Visitor *visitor) override;
       std::tuple<Item*, Item*> get();
+      std::string typeAsString(void) override;
     private:
       Item *runtime, *N;
   };
@@ -196,6 +212,7 @@ namespace L2 {
       Instruction_label(Item *target);
       void Accept(Visitor *visitor) override;
       std::tuple<Item*> get();
+      std::string typeAsString(void) override;
     private:
       Item *label;
   };
@@ -205,6 +222,7 @@ namespace L2 {
       Instruction_goto(Item *target);
       void Accept(Visitor *visitor) override;
       std::tuple<Item*> get();
+      std::string typeAsString(void) override;
     private:
       Item *label;
   };
@@ -214,6 +232,7 @@ namespace L2 {
       Instruction_stackarg(Item *dest, Item *offset);
       void Accept(Visitor *visitor) override;
       std::tuple<Item*, Item*> get();
+      std::string typeAsString(void) override;
     private:
       Item *dst, *M;
   };
@@ -284,15 +303,4 @@ namespace L2 {
   };
 
   std::string get_enum_string (int enum_value);
-
-  // arg register sets
-  //std::vector<std::unordered_set<Item>> arg_registers(7);
-  //arg_registers.push_back({reg_di, reg_si, reg_dx, reg_cx, reg_8, reg_9});
-  //arg_registers.push_back();
-  // arg_registers[1] = {reg_di};
-  // arg_registers[2] = {reg_di, reg_si};
-  // arg_registers[3] = {reg_di, reg_si, reg_dx};
-  // arg_registers[4] = {reg_di, reg_si, reg_dx, reg_cx};
-  // arg_registers[5] = {reg_di, reg_si, reg_dx, reg_cx, reg_8};
-  // arg_registers[6] = {reg_di, reg_si, reg_dx, reg_cx, reg_8, reg_9};
 }

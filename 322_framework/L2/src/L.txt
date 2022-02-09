@@ -7,13 +7,16 @@ TODO:
 4) compute IN and OUT sets from GEN, KILL, successor/predecessor
 
 #################### CHANGELOG ASYNCRONOUS ##################### (new entries go to top of stack)
+02/08/2022 Both:
+- implement typeAsString() methods for instructions (for debugging)
 
-02/01/2021 Eugene:
+
+02/01/2022 Eugene:
 - Change from program to function for parse_function_file
 - Test gen/kill sets
 
 
-02/01/2021 Jacob:
+02/01/2022 Jacob:
 - implemented ACTUAL toString() methods for Register, Number, Label, Variable
   -> don't see any need for the other Item subclasses yet
 - added a findSuccessorsPredecessors() method to function class
@@ -24,14 +27,14 @@ TODO:
 - added a section in liveness.cpp::create_liveness_list() for computing IN and OUT sets
 - updated our TODO list
 
-01/30/2021 Eugene:
+01/30/2022 Eugene:
 - debugging
   -> fixed the toString method for all item classes
   -> added constructor for Instruction_ret -> seems to error without
   -> fixed getting the reg from Mem r field
   -> fixed getting the number from N field for Instruction_calls and Instruction_runtime
 
-01/29/2021 (Jacob):
+01/29/2022 (Jacob):
 - change VisitInstruction() methods to use get() instead of directly accessing fields
 - remove 'using namespace std;' from liveness.cpp
   -> to avoid confusion between std::get<idx>(myTuple) and myClass.get()
@@ -41,7 +44,7 @@ TODO:
     -> none of the toString methods actually work lmao they just return empty string (i just needed it so the classes are recognized as polymorphic)
 - updated our TODO list
 
-Update Eugene Jan 29, 2021:
+Update Eugene Jan 29, 2022:
 - added reg_list for callee, caller, arg 
   -> used reg::rdi to get the int value for reg enum values
 - fixed loops creating callee, caller, arg 

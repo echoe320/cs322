@@ -12,9 +12,9 @@
 #include <unistd.h>
 #include <iostream>
 
-// #include <L2.h>
-#include <L2_parser.h>
+#include <L2.h>
 #include <liveness.h>
+#include <L2_parser.h>
 
 using namespace std;
 
@@ -123,7 +123,7 @@ int main(
    */
   if (liveness_only){
     L2::create_liveness_list(p);
-    //return 0;
+    return 0;
   }
 
   /*

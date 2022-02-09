@@ -2,19 +2,25 @@
 #include <iostream>
 #include <fstream>
 
-#include <liveness.h>
 // #include <L2.h>
+#include <liveness.h>
 
 // included libraries
 #include <unordered_set>
 #include <tuple>
 
+int caller_reg_list[] = {L2::reg::r10, L2::reg::r11, L2::reg::r8, L2::reg::r9, L2::reg::rax, L2::reg::rcx, L2::reg::rdi, L2::reg::rdx, L2::reg::rsi};
+int callee_reg_list[] = {L2::reg::r12, L2::reg::r13, L2::reg::r14, L2::reg::r15, L2::reg::rbp, L2::reg::rbx};
+int arg_reg_list[] = {L2::reg::rdi, L2::reg::rsi, L2::reg::rdx, L2::reg::rcx, L2::reg::r8, L2::reg::r9};
+
 namespace L2 {
+
   void Gen_Kill_Visitors::VisitInstruction(Instruction_ret *element){
     // gen = rax + callee save registers
     for (auto count : callee_reg_list) {
       Item *i;
       Register regi(static_cast<reg>(count));
+      std::cout << regi.toString() << "\n";
       i = &regi;
       element->reads.insert(i);
     }
@@ -22,14 +28,27 @@ namespace L2 {
   }
 
   void Gen_Kill_Visitors::VisitInstruction(Instruction_assignment *element){
+    std::cout << "visited Instruction_assignment" << "\n";
     // init variables to check
     auto fields = element->get();
     auto src = std::get<0>(fields);
     auto dst = std::get<1>(fields);
 
+    std::cout << "hi" << "\n";
+
+    // auto var_temp = dynamic_cast<Number *>(src); // (Variable*)item
+    auto var_temp = (Register*)dst;
+    std::cout << "casted" << "\n";
+    std::cout << var_temp->toString() << "\n";
+
     //if src is a variable/register, add to GEN (aka reads)
     if (dynamic_cast<Variable *>(src) != nullptr) element->reads.insert(src);
-    else if (dynamic_cast<Register *>(src) != nullptr) element->reads.insert(src);
+    else if (dynamic_cast<Register *>(src) != nullptr) {
+      std::cout << "successfully casted" << "\n";
+      element->reads.insert(src);
+      auto var_temp = dynamic_cast<Register *>(src);
+      std::cout << var_temp->toString() << "\n";
+    }
     else if (dynamic_cast<Memory *>(src) != nullptr) {
       Item *i;
       Memory* reg_obj = (Memory*)src;
@@ -196,43 +215,48 @@ namespace L2 {
     element->writes.insert(dst);
   }
 
-void create_liveness_list(Program p) { 
+  void create_liveness_list(Program p) {
     //Gen and kill 
-    auto *gen_kill_visitor = new Gen_Kill_Visitors();
-
+    auto gen_kill_visitor = new Gen_Kill_Visitors();
+    std::cout << "gen_kill_visitor initialized" << "\n";
 
     for (auto f : p.functions) {
       for (auto i : f->instructions) {
+        std::cout << i->typeAsString() << "\n";
         i->Accept(gen_kill_visitor);
         f->GEN.push_back(i->reads); // not sure if arrow or dot accessor (should be arrow)
         f->KILL.push_back(i->writes);
       }
 
     //Print gen & kill methods
+      std::cout << "Gen: " << std::endl;
       for (auto i: f->GEN) {
         for(auto item: i){
           if (dynamic_cast<Variable *>(item) != nullptr){
             Variable* var_temp = (Variable*)item;
-            std::cout << var_temp->toString() << std::endl;
+            std::cout << var_temp->toString() << " ";
           } else if (dynamic_cast<Register *>(item) != nullptr) {
             Register* reg_temp = (Register*)item;
-            std::cout << reg_temp->toString() << std::endl;
+            std::cout << reg_temp->toString() << " ";
             // std::cout << get_enum_string(reg_temp->get()) << std::endl;
           }
         } 
+        std::cout << std::endl;
       }
 
+      std::cout << "Kill: " << std::endl;
       for (auto i: f->KILL) {
         for(auto item: i){
           if (dynamic_cast<Variable *>(item) != nullptr){
             Variable* var_temp = (Variable*)item;
-            std::cout << var_temp->toString() << std::endl;
+            std::cout << var_temp->toString() << " ";
           } else if (dynamic_cast<Register *>(item) != nullptr) {
             Register* reg_temp = (Register*)item;
-            std::cout << reg_temp->toString() << std::endl;
+            std::cout << reg_temp->toString() << " ";
             // std::cout << get_enum_string(reg_temp->get()) << std::endl;
           }
-        } 
+        }
+        std::cout << std::endl;
       }
 
       // Successor and predecessor
@@ -240,11 +264,11 @@ void create_liveness_list(Program p) {
         f->findSuccessorsPredecessors();
       }
 
-      //Compute IN and OUT sets
-      bool didChange = false;
-      do {
-        continue;
-      } while (didChange);
+      // Compute IN and OUT sets
+      // bool didChange = false;
+      // do {
+      //   continue;
+      // } while (didChange);
     }
   }
 }
