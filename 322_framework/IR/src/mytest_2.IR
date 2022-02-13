@@ -39,13 +39,16 @@ define void :main() {
   int64 %i
   int64 %cond
   %i <- 0
+  br :loop
+
   :loop
   %i <- %i + 1
   %cond <- %i < 4
   %cond <- call :encode(%cond)
   call print(%cond)
-  br %cond :loop
+  br %cond :loop :exit
 
+  :exit
   %i <- call :encode(%i)
   call print(%i)
 

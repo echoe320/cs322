@@ -1,4 +1,5 @@
 define void :main(){
+  :entry
   int64 %arg1
   int64 %arg2
   int64 %arg3
@@ -52,18 +53,23 @@ define void :main(){
   int64 %cmp
   %iter <- 1
   %sum <- 1
+  br :loop
+
   :loop
   %load <- %arr[%iter]
   %sum <- %sum + %load
   %iter <- %iter + 1
   %cmp <- %iter <= 48
-  br %cmp :loop
+  br %cmp :loop :exit
+
+  :exit
   %sum <- %sum << 1
   %sum <- %sum + 1
   call print(%sum)
   return
 }
 define int64 :firsttest_helper(int64 %a1,int64 %a2,int64 %a3,int64 %a4,int64 %a5,int64 %a6){
+  :entry
   int64 %a23
   int64 %a45
   %a1 <- %a1 + 1

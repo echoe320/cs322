@@ -47,7 +47,7 @@ define int64 :isGood(int64 %kills, int64 %errors, int64 %numAttempts) {
   %temp <- %kills - %errors
   %res <- call :multiply(%temp, %numAttempts)
   %cond <- %res < 0
-  br %cond :negative
+  br %cond :negative :positive
 
   :positive
   return 1
@@ -65,14 +65,13 @@ define int64 :multiply(int64 %x, int64 %y) {
   %res <- 0
   %count <- 0
   %cond <- %count = %y
-  br %cond :zero
+  br %cond :zero :loop
 
   :loop
   %res <- %res + %x
   %count <- %count + 1
   %cond <- %count = %y
-  br %cond :end
-  br :loop
+  br %cond :end :loop
 
   :end
   return %res

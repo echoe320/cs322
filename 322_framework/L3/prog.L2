@@ -1,90 +1,130 @@
 (:main
   (:main
     0
-    %var1 <- 1
-    %var4 <- 4
-    %var6 <- 6
-    %var2 <- 2
-    %input <- %var1
-    %input += %var2
-    %var3 <- 3
-    %input <- %input
-    %input *= %var3
-    %var5 <- 5
-    %input <- %input
-    %input &= %var5
-    rdi <- %input
-    mem rsp -8 <- 
-:call_label1
-    call :quadrupleInt 1
-    
-:call_label1
-    %res <- rax
-    %res1 <- %res
-    %res1 <<= 1
-    %res1 <- %res1
-    %res1 += 1
-    rdi <- %res1
-    call print 1
-    %res2 <- %var1
-    %res2 <- %res2
-    %res2 <<= 1
-    %res2 <- %res2
-    %res2 += 1
-    rdi <- %res2
-    call print 1
-    rdi <- %res
-    mem rsp -8 <- 
-:call_label2
-    call :encode 1
-    
-:call_label2
-    %res3 <- rax
-    rdi <- %res3
-    call print 1
-    %i <- 0
     :call_label0
-    %i <- %i
-    %i += 1
-    %cond <- %i < 4
-    
-    rdi <- %cond
+    %player1_kills <- 21
+    %player1_errors <- 45
+    %player1_attempts <- %player1_kills
+    %player1_attempts += %player1_errors
+    %player2_kills <- 4
+    %player2_errors <- 8
+    %player2_attempts <- %player2_kills
+    %player2_attempts += %player2_errors
+    %player3_kills <- 17
+    %player3_errors <- 0
+    %player3_attempts <- %player3_kills
+    %player3_attempts += %player3_errors
+    rdi <- %player1_kills
+    rsi <- %player1_errors
+    rdx <- %player1_attempts
     mem rsp -8 <- 
-:call_label3
+:call_label1
+    call :isGood 3
+    
+:call_label1
+    %player1 <- rax
+    rdi <- %player1
+    mem rsp -8 <- 
+:call_label2
     call :encode 1
     
-:call_label3
-    %cond <- rax
-    rdi <- %cond
+:call_label2
+    %player1 <- rax
+    rdi <- %player1
     call print 1
-    cjump %cond = 1 :call_label0
-    rdi <- %i
+    rdi <- %player2_kills
+    rsi <- %player2_errors
+    rdx <- %player2_attempts
+    mem rsp -8 <- 
+:call_label3
+    call :isGood 3
+    
+:call_label3
+    %player2 <- rax
+    rdi <- %player2
     mem rsp -8 <- 
 :call_label4
     call :encode 1
     
 :call_label4
-    %i <- rax
-    rdi <- %i
+    %player2 <- rax
+    rdi <- %player2
+    call print 1
+    rdi <- %player3_kills
+    rsi <- %player3_errors
+    rdx <- %player3_attempts
+    mem rsp -8 <- 
+:call_label5
+    call :isGood 3
+    
+:call_label5
+    %player3 <- rax
+    rdi <- %player3
+    mem rsp -8 <- 
+:call_label6
+    call :encode 1
+    
+:call_label6
+    %player3 <- rax
+    rdi <- %player3
     call print 1
     return
   )
-  (:quadrupleInt
-    1
-    %var1 <- rdi
-    %res <- %var1
-    %res *= 4
+  (:isGood
+    3
+    %kills <- rdi
+    %errors <- rsi
+    %numAttempts <- rdx
+    :call_label_ciao_7
+    %temp <- %kills
+    %temp -= %errors
+    rdi <- %temp
+    rsi <- %numAttempts
+    mem rsp -8 <- 
+:call_label_ciao_10
+    call :multiply 2
+    
+:call_label_ciao_10
+    %res <- rax
+    %cond <- %res < 0
+    
+    cjump %cond = 1 :call_label_ciao_9
+    goto :call_label_ciao_8
+    :call_label_ciao_8
+    rax <- 1
+    return
+    :call_label_ciao_9
+    rax <- 0
+    return
+  )
+  (:multiply
+    2
+    %x <- rdi
+    %y <- rsi
+    :call_label_ciao__ciao_11
+    %res <- 0
+    %count <- 0
+    %cond <- %count = %y
+    
+    cjump %cond = 1 :call_label_ciao__ciao_14
+    goto :call_label_ciao__ciao_12
+    :call_label_ciao__ciao_12
+    %res <- %res
+    %res += %x
+    %count <- %count
+    %count += 1
+    %cond <- %count = %y
+    
+    cjump %cond = 1 :call_label_ciao__ciao_13
+    goto :call_label_ciao__ciao_12
+    :call_label_ciao__ciao_13
     rax <- %res
+    return
+    :call_label_ciao__ciao_14
+    rax <- 0
     return
   )
   (:encode
-    1
-    %x <- rdi
-    %x <- %x
-    %x <<= 1
-    %x <- %x
-    %x += 1
-    rax <- %x
-    return
+    0
   )
 )
