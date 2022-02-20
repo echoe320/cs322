@@ -1,0 +1,79 @@
+void main ( ){
+
+  int64[] a
+  a <- new Array(10)
+  print(a)
+  initArray(a)
+  sortArray(a)
+  print(a)
+  return 
+}
+
+void initArray (int64[] A){
+
+  A[0] <- 0
+  A[1] <- 3
+  A[2] <- 1
+  A[3] <- 5
+  A[4] <- 6
+  A[5] <- 2
+  A[6] <- 8
+  A[7] <- 9
+  A[8] <- 4
+  A[9] <- 7
+  return
+}
+
+void sortArray () {
+  int64 len_out
+  int64 len_in
+  
+  int64 value1
+  int64 ind_2
+  int64 value2
+  
+  len_out <- length A 0
+  len_in <- len_out - 1
+  int64 i
+  i <- 0
+  int64 j
+  
+  :outer_loop_cond
+  int64 out_check
+  out_check <- i < len_out  
+  br check_outer :inner_loop_init :end
+  
+  :outer_loop_inc
+  i <- i + 1 
+  br :outer_loop_cond
+  
+  :inner_loop_init
+  int64 j 
+  j <- 0
+  br :inner_loop_cond
+
+  :inner_loop_cond
+  int64 in_check
+  in_check <- j < len_in
+  br in_check :body :outer_loop_inc
+
+  :body
+  value1 <- A[j]
+  ind_2 <- j + 1
+  value2 <- A[ind_2]
+  val_cmp <- value1 > value2
+  br val_cmp :swap :inner_loop_inc
+  
+  :swap
+  A[j] <- value2
+  A[ind_2] <- value1
+  br :inner_loop_inc
+  
+  :inner_loop_inc
+  j <- j + 1
+  len_in <- len_in - 1
+  br :inner_loop_cond
+  
+  :end
+  return
+}
