@@ -13,21 +13,21 @@ void main (){
   initTuple(b)
   print(a)
   print(b)
-  res_1 <- tuple_addition(a, b)
-  res_2 <- tuple_subtraction(a, b)
+  res_1 <- tuple_addition(a, b, len)
+  res_2 <- tuple_subtraction(a, b, len)
   print(res_1)
   print(res_2)
   return 
 }
 
-void initArray (tuple A){
+void initTuple (tuple A){
   A[0] <- 1
   A[1] <- 2
   A[2] <- 3
   return
 }
 
-tuple tuple_addition (tuple A, tuple B) {
+tuple tuple_addition (tuple A, tuple B, int64 len) {
   tuple ret
   ret <- new Tuple(len)
   int64 i
@@ -54,7 +54,7 @@ tuple tuple_addition (tuple A, tuple B) {
   return ret
 }
 
-tuple tuple_subtraction (tuple A, tuple B) {
+tuple tuple_subtraction (tuple A, tuple B, int64 len) {
   tuple ret
   ret <- new Tuple(len)
   int64 i

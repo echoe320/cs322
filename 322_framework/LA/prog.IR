@@ -1,27 +1,18 @@
 define void :main ( ) {
 
  :new_label0
- tuple %a
+ int64[] %a
  %a <- 0
- tuple %b
- %b <- 0
- tuple %res_1
- %res_1 <- 0
- tuple %res_2
- %res_2 <- 0
+ int64 %sum
+ %sum <- 1
  int64 %len
  %len <- 1
- %len <- 7
- %a <- new Tuple (%len)
- %b <- new Tuple (%len)
-  call :initTuple (%a)
-  call :initTuple (%b)
+ %len <- 21
+ %a <- new Array (%len)
   call print (%a)
-  call print (%b)
- %res_1 <-  call :tuple_addition (%a, %b)
- %res_2 <-  call :tuple_subtraction (%a, %b)
-  call print (%res_1)
-  call print (%res_2)
+  call :initArray (%a)
+ %sum <-  call :sumArray (%a, %len)
+  call print (%sum)
  return 
 
  :new_label1
@@ -29,78 +20,102 @@ define void :main ( ) {
 
 }
 
-define void :initArray ( tuple %A) {
+define void :initArray ( int64[] %A) {
 
- :new_label15
+ :new_label60
  int64 %newVar0
  %newVar0 <- 1
  int64 %newVar1
  %newVar1 <- 1
  %newVar1 <- 1
  %newVar1 <- %newVar1 >> 1
- int64 %newVar6
- %newVar6 <- 49
- int64 %newVar7
- %newVar7 <- 1
- int64 %newVar8
- %newVar8 <- 1
- int64 %newVar9
- %newVar9 <- 1
- int64 %newVar10
- %newVar10 <- %A = 0
- br %newVar10 :new_label0 :new_label3 
+ int64 %newVar20
+ %newVar20 <- 37
+ int64 %newVar21
+ %newVar21 <- 1
+ int64 %newVar22
+ %newVar22 <- 1
+ int64 %newVar23
+ %newVar23 <- 1
+ int64 %newVar24
+ %newVar24 <- %A = 0
+ br %newVar24 :new_label0 :new_label3 
 
  :new_label3
- br :new_label4
+ int64 %newVar25
+ %newVar25 <- length %A 0
+ %newVar21 <- %newVar25
+ %newVar25 <- %newVar25 >> 1
+ %newVar23 <- %newVar1
+ %newVar23 <- %newVar23 << 1
+ %newVar23 <- %newVar23 + 1
+ int64 %newVar26
+ %newVar26 <- %newVar1 < %newVar25
+ br %newVar26 :new_label4 :new_label1 
+
+ :new_label4
+ br :new_label5
 
  :new_label0
-  call tensor-error (%newVar6)
+  call tensor-error (%newVar20)
  br :new_label1
 
  :new_label1
-  call tensor-error (%newVar6, %newVar7, %newVar9)
+  call tensor-error (%newVar20, %newVar21, %newVar23)
  br :new_label2
 
  :new_label2
-  call tensor-error (%newVar6, %newVar8, %newVar7, %newVar9)
- br :new_label4
+  call tensor-error (%newVar20, %newVar22, %newVar21, %newVar23)
+ br :new_label5
 
- :new_label4
- %A[%newVar1] <- 3
+ :new_label5
+ %A[%newVar1] <- 1
  int64 %newVar2
  %newVar2 <- 1
  int64 %newVar3
  %newVar3 <- 1
  %newVar3 <- 3
  %newVar3 <- %newVar3 >> 1
- int64 %newVar11
- %newVar11 <- 51
- int64 %newVar12
- %newVar12 <- 1
- int64 %newVar13
- %newVar13 <- 1
- int64 %newVar14
- %newVar14 <- 1
- int64 %newVar15
- %newVar15 <- %A = 0
- br %newVar15 :new_label5 :new_label8 
+ int64 %newVar27
+ %newVar27 <- 39
+ int64 %newVar28
+ %newVar28 <- 1
+ int64 %newVar29
+ %newVar29 <- 1
+ int64 %newVar30
+ %newVar30 <- 1
+ int64 %newVar31
+ %newVar31 <- %A = 0
+ br %newVar31 :new_label6 :new_label9 
 
- :new_label8
- br :new_label9
+ :new_label9
+ int64 %newVar32
+ %newVar32 <- length %A 0
+ %newVar28 <- %newVar32
+ %newVar32 <- %newVar32 >> 1
+ %newVar30 <- %newVar3
+ %newVar30 <- %newVar30 << 1
+ %newVar30 <- %newVar30 + 1
+ int64 %newVar33
+ %newVar33 <- %newVar3 < %newVar32
+ br %newVar33 :new_label10 :new_label7 
 
- :new_label5
-  call tensor-error (%newVar11)
- br :new_label6
+ :new_label10
+ br :new_label11
 
  :new_label6
-  call tensor-error (%newVar11, %newVar12, %newVar14)
+  call tensor-error (%newVar27)
  br :new_label7
 
  :new_label7
-  call tensor-error (%newVar11, %newVar13, %newVar12, %newVar14)
- br :new_label9
+  call tensor-error (%newVar27, %newVar28, %newVar30)
+ br :new_label8
 
- :new_label9
+ :new_label8
+  call tensor-error (%newVar27, %newVar29, %newVar28, %newVar30)
+ br :new_label11
+
+ :new_label11
  %A[%newVar3] <- 5
  int64 %newVar4
  %newVar4 <- 1
@@ -108,48 +123,388 @@ define void :initArray ( tuple %A) {
  %newVar5 <- 1
  %newVar5 <- 5
  %newVar5 <- %newVar5 >> 1
+ int64 %newVar34
+ %newVar34 <- 41
+ int64 %newVar35
+ %newVar35 <- 1
+ int64 %newVar36
+ %newVar36 <- 1
+ int64 %newVar37
+ %newVar37 <- 1
+ int64 %newVar38
+ %newVar38 <- %A = 0
+ br %newVar38 :new_label12 :new_label15 
+
+ :new_label15
+ int64 %newVar39
+ %newVar39 <- length %A 0
+ %newVar35 <- %newVar39
+ %newVar39 <- %newVar39 >> 1
+ %newVar37 <- %newVar5
+ %newVar37 <- %newVar37 << 1
+ %newVar37 <- %newVar37 + 1
+ int64 %newVar40
+ %newVar40 <- %newVar5 < %newVar39
+ br %newVar40 :new_label16 :new_label13 
+
+ :new_label16
+ br :new_label17
+
+ :new_label12
+  call tensor-error (%newVar34)
+ br :new_label13
+
+ :new_label13
+  call tensor-error (%newVar34, %newVar35, %newVar37)
+ br :new_label14
+
+ :new_label14
+  call tensor-error (%newVar34, %newVar36, %newVar35, %newVar37)
+ br :new_label17
+
+ :new_label17
+ %A[%newVar5] <- 1
+ int64 %newVar6
+ %newVar6 <- 1
+ int64 %newVar7
+ %newVar7 <- 1
+ %newVar7 <- 7
+ %newVar7 <- %newVar7 >> 1
+ int64 %newVar41
+ %newVar41 <- 43
+ int64 %newVar42
+ %newVar42 <- 1
+ int64 %newVar43
+ %newVar43 <- 1
+ int64 %newVar44
+ %newVar44 <- 1
+ int64 %newVar45
+ %newVar45 <- %A = 0
+ br %newVar45 :new_label18 :new_label21 
+
+ :new_label21
+ int64 %newVar46
+ %newVar46 <- length %A 0
+ %newVar42 <- %newVar46
+ %newVar46 <- %newVar46 >> 1
+ %newVar44 <- %newVar7
+ %newVar44 <- %newVar44 << 1
+ %newVar44 <- %newVar44 + 1
+ int64 %newVar47
+ %newVar47 <- %newVar7 < %newVar46
+ br %newVar47 :new_label22 :new_label19 
+
+ :new_label22
+ br :new_label23
+
+ :new_label18
+  call tensor-error (%newVar41)
+ br :new_label19
+
+ :new_label19
+  call tensor-error (%newVar41, %newVar42, %newVar44)
+ br :new_label20
+
+ :new_label20
+  call tensor-error (%newVar41, %newVar43, %newVar42, %newVar44)
+ br :new_label23
+
+ :new_label23
+ %A[%newVar7] <- 3
+ int64 %newVar8
+ %newVar8 <- 1
+ int64 %newVar9
+ %newVar9 <- 1
+ %newVar9 <- 9
+ %newVar9 <- %newVar9 >> 1
+ int64 %newVar48
+ %newVar48 <- 45
+ int64 %newVar49
+ %newVar49 <- 1
+ int64 %newVar50
+ %newVar50 <- 1
+ int64 %newVar51
+ %newVar51 <- 1
+ int64 %newVar52
+ %newVar52 <- %A = 0
+ br %newVar52 :new_label24 :new_label27 
+
+ :new_label27
+ int64 %newVar53
+ %newVar53 <- length %A 0
+ %newVar49 <- %newVar53
+ %newVar53 <- %newVar53 >> 1
+ %newVar51 <- %newVar9
+ %newVar51 <- %newVar51 << 1
+ %newVar51 <- %newVar51 + 1
+ int64 %newVar54
+ %newVar54 <- %newVar9 < %newVar53
+ br %newVar54 :new_label28 :new_label25 
+
+ :new_label28
+ br :new_label29
+
+ :new_label24
+  call tensor-error (%newVar48)
+ br :new_label25
+
+ :new_label25
+  call tensor-error (%newVar48, %newVar49, %newVar51)
+ br :new_label26
+
+ :new_label26
+  call tensor-error (%newVar48, %newVar50, %newVar49, %newVar51)
+ br :new_label29
+
+ :new_label29
+ %A[%newVar9] <- 1
+ int64 %newVar10
+ %newVar10 <- 1
+ int64 %newVar11
+ %newVar11 <- 1
+ %newVar11 <- 11
+ %newVar11 <- %newVar11 >> 1
+ int64 %newVar55
+ %newVar55 <- 47
+ int64 %newVar56
+ %newVar56 <- 1
+ int64 %newVar57
+ %newVar57 <- 1
+ int64 %newVar58
+ %newVar58 <- 1
+ int64 %newVar59
+ %newVar59 <- %A = 0
+ br %newVar59 :new_label30 :new_label33 
+
+ :new_label33
+ int64 %newVar60
+ %newVar60 <- length %A 0
+ %newVar56 <- %newVar60
+ %newVar60 <- %newVar60 >> 1
+ %newVar58 <- %newVar11
+ %newVar58 <- %newVar58 << 1
+ %newVar58 <- %newVar58 + 1
+ int64 %newVar61
+ %newVar61 <- %newVar11 < %newVar60
+ br %newVar61 :new_label34 :new_label31 
+
+ :new_label34
+ br :new_label35
+
+ :new_label30
+  call tensor-error (%newVar55)
+ br :new_label31
+
+ :new_label31
+  call tensor-error (%newVar55, %newVar56, %newVar58)
+ br :new_label32
+
+ :new_label32
+  call tensor-error (%newVar55, %newVar57, %newVar56, %newVar58)
+ br :new_label35
+
+ :new_label35
+ %A[%newVar11] <- 5
+ int64 %newVar12
+ %newVar12 <- 1
+ int64 %newVar13
+ %newVar13 <- 1
+ %newVar13 <- 13
+ %newVar13 <- %newVar13 >> 1
+ int64 %newVar62
+ %newVar62 <- 49
+ int64 %newVar63
+ %newVar63 <- 1
+ int64 %newVar64
+ %newVar64 <- 1
+ int64 %newVar65
+ %newVar65 <- 1
+ int64 %newVar66
+ %newVar66 <- %A = 0
+ br %newVar66 :new_label36 :new_label39 
+
+ :new_label39
+ int64 %newVar67
+ %newVar67 <- length %A 0
+ %newVar63 <- %newVar67
+ %newVar67 <- %newVar67 >> 1
+ %newVar65 <- %newVar13
+ %newVar65 <- %newVar65 << 1
+ %newVar65 <- %newVar65 + 1
+ int64 %newVar68
+ %newVar68 <- %newVar13 < %newVar67
+ br %newVar68 :new_label40 :new_label37 
+
+ :new_label40
+ br :new_label41
+
+ :new_label36
+  call tensor-error (%newVar62)
+ br :new_label37
+
+ :new_label37
+  call tensor-error (%newVar62, %newVar63, %newVar65)
+ br :new_label38
+
+ :new_label38
+  call tensor-error (%newVar62, %newVar64, %newVar63, %newVar65)
+ br :new_label41
+
+ :new_label41
+ %A[%newVar13] <- 3
+ int64 %newVar14
+ %newVar14 <- 1
+ int64 %newVar15
+ %newVar15 <- 1
+ %newVar15 <- 15
+ %newVar15 <- %newVar15 >> 1
+ int64 %newVar69
+ %newVar69 <- 51
+ int64 %newVar70
+ %newVar70 <- 1
+ int64 %newVar71
+ %newVar71 <- 1
+ int64 %newVar72
+ %newVar72 <- 1
+ int64 %newVar73
+ %newVar73 <- %A = 0
+ br %newVar73 :new_label42 :new_label45 
+
+ :new_label45
+ int64 %newVar74
+ %newVar74 <- length %A 0
+ %newVar70 <- %newVar74
+ %newVar74 <- %newVar74 >> 1
+ %newVar72 <- %newVar15
+ %newVar72 <- %newVar72 << 1
+ %newVar72 <- %newVar72 + 1
+ int64 %newVar75
+ %newVar75 <- %newVar15 < %newVar74
+ br %newVar75 :new_label46 :new_label43 
+
+ :new_label46
+ br :new_label47
+
+ :new_label42
+  call tensor-error (%newVar69)
+ br :new_label43
+
+ :new_label43
+  call tensor-error (%newVar69, %newVar70, %newVar72)
+ br :new_label44
+
+ :new_label44
+  call tensor-error (%newVar69, %newVar71, %newVar70, %newVar72)
+ br :new_label47
+
+ :new_label47
+ %A[%newVar15] <- 1
  int64 %newVar16
- %newVar16 <- 53
+ %newVar16 <- 1
  int64 %newVar17
  %newVar17 <- 1
+ %newVar17 <- 17
+ %newVar17 <- %newVar17 >> 1
+ int64 %newVar76
+ %newVar76 <- 53
+ int64 %newVar77
+ %newVar77 <- 1
+ int64 %newVar78
+ %newVar78 <- 1
+ int64 %newVar79
+ %newVar79 <- 1
+ int64 %newVar80
+ %newVar80 <- %A = 0
+ br %newVar80 :new_label48 :new_label51 
+
+ :new_label51
+ int64 %newVar81
+ %newVar81 <- length %A 0
+ %newVar77 <- %newVar81
+ %newVar81 <- %newVar81 >> 1
+ %newVar79 <- %newVar17
+ %newVar79 <- %newVar79 << 1
+ %newVar79 <- %newVar79 + 1
+ int64 %newVar82
+ %newVar82 <- %newVar17 < %newVar81
+ br %newVar82 :new_label52 :new_label49 
+
+ :new_label52
+ br :new_label53
+
+ :new_label48
+  call tensor-error (%newVar76)
+ br :new_label49
+
+ :new_label49
+  call tensor-error (%newVar76, %newVar77, %newVar79)
+ br :new_label50
+
+ :new_label50
+  call tensor-error (%newVar76, %newVar78, %newVar77, %newVar79)
+ br :new_label53
+
+ :new_label53
+ %A[%newVar17] <- 1
  int64 %newVar18
  %newVar18 <- 1
  int64 %newVar19
  %newVar19 <- 1
- int64 %newVar20
- %newVar20 <- %A = 0
- br %newVar20 :new_label10 :new_label13 
+ %newVar19 <- 19
+ %newVar19 <- %newVar19 >> 1
+ int64 %newVar83
+ %newVar83 <- 55
+ int64 %newVar84
+ %newVar84 <- 1
+ int64 %newVar85
+ %newVar85 <- 1
+ int64 %newVar86
+ %newVar86 <- 1
+ int64 %newVar87
+ %newVar87 <- %A = 0
+ br %newVar87 :new_label54 :new_label57 
 
- :new_label13
- br :new_label14
+ :new_label57
+ int64 %newVar88
+ %newVar88 <- length %A 0
+ %newVar84 <- %newVar88
+ %newVar88 <- %newVar88 >> 1
+ %newVar86 <- %newVar19
+ %newVar86 <- %newVar86 << 1
+ %newVar86 <- %newVar86 + 1
+ int64 %newVar89
+ %newVar89 <- %newVar19 < %newVar88
+ br %newVar89 :new_label58 :new_label55 
 
- :new_label10
-  call tensor-error (%newVar16)
- br :new_label11
+ :new_label58
+ br :new_label59
 
- :new_label11
-  call tensor-error (%newVar16, %newVar17, %newVar19)
- br :new_label12
+ :new_label54
+  call tensor-error (%newVar83)
+ br :new_label55
 
- :new_label12
-  call tensor-error (%newVar16, %newVar18, %newVar17, %newVar19)
- br :new_label14
+ :new_label55
+  call tensor-error (%newVar83, %newVar84, %newVar86)
+ br :new_label56
 
- :new_label14
- %A[%newVar5] <- 7
+ :new_label56
+  call tensor-error (%newVar83, %newVar85, %newVar84, %newVar86)
+ br :new_label59
+
+ :new_label59
+ %A[%newVar19] <- 3
  return 
 
- :new_label16
+ :new_label61
  return 
 
 }
 
-define tuple :tuple_addition ( tuple %A, tuple %B) {
+define int64 :sumArray ( int64[] %A, int64 %len) {
 
- :new_label15
- tuple %ret
- %ret <- 0
- %ret <- new Tuple (len)
+ :new_label6
+ int64 %ret
+ %ret <- 1
  int64 %i
  %i <- 1
  %i <- 1
@@ -164,7 +519,7 @@ define tuple :tuple_addition ( tuple %A, tuple %B) {
  %newVar0 <- %newVar0 >> 1
  int64 %newVar1
  %newVar1 <- 1
- %newVar1 <- :len
+ %newVar1 <- %len
  %newVar1 <- %newVar1 >> 1
  %cmp <- %newVar0 < %newVar1
  %cmp <- %cmp << 1
@@ -178,307 +533,73 @@ define tuple :tuple_addition ( tuple %A, tuple %B) {
  :add
  int64 %a_val
  %a_val <- 1
- int64 %b_val
- %b_val <- 1
- int64 %c_val
- %c_val <- 1
  int64 %newVar3
  %newVar3 <- 1
  int64 %newVar4
  %newVar4 <- 1
  %newVar4 <- %i
  %newVar4 <- %newVar4 >> 1
+ int64 %newVar9
+ %newVar9 <- 89
+ int64 %newVar10
+ %newVar10 <- 1
+ int64 %newVar11
+ %newVar11 <- 1
+ int64 %newVar12
+ %newVar12 <- 1
  int64 %newVar13
- %newVar13 <- 93
- int64 %newVar14
- %newVar14 <- 1
- int64 %newVar15
- %newVar15 <- 1
- int64 %newVar16
- %newVar16 <- 1
- int64 %newVar17
- %newVar17 <- %A = 0
- br %newVar17 :new_label0 :new_label3 
+ %newVar13 <- %A = 0
+ br %newVar13 :new_label0 :new_label3 
 
  :new_label3
- br :new_label4
+ int64 %newVar14
+ %newVar14 <- length %A 0
+ %newVar10 <- %newVar14
+ %newVar14 <- %newVar14 >> 1
+ %newVar12 <- %newVar4
+ %newVar12 <- %newVar12 << 1
+ %newVar12 <- %newVar12 + 1
+ int64 %newVar15
+ %newVar15 <- %newVar4 < %newVar14
+ br %newVar15 :new_label4 :new_label1 
+
+ :new_label4
+ br :new_label5
 
  :new_label0
-  call tensor-error (%newVar13)
+  call tensor-error (%newVar9)
  br :new_label1
 
  :new_label1
-  call tensor-error (%newVar13, %newVar14, %newVar16)
+  call tensor-error (%newVar9, %newVar10, %newVar12)
  br :new_label2
 
  :new_label2
-  call tensor-error (%newVar13, %newVar15, %newVar14, %newVar16)
- br :new_label4
+  call tensor-error (%newVar9, %newVar11, %newVar10, %newVar12)
+ br :new_label5
 
- :new_label4
+ :new_label5
  %a_val <- %A[%newVar4]
  int64 %newVar5
  %newVar5 <- 1
+ %newVar5 <- %ret
+ %newVar5 <- %newVar5 >> 1
  int64 %newVar6
  %newVar6 <- 1
- %newVar6 <- %i
+ %newVar6 <- %a_val
  %newVar6 <- %newVar6 >> 1
- int64 %newVar18
- %newVar18 <- 95
- int64 %newVar19
- %newVar19 <- 1
- int64 %newVar20
- %newVar20 <- 1
- int64 %newVar21
- %newVar21 <- 1
- int64 %newVar22
- %newVar22 <- %B = 0
- br %newVar22 :new_label5 :new_label8 
-
- :new_label8
- br :new_label9
-
- :new_label5
-  call tensor-error (%newVar18)
- br :new_label6
-
- :new_label6
-  call tensor-error (%newVar18, %newVar19, %newVar21)
- br :new_label7
-
- :new_label7
-  call tensor-error (%newVar18, %newVar20, %newVar19, %newVar21)
- br :new_label9
-
- :new_label9
- %b_val <- %B[%newVar6]
+ %ret <- %newVar5 + %newVar6
+ %ret <- %ret << 1
+ %ret <- %ret + 1
  int64 %newVar7
  %newVar7 <- 1
- %newVar7 <- %a_val
+ %newVar7 <- %i
  %newVar7 <- %newVar7 >> 1
  int64 %newVar8
  %newVar8 <- 1
- %newVar8 <- %b_val
+ %newVar8 <- 3
  %newVar8 <- %newVar8 >> 1
- %c_val <- %newVar7 + %newVar8
- %c_val <- %c_val << 1
- %c_val <- %c_val + 1
- int64 %newVar9
- %newVar9 <- 1
- int64 %newVar10
- %newVar10 <- 1
- %newVar10 <- %i
- %newVar10 <- %newVar10 >> 1
- int64 %newVar23
- %newVar23 <- 99
- int64 %newVar24
- %newVar24 <- 1
- int64 %newVar25
- %newVar25 <- 1
- int64 %newVar26
- %newVar26 <- 1
- int64 %newVar27
- %newVar27 <- %ret = 0
- br %newVar27 :new_label10 :new_label13 
-
- :new_label13
- br :new_label14
-
- :new_label10
-  call tensor-error (%newVar23)
- br :new_label11
-
- :new_label11
-  call tensor-error (%newVar23, %newVar24, %newVar26)
- br :new_label12
-
- :new_label12
-  call tensor-error (%newVar23, %newVar25, %newVar24, %newVar26)
- br :new_label14
-
- :new_label14
- %ret[%newVar10] <- %c_val
- int64 %newVar11
- %newVar11 <- 1
- %newVar11 <- %i
- %newVar11 <- %newVar11 >> 1
- int64 %newVar12
- %newVar12 <- 1
- %newVar12 <- 3
- %newVar12 <- %newVar12 >> 1
- %i <- %newVar11 + %newVar12
- %i <- %i << 1
- %i <- %i + 1
- br :loop
-
- :end
- return %ret
-
-}
-
-define tuple :tuple_subtraction ( tuple %A, tuple %B) {
-
- :new_label15
- tuple %ret
- %ret <- 0
- %ret <- new Tuple (len)
- int64 %i
- %i <- 1
- %i <- 1
- br :loop
-
- :loop
- int64 %cmp
- %cmp <- 1
- int64 %newVar0
- %newVar0 <- 1
- %newVar0 <- %i
- %newVar0 <- %newVar0 >> 1
- int64 %newVar1
- %newVar1 <- 1
- %newVar1 <- :len
- %newVar1 <- %newVar1 >> 1
- %cmp <- %newVar0 < %newVar1
- %cmp <- %cmp << 1
- %cmp <- %cmp + 1
- int64 %newVar2
- %newVar2 <- 1
- %newVar2 <- %cmp
- %newVar2 <- %newVar2 >> 1
- br %newVar2 :sub :end 
-
- :sub
- int64 %a_val
- %a_val <- 1
- int64 %b_val
- %b_val <- 1
- int64 %c_val
- %c_val <- 1
- int64 %newVar3
- %newVar3 <- 1
- int64 %newVar4
- %newVar4 <- 1
- %newVar4 <- %i
- %newVar4 <- %newVar4 >> 1
- int64 %newVar13
- %newVar13 <- 147
- int64 %newVar14
- %newVar14 <- 1
- int64 %newVar15
- %newVar15 <- 1
- int64 %newVar16
- %newVar16 <- 1
- int64 %newVar17
- %newVar17 <- %A = 0
- br %newVar17 :new_label0 :new_label3 
-
- :new_label3
- br :new_label4
-
- :new_label0
-  call tensor-error (%newVar13)
- br :new_label1
-
- :new_label1
-  call tensor-error (%newVar13, %newVar14, %newVar16)
- br :new_label2
-
- :new_label2
-  call tensor-error (%newVar13, %newVar15, %newVar14, %newVar16)
- br :new_label4
-
- :new_label4
- %a_val <- %A[%newVar4]
- int64 %newVar5
- %newVar5 <- 1
- int64 %newVar6
- %newVar6 <- 1
- %newVar6 <- %i
- %newVar6 <- %newVar6 >> 1
- int64 %newVar18
- %newVar18 <- 149
- int64 %newVar19
- %newVar19 <- 1
- int64 %newVar20
- %newVar20 <- 1
- int64 %newVar21
- %newVar21 <- 1
- int64 %newVar22
- %newVar22 <- %B = 0
- br %newVar22 :new_label5 :new_label8 
-
- :new_label8
- br :new_label9
-
- :new_label5
-  call tensor-error (%newVar18)
- br :new_label6
-
- :new_label6
-  call tensor-error (%newVar18, %newVar19, %newVar21)
- br :new_label7
-
- :new_label7
-  call tensor-error (%newVar18, %newVar20, %newVar19, %newVar21)
- br :new_label9
-
- :new_label9
- %b_val <- %B[%newVar6]
- int64 %newVar7
- %newVar7 <- 1
- %newVar7 <- %a_val
- %newVar7 <- %newVar7 >> 1
- int64 %newVar8
- %newVar8 <- 1
- %newVar8 <- %b_val
- %newVar8 <- %newVar8 >> 1
- %c_val <- %newVar7 - %newVar8
- %c_val <- %c_val << 1
- %c_val <- %c_val + 1
- int64 %newVar9
- %newVar9 <- 1
- int64 %newVar10
- %newVar10 <- 1
- %newVar10 <- %i
- %newVar10 <- %newVar10 >> 1
- int64 %newVar23
- %newVar23 <- 153
- int64 %newVar24
- %newVar24 <- 1
- int64 %newVar25
- %newVar25 <- 1
- int64 %newVar26
- %newVar26 <- 1
- int64 %newVar27
- %newVar27 <- %ret = 0
- br %newVar27 :new_label10 :new_label13 
-
- :new_label13
- br :new_label14
-
- :new_label10
-  call tensor-error (%newVar23)
- br :new_label11
-
- :new_label11
-  call tensor-error (%newVar23, %newVar24, %newVar26)
- br :new_label12
-
- :new_label12
-  call tensor-error (%newVar23, %newVar25, %newVar24, %newVar26)
- br :new_label14
-
- :new_label14
- %ret[%newVar10] <- %c_val
- int64 %newVar11
- %newVar11 <- 1
- %newVar11 <- %i
- %newVar11 <- %newVar11 >> 1
- int64 %newVar12
- %newVar12 <- 1
- %newVar12 <- 3
- %newVar12 <- %newVar12 >> 1
- %i <- %newVar11 + %newVar12
+ %i <- %newVar7 + %newVar8
  %i <- %i << 1
  %i <- %i + 1
  br :loop

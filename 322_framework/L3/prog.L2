@@ -34,9 +34,10 @@
     
 :call_label2
     rdi <- %a
+    rsi <- %len
     mem rsp -8 <- 
 :call_label3
-    call :sumArray 1
+    call :sumArray 2
     
 :call_label3
     %sum <- rax
@@ -695,8 +696,9 @@
     return
   )
   (:sumArray
-    1
+    2
     %A <- rdi
+    %len <- rsi
     :call_label_ciao__ciao_66
     %ret <- 1
     %i <- 1
@@ -709,7 +711,7 @@
     %newVar0 <- %newVar0
     %newVar0 >>= 1
     %newVar1 <- 1
-    %newVar1 <- :len
+    %newVar1 <- %len
     %newVar1 <- %newVar1
     %newVar1 >>= 1
     %cmp <- %newVar0 < %newVar1
