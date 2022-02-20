@@ -597,6 +597,10 @@ namespace L2 {
       Item *i;
       Register regi(rdi);
       i = &regi;
+
+      auto var_temp = dynamic_cast<Register *>(i);
+      std::cout << var_temp->toString() << "\n";
+
       parsed_items.push_back(i);
       if (shouldPrint) cout << "register_rdi_rule ended\n";
     }

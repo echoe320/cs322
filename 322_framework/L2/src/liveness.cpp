@@ -33,11 +33,12 @@ namespace L2 {
     auto fields = element->get();
     auto src = std::get<0>(fields);
     auto dst = std::get<1>(fields);
+    auto s = std::get<0>(fields);
 
     std::cout << "hi" << "\n";
 
     // auto var_temp = dynamic_cast<Number *>(src); // (Variable*)item
-    auto var_temp = (Register*)dst;
+    auto var_temp = dynamic_cast<Register *>(s);
     std::cout << "casted" << "\n";
     std::cout << var_temp->toString() << "\n";
 

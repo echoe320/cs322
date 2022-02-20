@@ -1,4 +1,4 @@
-void main ( ){
+void main (){
 
   int64[] a
   a <- new Array(10)
@@ -36,7 +36,6 @@ void sortArray () {
   len_in <- len_out - 1
   int64 i
   i <- 0
-  int64 j
   
   :outer_loop_cond
   int64 out_check

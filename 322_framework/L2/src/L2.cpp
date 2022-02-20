@@ -125,7 +125,9 @@ namespace L2 {
     // src_dst.second = this->dst;
     // return std::pair<Item*, Item*>{this->src, this->dst};
     // return std::make_tuple(this->src, this->dst);
-    std::tuple<Item*, Item*> tup(this->src, this->dst);
+    Item* s = this->src;
+    Item* d = this->dst;
+    std::tuple<Item*, Item*> tup(s, d);
     return tup;
   }
   std::string Instruction_assignment::typeAsString() {

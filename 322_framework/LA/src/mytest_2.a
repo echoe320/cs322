@@ -1,0 +1,82 @@
+void main (){
+  tuple a
+  tuple b
+  tuple res_1
+  tuple res_2
+  int64 len
+  len <- 3
+
+  a <- new Tuple(len)
+  b <- new Tuple(len)
+
+  initTuple(a)
+  initTuple(b)
+  print(a)
+  print(b)
+  res_1 <- tuple_addition(a, b)
+  res_2 <- tuple_subtraction(a, b)
+  print(res_1)
+  print(res_2)
+  return 
+}
+
+void initArray (tuple A){
+  A[0] <- 1
+  A[1] <- 2
+  A[2] <- 3
+  return
+}
+
+tuple tuple_addition (tuple A, tuple B) {
+  tuple ret
+  ret <- new Tuple(len)
+  int64 i
+  i <- 0
+
+  :loop
+  int64 cmp
+  cmp <- i < len
+  br cmp :add :end
+
+  :add
+  int64 a_val
+  int64 b_val
+  int64 c_val
+
+  a_val <- A[i]
+  b_val <- B[i]
+  c_val <- a_val + b_val
+  ret[i] <- c_val
+  i <- i + 1
+  br :loop
+
+  :end
+  return ret
+}
+
+tuple tuple_subtraction (tuple A, tuple B) {
+  tuple ret
+  ret <- new Tuple(len)
+  int64 i
+  i <- 0
+
+  :loop
+  int64 cmp
+  cmp <- i < len
+  br cmp :sub :end
+
+  :sub
+  int64 a_val
+  int64 b_val
+  int64 c_val
+
+  a_val <- A[i]
+  b_val <- B[i]
+  c_val <- a_val - b_val
+  ret[i] <- c_val
+  i <- i + 1
+  br :loop
+
+  :end
+  return ret
+}
