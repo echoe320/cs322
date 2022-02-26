@@ -4,6 +4,7 @@
 
 // #include <L2.h>
 #include <liveness.h>
+#include <L2_parser.h>
 
 // included libraries
 #include <unordered_set>
@@ -18,11 +19,9 @@ namespace L2 {
   void Gen_Kill_Visitors::VisitInstruction(Instruction_ret *element){
     // gen = rax + callee save registers
     for (auto count : callee_reg_list) {
-      Item *i;
-      Register regi(static_cast<reg>(count));
-      std::cout << regi.toString() << "\n";
-      i = &regi;
-      element->reads.insert(i);
+      Register* regi = new Register(static_cast<reg>(count));
+      // std::cout << regi->toString() << "\n";
+      element->reads.insert(regi);
     }
     element->writes.clear();
   }
@@ -33,41 +32,40 @@ namespace L2 {
     auto fields = element->get();
     auto src = std::get<0>(fields);
     auto dst = std::get<1>(fields);
-    auto s = std::get<0>(fields);
+    // auto s = std::get<0>(fields);
 
-    std::cout << "hi" << "\n";
+    // auto dst_1 = element -> get_dst();
+    // std::cout << dst << "\n";
+    // std::cout << "hi there" << "\n";
 
     // auto var_temp = dynamic_cast<Number *>(src); // (Variable*)item
-    auto var_temp = dynamic_cast<Register *>(s);
-    std::cout << "casted" << "\n";
-    std::cout << var_temp->toString() << "\n";
+    // auto var_temp = dynamic_cast<Register *>(dst);
+    // Register* reg_obj = (Register*)src_1;
+    // std::cout << "casted" << "\n";
+    // std::cout << var_temp->toString() << "\n";
 
     //if src is a variable/register, add to GEN (aka reads)
     if (dynamic_cast<Variable *>(src) != nullptr) element->reads.insert(src);
     else if (dynamic_cast<Register *>(src) != nullptr) {
-      std::cout << "successfully casted" << "\n";
+      // std::cout << "successfully casted" << "\n";
       element->reads.insert(src);
-      auto var_temp = dynamic_cast<Register *>(src);
-      std::cout << var_temp->toString() << "\n";
+      // auto var_temp = dynamic_cast<Register *>(src);
+      // std::cout << var_temp->toString() << "\n";
     }
     else if (dynamic_cast<Memory *>(src) != nullptr) {
-      Item *i;
       Memory* reg_obj = (Memory*)src;
       reg reg_temp = reg_obj->get().first;
-      Register regi(rdi); //create new Register object with Memory's reg r field
-      i = &regi;
-      element->reads.insert(i);
+      Register* regi = new Register(rdi); //create new Register object with Memory's reg r field
+      element->reads.insert(regi);
     }
     //check if dst is a variable/register
     if (dynamic_cast<Variable *>(dst) != nullptr) element->writes.insert(dst);
     else if (dynamic_cast<Register *>(dst) != nullptr) element->writes.insert(dst);
     else if (dynamic_cast<Memory *>(dst) != nullptr) {
-      Item *i;
       Memory* reg_obj = (Memory*)dst;
       reg reg_temp = reg_obj->get().first;
-      Register regi(reg_temp); //create new Register object with Memory's reg r field
-      i = &regi;
-      element->writes.insert(i);
+      Register* regi = new Register(reg_temp); //create new Register object with Memory's reg r field
+      element->writes.insert(regi);
     }
   }
 
@@ -230,7 +228,7 @@ namespace L2 {
       }
 
     //Print gen & kill methods
-      std::cout << "Gen: " << std::endl;
+      std::cout << "Gen: ";
       for (auto i: f->GEN) {
         for(auto item: i){
           if (dynamic_cast<Variable *>(item) != nullptr){
@@ -242,10 +240,10 @@ namespace L2 {
             // std::cout << get_enum_string(reg_temp->get()) << std::endl;
           }
         } 
-        std::cout << std::endl;
       }
+      std::cout << std::endl;
 
-      std::cout << "Kill: " << std::endl;
+      std::cout << "Kill: ";
       for (auto i: f->KILL) {
         for(auto item: i){
           if (dynamic_cast<Variable *>(item) != nullptr){
@@ -257,8 +255,8 @@ namespace L2 {
             // std::cout << get_enum_string(reg_temp->get()) << std::endl;
           }
         }
-        std::cout << std::endl;
       }
+      std::cout << std::endl;
 
       // Successor and predecessor
       for (auto f : p.functions) {
@@ -266,10 +264,10 @@ namespace L2 {
       }
 
       // Compute IN and OUT sets
-      // bool didChange = false;
-      // do {
-      //   continue;
-      // } while (didChange);
+      bool didChange = false;
+      do {
+        continue;
+      } while (didChange);
     }
   }
 }

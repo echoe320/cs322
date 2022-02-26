@@ -21,14 +21,14 @@ namespace L2 {
   //Register
   Register::Register(reg regi) {
     this->r = regi;
-    std::cout << "set register " << get_enum_string(regi) << "\n";
+    // std::cout << "set register " << get_enum_string(regi) << "\n";
   }
   reg Register::get(void) {
     return this->r;
   }
   std::string Register::toString(void) {
     // use enum as an index to access the string version of register
-    std::cout << "toString\n";
+    // std::cout << "toString\n";
     return get_enum_string(this->r);
   }
 
@@ -125,9 +125,7 @@ namespace L2 {
     // src_dst.second = this->dst;
     // return std::pair<Item*, Item*>{this->src, this->dst};
     // return std::make_tuple(this->src, this->dst);
-    Item* s = this->src;
-    Item* d = this->dst;
-    std::tuple<Item*, Item*> tup(s, d);
+    std::tuple<Item*, Item*> tup(this->src, this->dst);
     return tup;
   }
   std::string Instruction_assignment::typeAsString() {

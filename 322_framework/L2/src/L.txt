@@ -7,6 +7,11 @@ TODO:
 4) compute IN and OUT sets from GEN, KILL, successor/predecessor
 
 #################### CHANGELOG ASYNCRONOUS ##################### (new entries go to top of stack)
+02/26/2022 Eugene:
+- debugged issue with pointers segment faulting. Changed filling Item * vector from Item* objects to Register * regi = new Register(rdi); and directly pushing (regi) into the stack(see rdi register parser for an example). 
+- Gen and kill now prints lists -> need to check for correctness and for outlier cases.
+- Next steps: check if findSuccessorsPredecessors works properly, implement the liveness algorithm.
+
 02/08/2022 Both:
 - implement typeAsString() methods for instructions (for debugging)
 
