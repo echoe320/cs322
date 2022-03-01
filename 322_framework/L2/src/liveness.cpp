@@ -219,14 +219,16 @@ namespace L2 {
       for (auto i : f->instructions) {
         std::cout << i->typeAsString() << "\n";
         i->Accept(gen_kill_visitor);
-        f->GEN.push_back(i->reads); // not sure if arrow or dot accessor (should be arrow)
+        f->GEN.push_back(i->reads);
         f->KILL.push_back(i->writes);
       }
 
     //Print gen & kill methods
-      std::cout << "Gen: ";
+      std::cout << "Gen:" << std::endl;
+      int count = 0;
       for (auto i: f->GEN) {
-        for(auto item: i){
+        std::cout << std::to_string(count) << ": ";
+        for(auto item: i) {
           if (dynamic_cast<Variable *>(item) != nullptr){
             Variable* var_temp = (Variable*)item;
             std::cout << var_temp->toString() << " ";
@@ -236,11 +238,14 @@ namespace L2 {
             // std::cout << get_enum_string(reg_temp->get()) << std::endl;
           }
         } 
+        count++;
+        std::cout << std::endl;
       }
-      std::cout << std::endl;
 
-      std::cout << "Kill: ";
+      std::cout << "Kill: " << std::endl;
+      int count2 = 0;
       for (auto i: f->KILL) {
+        std::cout << std::to_string(count2) << ": ";
         for(auto item: i){
           if (dynamic_cast<Variable *>(item) != nullptr){
             Variable* var_temp = (Variable*)item;
@@ -251,20 +256,76 @@ namespace L2 {
             // std::cout << get_enum_string(reg_temp->get()) << std::endl;
           }
         }
+        count2++;
+        std::cout << std::endl;
       }
-      std::cout << std::endl;
+      // std::cout << std::endl;
 
       // Successor and predecessor
-      for (auto f : p.functions) {
-        f->findSuccessorsPredecessors();
-      }
+      std::cout << "Start of SuccessorsPredecessors" << std::endl;
+      f->findSuccessorsPredecessors();
+      std::cout << "End of SuccessorsPredecessors" << std::endl;
+      //* UNCOMMENT TO PRINT SUCCESSORS
+      // std::set<int>::iterator it;
+      // for (auto f : p.functions) {
+      //   for (int ii = 0; ii < f->instructions.size(); ii++) {
+          
+      //     std::cout << "instruction " << std::to_string(ii) << " succeeded by: ";
+      //     for (it = f->instructions[ii]->successor_idx.begin(); it != f->instructions[ii]->successor_idx.end(); ++it)
+      //       std::cout << ' ' << *it;
+      //     std::cout << '\n';
+      //   }
+      // }
+
 
       // Compute IN and OUT sets
-      bool didChange = false;
-      do {
-        continue;
-        // 
-      } while (didChange);
+      std::cout << "Start of INOUTSETS" << std::endl;
+      // <std::unordered_set<Item *>> temp_IN;
+      // <std::unordered_set<Item *>> temp_OUT;
+
+      // bool didChange = false;
+      // do {
+      for (int ii = 0; ii < f->instructions.size(); ii++) {
+        // std::unordered_set<Item *> temp_IN; //set equal to instruction's IN set (this will be the previous iteration's) and compare at end
+        // std::unordered_set<Item *> temp_OUT;
+        std::cout << "ii equals " << std::to_string(ii) << std::endl;
+
+        // IN[i] = GEN[i] ∪(OUT[i] – KILL[i])
+        std::cout << "adding GEN to IN" << std::endl;
+
+        if (!f->GEN[ii].empty()) {
+          for (auto it = f->GEN[ii].begin(); it != f->GEN[ii].end(); ++it) {
+            f->instructions[ii]->IN.insert(*it);
+          }
+        }
+        std::cout << "done adding GEN to IN" << std::endl;
+        
+        bool OUTKILLFLAG;
+        std::cout << "Start of checking OUT and KILL" << std::endl;
+        
+        if (f->OUT.size() < 1) continue;
+        for (auto it1 = f->OUT[ii].begin(); it1 != f->OUT[ii].end(); ++it1) {
+          std::cout << "Start of checking indicies"  << std::endl;
+          OUTKILLFLAG = false;
+          for (auto it2 = f->KILL[ii].begin(); it2 != f->KILL[ii].end(); ++it2) {
+            if (*it1 == *it2) {
+              break;
+              OUTKILLFLAG = true;
+            }
+          }
+          if (!OUTKILLFLAG) f->instructions[ii]->IN.insert(*it1);
+          std::cout << "End of checking indicies"  << std::endl;
+        }
+        std::cout << "END of checking OUT and KILL" << std::endl;
+        
+        // if (temp_OUT != f->instructions[ii]->OUT || temp_IN != f->instructions[ii]->IN) {
+        //   didChange = true;
+        // }
+      }
+
+      std::cout << "End of INOUTSETS" << std::endl;
+      // } while (didChange);
     }
+    //TODO: have another for loop to push_back the instruction's IN and OUT sets to the function's IN and OUT vectors (AFTER all the do-while)
   }
 }

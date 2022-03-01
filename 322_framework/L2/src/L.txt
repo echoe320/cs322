@@ -1,10 +1,8 @@
 LLLLLLLLLLLLLLLLLLLLLLLL
 
 TODO:
-1) rework liveness.cpp::create_liveness_list() (see comment i made above set vector initialization)
-2) test computation of GEN and KILL sets
-3) test findSuccessorsPredecessors()
-4) compute IN and OUT sets from GEN, KILL, successor/predecessor
+1) compute IN and OUT sets from GEN, KILL, successor/predecessor
+  -> figure out why its seg faulting
 
 #################### CHANGELOG ASYNCRONOUS ##################### (new entries go to top of stack)
 02/25/2022 Eugene:

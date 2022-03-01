@@ -107,6 +107,8 @@ namespace L2 {
       std::set<int> successor_idx;
       std::unordered_set<Item *> reads; // Gen
       std::unordered_set<Item *> writes; // Kill
+      std::unordered_set<Item *> IN; // IN
+      std::unordered_set<Item *> OUT; // OUT
   };
 
   class Instruction_ret : public Instruction{
