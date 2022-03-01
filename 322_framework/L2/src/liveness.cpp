@@ -23,6 +23,10 @@ namespace L2 {
       // std::cout << regi->toString() << "\n";
       element->reads.insert(regi);
     }
+    // rax
+    Register* regi = new Register(rax);
+    element->reads.insert(regi);
+
     element->writes.clear();
   }
 
@@ -158,19 +162,15 @@ namespace L2 {
     int numArgs = num->get(); // get the number field from N 
     // auto numArgs = 1; // get number of args from N (same problem as accessing Memory reg r field (line 39, 48))
     for (int i = 0; i < numArgs; i++){
-      Item* it;
       int arg_reg = arg_reg_list[i];
-      Register regi(static_cast<reg>(arg_reg));
-      it = &regi;
-      element->reads.insert(it);
+      Register* regi = new Register(static_cast<reg>(arg_reg));
+      element->reads.insert(regi);
     }
 
     // kill = caller save registers
     for (auto count : caller_reg_list) {
-      Item *i;
-      Register regi(static_cast<reg>(count));
-      i = &regi;
-      element->writes.insert(i);
+      Register* regi = new Register(static_cast<reg>(count));
+      element->writes.insert(regi);
     }
   }
 
@@ -183,18 +183,14 @@ namespace L2 {
     int numArgs = num->get(); // get the number field from N 
     // int numArgs = 1; // get number of args from N (same problem as accessing Memory reg r field (line 39, 48))
     for (int i = 0; i < numArgs; i++){
-      Item* it;
       int arg_reg = arg_reg_list[i];
-      Register regi(static_cast<reg>(arg_reg));
-      it = &regi;
-      element->reads.insert(it);
+      Register* regi = new Register(static_cast<reg>(arg_reg));
+      element->reads.insert(regi);
     }
     // kill = caller save registers
     for (auto count : caller_reg_list) {
-      Item *i;
-      Register regi(static_cast<reg>(count));
-      i = &regi;
-      element->writes.insert(i);
+      Register* regi = new Register(static_cast<reg>(count));
+      element->writes.insert(regi);
     }
   }
 
