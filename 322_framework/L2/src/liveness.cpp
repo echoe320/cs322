@@ -243,9 +243,9 @@ namespace L2 {
       }
 
       std::cout << "Kill: " << std::endl;
-      int count2 = 0;
+      count = 0;
       for (auto i: f->KILL) {
-        std::cout << std::to_string(count2) << ": ";
+        std::cout << std::to_string(count) << ": ";
         for(auto item: i){
           if (dynamic_cast<Variable *>(item) != nullptr){
             Variable* var_temp = (Variable*)item;
@@ -256,7 +256,7 @@ namespace L2 {
             // std::cout << get_enum_string(reg_temp->get()) << std::endl;
           }
         }
-        count2++;
+        count++;
         std::cout << std::endl;
       }
       // std::cout << std::endl;
@@ -283,49 +283,99 @@ namespace L2 {
       // <std::unordered_set<Item *>> temp_IN;
       // <std::unordered_set<Item *>> temp_OUT;
 
-      // bool didChange = false;
-      // do {
-      for (int ii = 0; ii < f->instructions.size(); ii++) {
-        // std::unordered_set<Item *> temp_IN; //set equal to instruction's IN set (this will be the previous iteration's) and compare at end
-        // std::unordered_set<Item *> temp_OUT;
-        std::cout << "ii equals " << std::to_string(ii) << std::endl;
+      bool didChange;
+      do {
+        didChange = false;
+        for (int ii = 0; ii < f->instructions.size(); ii++) {
+          std::unordered_set<Item *> temp_IN = f->instructions[ii]->IN; //set equal to instruction's IN set (this will be the previous iteration's) and compare at end
+          std::unordered_set<Item *> temp_OUT = f->instructions[ii]->OUT;
+          f->instructions[ii]->IN.clear();
+          f->instructions[ii]->OUT.clear();
 
-        // IN[i] = GEN[i] ∪(OUT[i] – KILL[i])
-        std::cout << "adding GEN to IN" << std::endl;
+          std::cout << "instruction #" << std::to_string(ii) << std::endl;
 
-        if (!f->GEN[ii].empty()) {
-          for (auto it = f->GEN[ii].begin(); it != f->GEN[ii].end(); ++it) {
-            f->instructions[ii]->IN.insert(*it);
-          }
-        }
-        std::cout << "done adding GEN to IN" << std::endl;
-        
-        bool OUTKILLFLAG;
-        std::cout << "Start of checking OUT and KILL" << std::endl;
-        
-        if (f->OUT.size() < 1) continue;
-        for (auto it1 = f->OUT[ii].begin(); it1 != f->OUT[ii].end(); ++it1) {
-          std::cout << "Start of checking indicies"  << std::endl;
-          OUTKILLFLAG = false;
-          for (auto it2 = f->KILL[ii].begin(); it2 != f->KILL[ii].end(); ++it2) {
-            if (*it1 == *it2) {
-              break;
-              OUTKILLFLAG = true;
+          // IN[i] = GEN[i] ∪(OUT[i] – KILL[i])
+          std::cout << "adding GEN to IN" << std::endl;
+
+          if (!f->GEN[ii].empty()) {
+            for (auto it = f->GEN[ii].begin(); it != f->GEN[ii].end(); ++it) {
+              f->instructions[ii]->IN.insert(*it);
             }
           }
-          if (!OUTKILLFLAG) f->instructions[ii]->IN.insert(*it1);
-          std::cout << "End of checking indicies"  << std::endl;
+          std::cout << "done adding GEN to IN" << std::endl;
+
+          std::cout << "populating instruction's OUT set" << std::endl;
+          // find the successor(s) of the current instruction
+          for (auto it1 = f->instructions[ii]->successor_idx.begin(); it1 != f->instructions[ii]->successor_idx.end(); ++it1) {
+            // iterate through the successors' IN sets
+            for (auto it2 = f->instructions[*it1]->IN.begin(); it2 != f->instructions[*it1]->IN.end(); ++it2) {
+              // add each item in the successors' IN sets to the current instruction's OUT set
+              f->instructions[ii]->OUT.insert(*it2);
+            }
+          }
+          std::cout << "done populating instruction's OUT set" << std::endl;
+          
+          bool OUTKILLFLAG;
+          std::cout << "Start of checking OUT and KILL" << std::endl;
+          
+          for (auto it1 = f->instructions[ii]->OUT.begin(); it1 != f->instructions[ii]->OUT.end(); ++it1) {
+            std::cout << "Start of checking indicies"  << std::endl;
+            OUTKILLFLAG = false;
+            for (auto it2 = f->KILL[ii].begin(); it2 != f->KILL[ii].end(); ++it2) {
+              if (*it1 == *it2) {
+                OUTKILLFLAG = true;
+                break;
+              }
+            }
+            if (!OUTKILLFLAG) f->instructions[ii]->IN.insert(*it1);
+            std::cout << "End of checking indicies"  << std::endl;
+          }
+          std::cout << "END of checking OUT and KILL" << std::endl;
+          
+          if (temp_OUT != f->instructions[ii]->OUT || temp_IN != f->instructions[ii]->IN) {
+            didChange = true;
+          }
         }
-        std::cout << "END of checking OUT and KILL" << std::endl;
-        
-        // if (temp_OUT != f->instructions[ii]->OUT || temp_IN != f->instructions[ii]->IN) {
-        //   didChange = true;
-        // }
-      }
+      } while (didChange);
 
       std::cout << "End of INOUTSETS" << std::endl;
-      // } while (didChange);
-    }
+
+      //* UNCOMMENT TO PRINT IN AND OUT SETS
+      std::cout << "IN: " << std::endl;
+      count = 0;
+      for (int kk = 0; kk < f->instructions.size(); kk++) {
+        std::cout << std::to_string(count) << ": ";
+        for (auto it = f->instructions[kk]->IN.begin(); it != f->instructions[kk]->IN.end(); ++it) {
+          if (dynamic_cast<Variable *>(*it) != nullptr) {
+            Variable* var_temp = (Variable*) *it;
+            std::cout << var_temp->toString() << " ";
+          }
+          else if (dynamic_cast<Register *>(*it) != nullptr) {
+            Register* reg_temp = (Register*) *it;
+            std::cout << reg_temp->toString() << " ";
+          }
+        }
+        count++;
+        std::cout << std::endl;
+      }
+      std::cout << "OUT: " << std::endl;
+      count = 0;
+      for (int kk = 0; kk < f->instructions.size(); kk++) {
+        std::cout << std::to_string(count) << ": ";
+        for (auto it = f->instructions[kk]->OUT.begin(); it != f->instructions[kk]->OUT.end(); ++it) {
+          if (dynamic_cast<Variable *>(*it) != nullptr) {
+            Variable* var_temp = (Variable*) *it;
+            std::cout << var_temp->toString() << " ";
+          }
+          else if (dynamic_cast<Register *>(*it) != nullptr) {
+            Register* reg_temp = (Register*) *it;
+            std::cout << reg_temp->toString() << " ";
+          }
+        }
+        count++;
+        std::cout << std::endl;
+      }
     //TODO: have another for loop to push_back the instruction's IN and OUT sets to the function's IN and OUT vectors (AFTER all the do-while)
+    }
   }
 }

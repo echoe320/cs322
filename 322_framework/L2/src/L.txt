@@ -1,14 +1,28 @@
 LLLLLLLLLLLLLLLLLLLLLLLL
 
 TODO:
-1) compute IN and OUT sets from GEN, KILL, successor/predecessor
-  -> figure out why its seg faulting
+1) push instruction's IN and OUT sets to function's IN and OUT vectors
+2) debug tests??
+  -> i ran tests 0-5 in liveness test folders
+    -> test0.L2f works fine (order of IN and OUT sets are not correct, but i think that's an issue for later)
+    -> test1 has a parser error?
+    -> some of the other tests i ran was stopping at random points throughout the process; not seg faulting, just printing a start statement and not printing the end statement??
+3) output IN and OUT sets in the correct format
+  -> i dont remember if we're supposed to print it to terminal or a file or something idk
 
 #################### CHANGELOG ASYNCRONOUS ##################### (new entries go to top of stack)
+03/04/2022 Jacob:
+- populated OUT sets based off of IN sets of successor(s)
+- implemented OUTKILL checking
+- implemented didChange checking
+- added printing statements for IN and OUT sets
+
+
 02/25/2022 Eugene:
 - debugged issue with pointers segment faulting. Changed filling Item * vector with Item* objects to Register * regi = new Register(rdi); and directly pushing (regi) into the stack(see rdi register parser for an example). 
 - Gen and kill now prints lists -> need to check for correctness and for outlier cases.
 - Next steps: check if findSuccessorsPredecessors works properly, implement the liveness algorithm.
+
 
 02/08/2022 Both:
 - implement typeAsString() methods for instructions (for debugging)
