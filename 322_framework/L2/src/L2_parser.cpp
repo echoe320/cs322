@@ -371,6 +371,7 @@ namespace L2 {
       pegtl::sor<
         w_rule,
         Label_rule
+        // runtime_op_rule
       >,
       seps,
       number,
@@ -459,6 +460,7 @@ namespace L2 {
       pegtl::seq< pegtl::at<Instruction_shift_rule>       , Instruction_shift_rule        >,
       pegtl::seq< pegtl::at<Instruction_cjump_rule>       , Instruction_cjump_rule        >,
       pegtl::seq< pegtl::at<Instruction_LEA_rule>         , Instruction_LEA_rule          >,
+      pegtl::seq< pegtl::at<Instruction_runtime_rule>         , Instruction_runtime_rule          >,
       pegtl::seq< pegtl::at<Instruction_call_rule>        , Instruction_call_rule         >,
       pegtl::seq< pegtl::at<Instruction_goto_rule>        , Instruction_goto_rule         >,
       pegtl::seq< pegtl::at<Instruction_label_rule>       , Instruction_label_rule        >
@@ -683,13 +685,21 @@ namespace L2 {
     template< typename Input >
     static void apply( const Input & in, Program & p){
       if (shouldPrint) cout << "mem_rule started\n";
-      Number* n = (Number *) &parsed_items.back();
-      int64_t os = n->get();
+      auto os = parsed_items.back();
       parsed_items.pop_back();
-      Register* regis = (Register *) &parsed_items.back();
-      reg regi = regis->get();
+      auto rv = parsed_items.back();
       parsed_items.pop_back();
-      Memory* mem = new Memory(regi, os);
+
+
+      // Number* n = (Number *) parsed_items.back();
+      // Number* n = &parsed_items.back();
+      // int64_t os = n->get();
+      // parsed_items.pop_back();
+      // Register* regis = (Register *) parsed_items.back();
+      // reg regi = regis->get();
+      // cout << regi << endl;
+      // parsed_items.pop_back();
+      Memory* mem = new Memory(rv, os);
       if (shouldPrint) cout << "mem_rule ended\n";
 
       parsed_items.push_back(mem);

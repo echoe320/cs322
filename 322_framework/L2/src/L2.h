@@ -38,12 +38,11 @@ namespace L2 {
 
   class Memory : public Item {
     public:
-      Memory(reg regi, int64_t os);
-      std::pair<L2::reg, int64_t> get(void);
+      Memory(Item *arg, Item *os);
+      std::pair<Item *, Item *> get(void);
       std::string toString(void) override;
     private:
-      reg r;
-      int64_t offset;
+      Item *rv, *offset;
   };
 
   class Number : public Item {

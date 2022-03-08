@@ -33,12 +33,12 @@ namespace L2 {
   }
 
   //Memory
-  Memory::Memory(reg regi, int64_t os){
-    this->r = regi;
+  Memory::Memory(Item *arg, Item *os){
+    this->rv = arg;
     this->offset = os;
   }
-  std::pair<L2::reg, int64_t> Memory::get(void){
-    std::pair<L2::reg, int64_t> res{this->r, this->offset};
+  std::pair<Item *, Item *> Memory::get(void){
+    std::pair<Item *, Item *> res{this->rv, this->offset};
     return res; // res.first
   }
   std::string Memory::toString(void) {
@@ -75,7 +75,7 @@ namespace L2 {
     return this->varName;
   }
   std::string Variable::toString(void) {
-    return "%" + this->varName;
+    return this->varName;
   }
 
   //Operation

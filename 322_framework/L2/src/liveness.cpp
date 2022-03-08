@@ -57,19 +57,30 @@ namespace L2 {
       // std::cout << var_temp->toString() << "\n";
     }
     else if (dynamic_cast<Memory *>(src) != nullptr) {
-      Memory* reg_obj = (Memory*)src;
-      reg reg_temp = reg_obj->get().first;
-      Register* regi = new Register(rdi); //create new Register object with Memory's reg r field
-      element->reads.insert(regi);
+      auto mem_temp = dynamic_cast<Memory *>(src);
+      auto mem_fields = mem_temp->get();
+      auto rv_temp = std::get<0>(mem_fields);
+      // auto reg_temp = dynamic_cast<Register *>(reg);
+      // auto dst = std::get<1>(fields);
+      // Memory* reg_obj = (Memory*)src;
+      // std::cout << "hi there" << "\n";
+      // reg reg_temp = reg_obj->get().first;
+      // std::cout << "hi there" << "\n";
+      // Register* regi = new Register(reg_temp); //create new Register object with Memory's reg r field
+      element->reads.insert(rv_temp);
     }
     //check if dst is a variable/register
     if (dynamic_cast<Variable *>(dst) != nullptr) element->writes.insert(dst);
     else if (dynamic_cast<Register *>(dst) != nullptr) element->writes.insert(dst);
     else if (dynamic_cast<Memory *>(dst) != nullptr) {
-      Memory* reg_obj = (Memory*)dst;
-      reg reg_temp = reg_obj->get().first;
-      Register* regi = new Register(reg_temp); //create new Register object with Memory's reg r field
-      element->writes.insert(regi);
+      // Memory* reg_obj = (Memory*) dst;
+      // reg reg_temp = reg_obj->get().first;
+      // Register* regi = new Register(reg_temp); //create new Register object with Memory's reg r field
+      // element->writes.insert(regi);
+      auto mem_temp = dynamic_cast<Memory *>(dst);
+      auto mem_fields = mem_temp->get();
+      auto rv_temp = std::get<0>(mem_fields);
+      element->reads.insert(rv_temp);
     }
   }
 
@@ -225,7 +236,7 @@ namespace L2 {
 
     //Print gen & kill methods
       std::cout << "Gen:" << std::endl;
-      int count = 0;
+      int count = 3;
       for (auto i: f->GEN) {
         std::cout << std::to_string(count) << ": ";
         for(auto item: i) {
@@ -243,7 +254,7 @@ namespace L2 {
       }
 
       std::cout << "Kill: " << std::endl;
-      count = 0;
+      count = 3;
       for (auto i: f->KILL) {
         std::cout << std::to_string(count) << ": ";
         for(auto item: i){
