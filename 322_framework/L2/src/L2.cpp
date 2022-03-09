@@ -325,6 +325,7 @@ namespace L2 {
         auto rt = static_cast<Runtime *>(std::get<0>(inst_temp->get()));
         auto rt_code = rt->get();
         if (rt_code == rt_tensor_error) continue;
+        else this->instructions[ii]->successor_idx.insert(ii + 1);
       }
 
       // goto instruction's successor is the target (label)

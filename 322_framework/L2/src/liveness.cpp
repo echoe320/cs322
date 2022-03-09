@@ -14,13 +14,15 @@ int caller_reg_list[] = {L2::reg::r10, L2::reg::r11, L2::reg::r8, L2::reg::r9, L
 int callee_reg_list[] = {L2::reg::r12, L2::reg::r13, L2::reg::r14, L2::reg::r15, L2::reg::rbp, L2::reg::rbx};
 int arg_reg_list[] = {L2::reg::rdi, L2::reg::rsi, L2::reg::rdx, L2::reg::rcx, L2::reg::r8, L2::reg::r9};
 
+bool shouldPrint = true;
+
 namespace L2 {
 
   void Gen_Kill_Visitors::VisitInstruction(Instruction_ret *element){
     // gen = rax + callee save registers
     for (auto count : callee_reg_list) {
       Register* regi = new Register(static_cast<reg>(count));
-      // std::cout << regi->toString() << "\n";
+      // if (shouldPrint) std::cout << regi->toString() << "\n";
       element->reads.insert(regi);
     }
     // rax
@@ -31,7 +33,7 @@ namespace L2 {
   }
 
   void Gen_Kill_Visitors::VisitInstruction(Instruction_assignment *element){
-    std::cout << "visited Instruction_assignment" << "\n";
+    if (shouldPrint) std::cout << "visited Instruction_assignment" << "\n";
     // init variables to check
     auto fields = element->get();
     auto src = std::get<0>(fields);
@@ -67,7 +69,8 @@ namespace L2 {
       // reg reg_temp = reg_obj->get().first;
       // std::cout << "hi there" << "\n";
       // Register* regi = new Register(reg_temp); //create new Register object with Memory's reg r field
-      element->reads.insert(rv_temp);
+      std::cout << "AHHHHHHHHHHHHHHHHHHHHHHH MEMORY VISITED AHHHHHHHHHHHHHHHHH" << std::endl;
+      if (rv_temp->toString() != "rsp") element->reads.insert(rv_temp);
     }
     //check if dst is a variable/register
     if (dynamic_cast<Variable *>(dst) != nullptr) element->writes.insert(dst);
@@ -236,7 +239,7 @@ namespace L2 {
 
     //Print gen & kill methods
       std::cout << "Gen:" << std::endl;
-      int count = 3;
+      int count = 0;
       for (auto i: f->GEN) {
         std::cout << std::to_string(count) << ": ";
         for(auto item: i) {
@@ -254,7 +257,7 @@ namespace L2 {
       }
 
       std::cout << "Kill: " << std::endl;
-      count = 3;
+      count = 0;
       for (auto i: f->KILL) {
         std::cout << std::to_string(count) << ": ";
         for(auto item: i){
@@ -276,21 +279,21 @@ namespace L2 {
       std::cout << "Start of SuccessorsPredecessors" << std::endl;
       f->findSuccessorsPredecessors();
       std::cout << "End of SuccessorsPredecessors" << std::endl;
-      //* UNCOMMENT TO PRINT SUCCESSORS
-      // std::set<int>::iterator it;
-      // for (auto f : p.functions) {
-      //   for (int ii = 0; ii < f->instructions.size(); ii++) {
+      // * UNCOMMENT TO PRINT SUCCESSORS
+      std::set<int>::iterator it;
+      for (auto f : p.functions) {
+        for (int ii = 0; ii < f->instructions.size(); ii++) {
           
-      //     std::cout << "instruction " << std::to_string(ii) << " succeeded by: ";
-      //     for (it = f->instructions[ii]->successor_idx.begin(); it != f->instructions[ii]->successor_idx.end(); ++it)
-      //       std::cout << ' ' << *it;
-      //     std::cout << '\n';
-      //   }
-      // }
+          std::cout << "instruction " << std::to_string(ii) << " succeeded by: ";
+          for (it = f->instructions[ii]->successor_idx.begin(); it != f->instructions[ii]->successor_idx.end(); ++it)
+            std::cout << ' ' << *it;
+          std::cout << '\n';
+        }
+      }
 
 
       // Compute IN and OUT sets
-      std::cout << "Start of INOUTSETS" << std::endl;
+      // std::cout << "Start of INOUTSETS" << std::endl;
       // <std::unordered_set<Item *>> temp_IN;
       // <std::unordered_set<Item *>> temp_OUT;
 
@@ -303,19 +306,19 @@ namespace L2 {
           f->instructions[ii]->IN.clear();
           f->instructions[ii]->OUT.clear();
 
-          std::cout << "instruction #" << std::to_string(ii) << std::endl;
+          // std::cout << "instruction #" << std::to_string(ii) << std::endl;
 
           // IN[i] = GEN[i] ∪(OUT[i] – KILL[i])
-          std::cout << "adding GEN to IN" << std::endl;
+          // std::cout << "adding GEN to IN" << std::endl;
 
           if (!f->GEN[ii].empty()) {
             for (auto it = f->GEN[ii].begin(); it != f->GEN[ii].end(); ++it) {
               f->instructions[ii]->IN.insert(*it);
             }
           }
-          std::cout << "done adding GEN to IN" << std::endl;
+          // std::cout << "done adding GEN to IN" << std::endl;
 
-          std::cout << "populating instruction's OUT set" << std::endl;
+          // std::cout << "populating instruction's OUT set" << std::endl;
           // find the successor(s) of the current instruction
           for (auto it1 = f->instructions[ii]->successor_idx.begin(); it1 != f->instructions[ii]->successor_idx.end(); ++it1) {
             // iterate through the successors' IN sets
@@ -324,13 +327,13 @@ namespace L2 {
               f->instructions[ii]->OUT.insert(*it2);
             }
           }
-          std::cout << "done populating instruction's OUT set" << std::endl;
+          // std::cout << "done populating instruction's OUT set" << std::endl;
           
           bool OUTKILLFLAG;
-          std::cout << "Start of checking OUT and KILL" << std::endl;
+          // std::cout << "Start of checking OUT and KILL" << std::endl;
           
           for (auto it1 = f->instructions[ii]->OUT.begin(); it1 != f->instructions[ii]->OUT.end(); ++it1) {
-            std::cout << "Start of checking indicies"  << std::endl;
+            // std::cout << "Start of checking indicies"  << std::endl;
             OUTKILLFLAG = false;
             for (auto it2 = f->KILL[ii].begin(); it2 != f->KILL[ii].end(); ++it2) {
               if (*it1 == *it2) {
@@ -339,9 +342,9 @@ namespace L2 {
               }
             }
             if (!OUTKILLFLAG) f->instructions[ii]->IN.insert(*it1);
-            std::cout << "End of checking indicies"  << std::endl;
+            // std::cout << "End of checking indicies"  << std::endl;
           }
-          std::cout << "END of checking OUT and KILL" << std::endl;
+          // std::cout << "END of checking OUT and KILL" << std::endl;
           
           if (temp_OUT != f->instructions[ii]->OUT || temp_IN != f->instructions[ii]->IN) {
             didChange = true;
@@ -349,7 +352,7 @@ namespace L2 {
         }
       } while (didChange);
 
-      std::cout << "End of INOUTSETS" << std::endl;
+      // std::cout << "End of INOUTSETS" << std::endl;
 
       //* UNCOMMENT TO PRINT IN AND OUT SETS
       std::cout << "IN: " << std::endl;

@@ -11,6 +11,10 @@ TODO:
   -> i dont remember if we're supposed to print it to terminal or a file or something idk
 
 #################### CHANGELOG ASYNCRONOUS ##################### (new entries go to top of stack)
+03/08/2022 Jacob:
+- fixed successors for "call u N"
+- need to figure out how to filter rsp from getting added to GEN sets
+
 03/04/2022 Jacob:
 - populated OUT sets based off of IN sets of successor(s)
 - implemented OUTKILL checking
