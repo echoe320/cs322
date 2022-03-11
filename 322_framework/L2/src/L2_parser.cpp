@@ -236,9 +236,9 @@ namespace L2 {
 
   struct cmp_rule :
     pegtl::sor<
-      less_rule,
-      lessEq_rule,
-      equal_rule
+      pegtl::seq< pegtl::at<lessEq_rule>, lessEq_rule>,
+      pegtl::seq< pegtl::at<less_rule  >, less_rule   >,
+      pegtl::seq< pegtl::at<equal_rule >, equal_rule >
     > {};
     
   //------------------------ Conditional Jumps ------------------------------
@@ -572,7 +572,7 @@ namespace L2 {
 	static void apply( const Input & in, Program & p){
       if (shouldPrint) cout << "number started\n";
       Number* n = new Number(std::stoi(in.string()));
-      std::cout << n << "\n";
+      // std::cout << n << "\n";
       parsed_items.push_back(n);
       if (shouldPrint) cout << "number ended\n";
     }

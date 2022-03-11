@@ -1,6 +1,8 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <vector>
+#include <algorithm>
 
 // #include <L2.h>
 #include <liveness.h>
@@ -211,7 +213,7 @@ namespace L2 {
   void create_liveness_list(Program p) {
     //Gen and kill 
     auto gen_kill_visitor = new Gen_Kill_Visitors();
-    std::cout << "gen_kill_visitor initialized" << "\n";
+    // std::cout << "gen_kill_visitor initialized" << "\n";
 
     for (auto f : p.functions) {
       for (auto i : f->instructions) {
@@ -221,59 +223,58 @@ namespace L2 {
         f->KILL.push_back(i->writes);
       }
 
-    //Print gen & kill methods
-      std::cout << "Gen:" << std::endl;
       int count = 0;
-      for (auto i: f->GEN) {
-        std::cout << std::to_string(count) << ": ";
-        for(auto item: i) {
-          if (dynamic_cast<Variable *>(item) != nullptr){
-            Variable* var_temp = (Variable*)item;
-            std::cout << var_temp->toString() << " ";
-          } else if (dynamic_cast<Register *>(item) != nullptr) {
-            Register* reg_temp = (Register*)item;
-            std::cout << reg_temp->toString() << " ";
-            // std::cout << get_enum_string(reg_temp->get()) << std::endl;
-          }
-        } 
-        count++;
-        std::cout << std::endl;
-      }
+    //Print gen & kill methods
+      // std::cout << "Gen:" << std::endl;
+      // for (auto i: f->GEN) {
+      //   std::cout << std::to_string(count) << ": ";
+      //   for(auto item: i) {
+      //     if (dynamic_cast<Variable *>(item) != nullptr){
+      //       Variable* var_temp = (Variable*)item;
+      //       std::cout << var_temp->toString() << " ";
+      //     } else if (dynamic_cast<Register *>(item) != nullptr) {
+      //       Register* reg_temp = (Register*)item;
+      //       std::cout << reg_temp->toString() << " ";
+      //       // std::cout << get_enum_string(reg_temp->get()) << std::endl;
+      //     }
+      //   } 
+      //   count++;
+      //   std::cout << std::endl;
+      // }
 
-      std::cout << "Kill: " << std::endl;
-      count = 0;
-      for (auto i: f->KILL) {
-        std::cout << std::to_string(count) << ": ";
-        for(auto item: i){
-          if (dynamic_cast<Variable *>(item) != nullptr){
-            Variable* var_temp = (Variable*)item;
-            std::cout << var_temp->toString() << " ";
-          } else if (dynamic_cast<Register *>(item) != nullptr) {
-            Register* reg_temp = (Register*)item;
-            std::cout << reg_temp->toString() << " ";
-            // std::cout << get_enum_string(reg_temp->get()) << std::endl;
-          }
-        }
-        count++;
-        std::cout << std::endl;
-      }
-      // std::cout << std::endl;
+      // std::cout << "Kill: " << std::endl;
+      // count = 0;
+      // for (auto i: f->KILL) {
+      //   std::cout << std::to_string(count) << ": ";
+      //   for(auto item: i){
+      //     if (dynamic_cast<Variable *>(item) != nullptr){
+      //       Variable* var_temp = (Variable*)item;
+      //       std::cout << var_temp->toString() << " ";
+      //     } else if (dynamic_cast<Register *>(item) != nullptr) {
+      //       Register* reg_temp = (Register*)item;
+      //       std::cout << reg_temp->toString() << " ";
+      //       // std::cout << get_enum_string(reg_temp->get()) << std::endl;
+      //     }
+      //   }
+      //   count++;
+      //   std::cout << std::endl;
+      // }
 
       // Successor and predecessor
-      std::cout << "Start of SuccessorsPredecessors" << std::endl;
+      // if (shouldPrint) std::cout << "Start of SuccessorsPredecessors" << std::endl;
       f->findSuccessorsPredecessors();
-      std::cout << "End of SuccessorsPredecessors" << std::endl;
+      // if (shouldPrint) std::cout << "End of SuccessorsPredecessors" << std::endl;
       // * UNCOMMENT TO PRINT SUCCESSORS
-      std::set<int>::iterator it;
-      for (auto f : p.functions) {
-        for (int ii = 0; ii < f->instructions.size(); ii++) {
+      // std::set<int>::iterator it;
+      // for (auto f : p.functions) {
+      //   for (int ii = 0; ii < f->instructions.size(); ii++) {
           
-          std::cout << "instruction " << std::to_string(ii) << " succeeded by: ";
-          for (it = f->instructions[ii]->successor_idx.begin(); it != f->instructions[ii]->successor_idx.end(); ++it)
-            std::cout << ' ' << *it;
-          std::cout << '\n';
-        }
-      }
+      //     std::cout << "instruction " << std::to_string(ii) << " succeeded by: ";
+      //     for (it = f->instructions[ii]->successor_idx.begin(); it != f->instructions[ii]->successor_idx.end(); ++it)
+      //       std::cout << ' ' << *it;
+      //     std::cout << '\n';
+      //   }
+      // }
 
 
       // Compute IN and OUT sets
@@ -402,40 +403,66 @@ namespace L2 {
       // std::cout << "End of INOUTSETS" << std::endl;
 
       //* UNCOMMENT TO PRINT IN AND OUT SETS
-      std::cout << "IN: " << std::endl;
+      std::cout << "(" << std::endl;
+      std::cout << "(in " << std::endl;
       count = 0;
       for (int kk = 0; kk < f->instructions.size(); kk++) {
-        std::cout << std::to_string(count) << ": ";
+        // std::cout << std::to_string(count) << ": ";
+        std::vector<std::string> in_sorted;
+        std::cout << "(";
         for (auto it = f->instructions[kk]->IN.begin(); it != f->instructions[kk]->IN.end(); ++it) {
           if (dynamic_cast<Variable *>(*it) != nullptr) {
             Variable* var_temp = (Variable*) *it;
-            std::cout << var_temp->toString() << " ";
+            in_sorted.push_back(var_temp->toString());
+            // std::cout << var_temp->toString() << " ";
           }
           else if (dynamic_cast<Register *>(*it) != nullptr) {
             Register* reg_temp = (Register*) *it;
-            std::cout << reg_temp->toString() << " ";
+            in_sorted.push_back(reg_temp->toString());
+            // std::cout << reg_temp->toString() << " ";
           }
         }
         count++;
+        std::sort(in_sorted.begin(), in_sorted.end());
+        for (std::string i: in_sorted)
+          if (i == in_sorted.back()) {
+            std::cout << i << ")";
+          } else {
+            std::cout << i << ' ';
+          }
         std::cout << std::endl;
       }
-      std::cout << "OUT: " << std::endl;
+      std::cout << ")\n" << "\n";
+      std::cout << "(out " << std::endl;
       count = 0;
       for (int kk = 0; kk < f->instructions.size(); kk++) {
-        std::cout << std::to_string(count) << ": ";
+        // std::cout << std::to_string(count) << ": ";
+        std::vector<std::string> out_sorted;
+        std::cout << "(";
         for (auto it = f->instructions[kk]->OUT.begin(); it != f->instructions[kk]->OUT.end(); ++it) {
           if (dynamic_cast<Variable *>(*it) != nullptr) {
             Variable* var_temp = (Variable*) *it;
-            std::cout << var_temp->toString() << " ";
+            out_sorted.push_back(var_temp->toString());
+            // std::cout << var_temp->toString() << " ";
           }
           else if (dynamic_cast<Register *>(*it) != nullptr) {
             Register* reg_temp = (Register*) *it;
-            std::cout << reg_temp->toString() << " ";
+            out_sorted.push_back(reg_temp->toString());
+            // std::cout << reg_temp->toString() << " ";
           }
         }
         count++;
-        std::cout << std::endl;
+        std::sort(out_sorted.begin(), out_sorted.end());
+        for (std::string i: out_sorted)
+          if (i == out_sorted.back()) {
+            std::cout << i;
+          } else {
+            std::cout << i << ' ';
+          }
+        std::cout << ")" << std::endl;
       }
+      std::cout << ")" << std::endl;
+      std::cout << "\n" << ")\n" << "\n";
     //TODO: have another for loop to push_back the instruction's IN and OUT sets to the function's IN and OUT vectors (AFTER all the do-while)
     }
   }
