@@ -154,6 +154,7 @@ namespace L2 {
     
     // gen = u, args used
     if (dynamic_cast<Register *>(u) != nullptr) element->reads.insert(u);
+    else if (dynamic_cast<Variable *>(u) != nullptr) element->reads.insert(u);
     
     //adding 
     Number* num = (Number*) N;
@@ -426,11 +427,11 @@ namespace L2 {
         std::sort(in_sorted.begin(), in_sorted.end());
         for (std::string i: in_sorted)
           if (i == in_sorted.back()) {
-            std::cout << i << ")";
+            std::cout << i;
           } else {
             std::cout << i << ' ';
           }
-        std::cout << std::endl;
+        std::cout << ")" << std::endl;
       }
       std::cout << ")\n" << "\n";
       std::cout << "(out " << std::endl;

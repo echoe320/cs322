@@ -49,3 +49,12 @@
 (%fib_arr %i r12 r13 r14 r15 rbp rbx rdi)
 (%fib_arr %i r12 r13 r14 r15 rbp rbx rdi)
 (%fib_arr %i r12 r13 r14 r15 rbp rbx rdi)
+(%fib_arr %i r12 r13 r14 r15 rax rbp rbx)
+(%fib_arr %i r12 r13 r14 r15 rax rbp rbx)
+(%fib_arr %i r12 r13 r14 r15 rax rbp rbx)
+(%fib_arr %i r12 r13 r14 r15 rax rbp rbx)
+(r12 r13 r14 r15 rax rbp rbx)
+()
+)
+
+)

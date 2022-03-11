@@ -1,3 +1,30 @@
-terminate called after throwing an instance of 'tao::pegtl::parse_error'
-  what():  tests/liveness/test199.L2f:5:15(54): parse error matching L2::Function_rule
+(
+(in
+(r12 r13 r14 r15 rbp rbx rdi rsi)
+(%foo r12 r13 r14 r15 rbp rbx rsi)
+(%bar %foo r12 r13 r14 r15 rbp rbx)
+(%bar %flag %foo r12 r13 r14 r15 rbp rbx)
+(%bar r12 r13 r14 r15 rbp rbx)
+(%bar r12 r13 r14 r15 rbp rbx)
+(%bar r12 r13 r14 r15 rbp rbx)
+(r12 r13 r14 r15 rax rbp rbx)
+(%foo r12 r13 r14 r15 rbp rbx)
+(%foo r12 r13 r14 r15 rbp rbx)
+(r12 r13 r14 r15 rax rbp rbx)
+)
 
+(out
+(%foo r12 r13 r14 r15 rbp rbx rsi)
+(%bar %foo r12 r13 r14 r15 rbp rbx)
+(%bar %flag %foo r12 r13 r14 r15 rbp rbx)
+(%bar %foo r12 r13 r14 r15 rbp rbx)
+(%bar r12 r13 r14 r15 rbp rbx)
+(%bar r12 r13 r14 r15 rbp rbx)
+(r12 r13 r14 r15 rax rbp rbx)
+()
+(%foo r12 r13 r14 r15 rbp rbx)
+(r12 r13 r14 r15 rax rbp rbx)
+()
+)
+
+)
