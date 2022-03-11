@@ -669,7 +669,6 @@ namespace L2 {
     }
   };
 
-  // rsp action because it's not included in above w_rule
   template<> struct action < register_rsp_rule > {
     template< typename Input >
     static void apply( const Input & in, Program & p){
@@ -689,16 +688,6 @@ namespace L2 {
       parsed_items.pop_back();
       auto rv = parsed_items.back();
       parsed_items.pop_back();
-
-
-      // Number* n = (Number *) parsed_items.back();
-      // Number* n = &parsed_items.back();
-      // int64_t os = n->get();
-      // parsed_items.pop_back();
-      // Register* regis = (Register *) parsed_items.back();
-      // reg regi = regis->get();
-      // cout << regi << endl;
-      // parsed_items.pop_back();
       Memory* mem = new Memory(rv, os);
       if (shouldPrint) cout << "mem_rule ended\n";
 

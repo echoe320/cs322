@@ -17,6 +17,11 @@ namespace L2 {
   
   enum runtimeCode {rt_print, rt_input, rt_allocate, rt_tensor_error};
 
+  // bool strComp(const Item *a, const Item *b) {
+  //   return a->toString() > b->toString();
+  // }
+  // auto strComp [](Item *a, Item *b) {return a->toString() < b->toString()};
+
   // static const int* caller_reg_list[] = {reg::r10, reg::r11, reg::r8, reg::r9, reg::rax, reg::rcx, reg::rdi, reg::rdx, reg::rsi};
   // static const int* callee_reg_list[] = {reg::r12, reg::r13, reg::r14, reg::r15, reg::rbp, reg::rbx};
   // static const int* arg_reg_list[] = {reg::rdi, reg::rsi, reg::rdx, reg::rcx, reg::r8, reg::r9};
@@ -108,6 +113,8 @@ namespace L2 {
       std::unordered_set<Item *> writes; // Kill
       std::unordered_set<Item *> IN; // IN
       std::unordered_set<Item *> OUT; // OUT
+      // std::set<Item *, decltype(&strComp)*> IN(&strComp); // IN
+      // std::set<Item *, decltype(&strComp)*> OUT(&strComp); // OUT
   };
 
   class Instruction_ret : public Instruction{

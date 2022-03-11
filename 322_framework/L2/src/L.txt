@@ -2,15 +2,15 @@ LLLLLLLLLLLLLLLLLLLLLLLL
 
 TODO:
 1) push instruction's IN and OUT sets to function's IN and OUT vectors
-2) debug tests??
-  -> i ran tests 0-5 in liveness test folders
-    -> test0.L2f works fine (order of IN and OUT sets are not correct, but i think that's an issue for later)
-    -> test1 has a parser error?
-    -> some of the other tests i ran was stopping at random points throughout the process; not seg faulting, just printing a start statement and not printing the end statement??
+2) sort the IN and OUT sets by alphabetical order
 3) output IN and OUT sets in the correct format
   -> i dont remember if we're supposed to print it to terminal or a file or something idk
 
 #################### CHANGELOG ASYNCRONOUS ##################### (new entries go to top of stack)
+03/10/2022 Jacob:
+- fixed rsp being added to GEN sets
+- fixed successors for Instruction_goto
+
 03/08/2022 Jacob:
 - fixed successors for "call u N"
 - need to figure out how to filter rsp from getting added to GEN sets
