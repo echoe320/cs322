@@ -7,6 +7,12 @@ TODO:
   -> i dont remember if we're supposed to print it to terminal or a file or something idk
 
 #################### CHANGELOG ASYNCRONOUS ##################### (new entries go to top of stack)
+03/12/2022 Jacob:
+- implementing unordered_map for findSuccessorsPredecessors() to speed up 
+
+03/11/2022 Jacob:
+- started testing and fixing edge cases
+
 03/10/2022 Jacob:
 - fixed rsp being added to GEN sets
 - fixed successors for Instruction_goto

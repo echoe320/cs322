@@ -9,6 +9,7 @@
 
 // included libraries
 #include <unordered_set>
+#include <unordered_map>
 
 // using namespace std;
 bool doiprint = false;
@@ -316,6 +317,18 @@ namespace L2 {
   //* FUNCTION - setting successors and predecessors
   void Function::findSuccessorsPredecessors() {
     int instructions_len = this->instructions.size();
+
+    //* initialize label target map
+    std::unordered_map<std::string, int> label_dict;
+    for (int i = 0; i < instructions_len; i++) {
+      if (dynamic_cast<Instruction_label *>(this->instructions[i]) != nullptr) {
+        auto inst_temp = static_cast<Instruction_label *>(this->instructions[i]);
+        auto label = std::get<0>(inst_temp->get());
+        std::string target = label->toString();
+        label_dict[target] = i;
+      }
+    }
+
     for (int ii = 0; ii < instructions_len; ii++) {
       // return instruction has no successors
       if (dynamic_cast<Instruction_ret *>(this->instructions[ii]) != nullptr) {
