@@ -266,23 +266,18 @@ namespace L2 {
       f->findSuccessorsPredecessors();
       // if (shouldPrint) std::cout << "End of SuccessorsPredecessors" << std::endl;
       // * UNCOMMENT TO PRINT SUCCESSORS
-      // std::set<int>::iterator it;
-      // for (auto f : p.functions) {
-      //   for (int ii = 0; ii < f->instructions.size(); ii++) {
+      for (auto f : p.functions) {
+        for (int ii = 0; ii < f->instructions.size(); ii++) {
           
-      //     std::cout << "instruction " << std::to_string(ii) << " succeeded by: ";
-      //     for (it = f->instructions[ii]->successor_idx.begin(); it != f->instructions[ii]->successor_idx.end(); ++it)
-      //       std::cout << ' ' << *it;
-      //     std::cout << '\n';
-      //   }
-      // }
+          std::cout << "line " << std::to_string(ii+3) << " succeeded by: ";
+          for (auto it = f->instructions[ii]->successor_idx.begin(); it != f->instructions[ii]->successor_idx.end(); ++it)
+            std::cout << ' ' << *it + 3;
+          std::cout << '\n';
+        }
+      }
 
 
       // Compute IN and OUT sets
-      // std::cout << "Start of INOUTSETS" << std::endl;
-      // <std::unordered_set<Item *>> temp_IN;
-      // <std::unordered_set<Item *>> temp_OUT;
-
       bool didChange;
       do {
         didChange = false;
@@ -298,19 +293,15 @@ namespace L2 {
           // std::cout << "END of checking OUT and KILL" << std::endl;
 
           //* GEN[ii]
-          // std::cout << "adding GEN to IN" << std::endl;
+          if (shouldPrint) std::cout << "adding GEN to IN" << std::endl;
 
 
           //! START
           for (auto it = f->GEN[ii].begin(); it != f->GEN[ii].end(); ++it) {
             auto temp = *it;
             f->instructions[ii]->IN.insert(temp);
-            // for (auto it1 = temp_OUT.begin(); it1 != temp_OUT.end(); ++it1) {
-            //   auto temp1 = *it1;
-            //   if (temp->toString() == temp1->toString()) temp_OUT.erase(*it1);
-            // }
           }
-          // std::cout << "done adding GEN to IN" << std::endl;
+          if (shouldPrint) std::cout << "done adding GEN to IN" << std::endl;
 
           //* OUT[ii] - KILL[ii]
           bool OUTKILLFLAG;
@@ -336,46 +327,9 @@ namespace L2 {
           }
           //! END
 
-          //! NEW START
-          // bool OUTKILLFLAG;
-          // for (auto it0 = f->instructions[ii]->GEN.begin(); it0 != f->instructions[ii]->GEN.end(); ++it0) {
-          //   auto temp0 = *it0;
-          //   for (auto it1 = temp_OUT.begin(); it1 != temp_OUT.end(); ++it1) {
-          //     auto temp1 = *it1;
-          //     if (temp0->toString() == temp1->toString()) {
-
-          //     }
-          //     for (auto it2 = f->instructions[ii]->KILL.begin(); it2 != f->instructions[ii]->KILL.end(); ++it2) {
-          //       auto temp2 = *it2;
-          //       if (temp0->toString() == temp1->toString() || temp1->toString() == temp2->toString()) {
-          //         OUTKILLFLAG = true;
-          //         break;
-          //       }
-          //     }
-          //   }
-          // }
-          //! NEW END
-
-          //! NEW NEW START
-          // std::unordered_set<Item *> MINUS = temp_OUT;
-          // for (auto it0 = MINUS.begin(); it0 != MINUS.end(); ++it0) {
-          //   auto temp0 = *it0;
-          //   for (auto it1 = f->KILL[ii].begin(); it1 != f->KILL[ii].end(); ++it1) {
-          //     auto temp1 = *it1;
-          //     if (temp0->toString() == temp1->toString()) {
-          //       MINUS.erase(temp1);
-          //     }
-          //   }
-          //   for (auto it2 = f->GEN[ii].begin(); it2 != f->GEN[ii].end(); ++it2) {
-          //     auto temp2 = *it2;
-          //     if (temp2->toString() != temp0->toString()) MINUS.insert(temp2);
-          //   }
-          // }
-          // f->instructions[ii]->IN = MINUS;
-          //! NEW NEW END
-
+          
           //* populate OUT sets
-          // std::cout << "populating instruction's OUT set" << std::endl;
+          if (shouldPrint) std::cout << "populating instruction's OUT set" << std::endl;
           // find the successor(s) of the current instruction
           bool dupie;
           for (auto it1 = f->instructions[ii]->successor_idx.begin(); it1 != f->instructions[ii]->successor_idx.end(); ++it1) {

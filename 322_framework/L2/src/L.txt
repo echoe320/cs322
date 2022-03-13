@@ -2,13 +2,11 @@ LLLLLLLLLLLLLLLLLLLLLLLL
 
 TODO:
 1) push instruction's IN and OUT sets to function's IN and OUT vectors
-2) sort the IN and OUT sets by alphabetical order
-3) output IN and OUT sets in the correct format
-  -> i dont remember if we're supposed to print it to terminal or a file or something idk
+2) why are tests 203 and 206 not running????????????
 
 #################### CHANGELOG ASYNCRONOUS ##################### (new entries go to top of stack)
 03/12/2022 Jacob:
-- implementing unordered_map for findSuccessorsPredecessors() to speed up 
+- implementing unordered_map for findSuccessorsPredecessors() to speed up
 
 03/11/2022 Jacob:
 - started testing and fixing edge cases

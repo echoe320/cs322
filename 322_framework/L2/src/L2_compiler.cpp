@@ -27,6 +27,7 @@ int main(
   int argc, 
   char **argv
   ){
+  // std::cout << "STARTING FROM THE VERY BEGINNING" << std::endl;
   auto enable_code_generator = true;
   auto spill_only = false;
   auto interference_only = false;
@@ -93,7 +94,9 @@ int main(
     /*
      * Parse an L2 function.
      */
+    // std::cout << "Starting Parsing file now" << std::endl;
     p = L2::parse_function_file(argv[optind]);
+    // std::cout << "Ending Parsing file now" << std::endl;
 
   } else if (interference_only){
 

@@ -136,7 +136,6 @@ namespace L2 {
 
 
   //Special registers
-
   struct str_rax : TAOCPP_PEGTL_STRING( "rax" ) {};
   struct str_rsp : TAOCPP_PEGTL_STRING( "rsp" ) {};
 
@@ -237,7 +236,7 @@ namespace L2 {
   struct cmp_rule :
     pegtl::sor<
       pegtl::seq< pegtl::at<lessEq_rule>, lessEq_rule>,
-      pegtl::seq< pegtl::at<less_rule  >, less_rule   >,
+      pegtl::seq< pegtl::at<less_rule  >, less_rule  >,
       pegtl::seq< pegtl::at<equal_rule >, equal_rule >
     > {};
     
@@ -452,15 +451,15 @@ namespace L2 {
   struct Instruction_rule:
     pegtl::sor<
       pegtl::seq< pegtl::at<Instruction_return_rule>      , Instruction_return_rule       >,
+      pegtl::seq< pegtl::at<Instruction_cjump_rule>       , Instruction_cjump_rule        >,
       pegtl::seq< pegtl::at<Instruction_cmp_rule>         , Instruction_cmp_rule          >,
       pegtl::seq< pegtl::at<Instruction_stackarg_rule>    , Instruction_stackarg_rule     >,
       pegtl::seq< pegtl::at<Instruction_assignment_rule>  , Instruction_assignment_rule   >,
       pegtl::seq< pegtl::at<Instruction_arithmetic_rule>  , Instruction_arithmetic_rule   >,
       pegtl::seq< pegtl::at<Instruction_crement_rule>     , Instruction_crement_rule      >,
       pegtl::seq< pegtl::at<Instruction_shift_rule>       , Instruction_shift_rule        >,
-      pegtl::seq< pegtl::at<Instruction_cjump_rule>       , Instruction_cjump_rule        >,
       pegtl::seq< pegtl::at<Instruction_LEA_rule>         , Instruction_LEA_rule          >,
-      pegtl::seq< pegtl::at<Instruction_runtime_rule>         , Instruction_runtime_rule          >,
+      pegtl::seq< pegtl::at<Instruction_runtime_rule>     , Instruction_runtime_rule      >,
       pegtl::seq< pegtl::at<Instruction_call_rule>        , Instruction_call_rule         >,
       pegtl::seq< pegtl::at<Instruction_goto_rule>        , Instruction_goto_rule         >,
       pegtl::seq< pegtl::at<Instruction_label_rule>       , Instruction_label_rule        >
@@ -1232,14 +1231,17 @@ namespace L2 {
     /* 
      * Check the grammar for some possible issues.
      */
+    if (shouldPrint) std::cout << "checking grammar for possible issues" << std::endl;
     pegtl::analyze< function_file_grammer >();
 
     /*
      * Parse.
-     */   
+     */
+    if (shouldPrint) std::cout << "begin parsing" << std::endl;
     file_input< > fileInput(fileName);
     Program p;
     parse< function_file_grammer, action >(fileInput, p);
+    if (shouldPrint) std::cout << "end parsing" << std::endl;
 
     return p;
   }
