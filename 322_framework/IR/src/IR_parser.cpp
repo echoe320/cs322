@@ -625,25 +625,64 @@ namespace IR {
   template< typename Rule >
   struct action : pegtl::nothing< Rule > {};
 
-  template<> struct action < function_name > {
+  template<> struct action < function_type > {
     template< typename Input >
 	static void apply( const Input & in, Program & p){
-      if (shouldPrint) cout << "function_name action started\n";
+      if (shouldPrint) cout << "function_type (no end)\n";
       auto newF = new Function();
-      newF->name = in.string();
+      newF->type = in.string();
       p.functions.push_back(newF);
     }
   };
 
-  // template<> struct action < function_name > {
-  //   template< typename Input >
-	// static void apply( const Input & in, Program & p){
-  //     if (shouldPrint) cout << "function_name (no end)\n";
-  //     auto newF = new Function();
-  //     newF->name = in.string();
-  //     p.functions.push_back(newF);
-  //   }
-  // };
+  template<> struct action < function_name > {
+    template< typename Input >
+	static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "function_name action started\n";
+      auto currentF = p.functions.back();
+      currentF->isMain = in.string() == ":main";
+      currentF->name = in.string();
+    }
+  };
+
+  // Item rule actions
+
+  template<> struct action < number_rule > {
+    template< typename Input >
+	static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "number_rule started\n";
+      Number* n = new Number(std::stol(in.string()));
+      // std::cout << n << "\n";
+      parsed_items.push_back(n);
+      if (shouldPrint) cout << "number_rule ended\n";
+    }
+  };
+
+  template<> struct action < label_rule > {
+    template< typename Input >
+	static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "label_rule started\n";
+      Label* l = new Label(in.string());
+      parsed_items.push_back(l);
+      if (shouldPrint) cout << "label_rule ended\n";
+    }
+  };
+
+  template<> struct action < var_rule > { // need to edit this to scan for two parts
+    template< typename Input >
+    static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "var started\n";
+      Variable* v = new Variable(in.string());
+      parsed_items.push_back(v);
+      if (shouldPrint) cout << "var ended\n";
+    }
+  };
+
+
+
+  // Operation rule actions
+
+
 
   Program parse_file (char *fileName){
 

@@ -273,9 +273,10 @@ namespace IR {
    */
   class Function{
     public:
+      std::string type; 
       std::string name;
-      int64_t arguments;
-
+      bool isMain;
+      std::vector<Variable*> arguments;
       std::vector<Basic_Block*> basicblocks;
   };
 
