@@ -23,6 +23,14 @@ using namespace pegtl;
 using namespace std;
 
 namespace IR {
+  bool shouldPrint = false;
+
+  /* 
+   * Data required to parse
+   */ 
+
+  std::vector<Item *> parsed_items;
+
   /* 
    * Keywords.
    */
@@ -322,7 +330,7 @@ namespace IR {
     pegtl::sor<
       pegtl::seq<
         pegtl::sor<
-          variable_rule, 
+          var_rule, 
           number_rule
         >,
         pegtl::star<
@@ -330,7 +338,7 @@ namespace IR {
             pegtl::one<','>,
             seps,
             pegtl::sor<
-              variable_rule, 
+              var_rule, 
               number_rule
             >
           >
@@ -404,7 +412,7 @@ namespace IR {
 
   // Instruction_new_tuple_rule
 
-  struct str_tuple : TAOCPP_PEGTL_STRING( "Tuple" ) {};
+  // struct str_tuple : TAOCPP_PEGTL_STRING( "Tuple" ) {};
 
   struct tuple_rule : str_tuple {};
 
@@ -457,11 +465,53 @@ namespace IR {
 
   // te_br_label_rule
 
+  struct str_br : TAOCPP_PEGTL_STRING( "br" ) {};
+
+  struct br_rule : str_br {};
+
+  struct te_br_label_rule :
+    pegtl::seq<
+      seps,
+      br_rule,
+      seps,
+      label_rule,
+      seps
+    > {};
+
   // te_br_t_rule
+
+  struct te_br_t_rule :
+    pegtl::seq<
+      seps,
+      br_rule,
+      seps,
+      t_rule,
+      seps,
+      label_rule,
+      seps,
+      label_rule,
+      seps
+    > {};
 
   // te_return_rule
 
+  struct te_return_rule :
+    pegtl::seq<
+      seps,
+      str_return,
+      seps
+    > {};
+
   // te_return_t_rule
+
+  struct te_return_t_rule :
+    pegtl::seq<
+      seps,
+      str_return,
+      seps,
+      t_rule,
+      seps
+    > {};
 
   // Umbrella te Rule(s)
   struct te_rule : 
@@ -515,14 +565,14 @@ namespace IR {
       pegtl::seq<
         type_rule,
         seps,
-        variable_rule,
+        var_rule,
         pegtl::star<
           pegtl::seq<
             pegtl::one< ',' >,
             seps,
             type_rule,
             seps,
-            variable_rule
+            var_rule
           >
         >
       >,
@@ -563,7 +613,7 @@ namespace IR {
       >
     > {};
 
-  struct grammer :
+  struct grammar :
     pegtl::must< 
       Functions_rule
     > {};
@@ -578,13 +628,22 @@ namespace IR {
   template<> struct action < function_name > {
     template< typename Input >
 	static void apply( const Input & in, Program & p){
-      if (shouldPrint) cout << "function_name (no end)\n";
+      if (shouldPrint) cout << "function_name action started\n";
       auto newF = new Function();
       newF->name = in.string();
       p.functions.push_back(newF);
     }
   };
 
+  // template<> struct action < function_name > {
+  //   template< typename Input >
+	// static void apply( const Input & in, Program & p){
+  //     if (shouldPrint) cout << "function_name (no end)\n";
+  //     auto newF = new Function();
+  //     newF->name = in.string();
+  //     p.functions.push_back(newF);
+  //   }
+  // };
 
   Program parse_file (char *fileName){
 

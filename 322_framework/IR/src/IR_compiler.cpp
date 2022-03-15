@@ -13,8 +13,8 @@
 #include <iostream>
 
 #include <IR.h>
+#include <IR_parser.h>
 // #include <liveness.h>
-// #include <L2_parser.h>
 
 using namespace std;
 
