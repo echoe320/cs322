@@ -356,11 +356,77 @@ namespace IR {
 
   // Instruction_call_assign_rule
 
+  struct Instruction_call_assign_rule :
+    pegtl::seq<
+      seps,
+      var_rule,
+      seps,
+      str_arrow,
+      seps,
+      call_rule,
+      seps,
+      callee_rule,
+      seps,
+      pegtl::one< '(' >,
+      seps,
+      arguments_rule,
+      seps,
+      pegtl::one< ')' >,
+      seps
+    > {};
+
   // Instruction_new_array_rule
+
+  struct str_new : TAOCPP_PEGTL_STRING( "new" ) {};
+  struct str_array : TAOCPP_PEGTL_STRING( "Array" ) {};
+
+  struct new_rule : str_new {};
+  struct array_rule : str_array {};
+
+  struct Instruction_new_array_rule :
+    pegtl::seq<
+      seps,
+      var_rule,
+      seps,
+      str_arrow,
+      seps,
+      new_rule,
+      seps,
+      array_rule,
+      seps,
+      pegtl::one< '(' >,
+      seps,
+      arguments_rule,
+      seps,
+      pegtl::one< ')' >,
+      seps
+    > {};
 
   // Instruction_new_tuple_rule
 
+  struct str_tuple : TAOCPP_PEGTL_STRING( "Tuple" ) {};
 
+  struct tuple_rule : str_tuple {};
+
+  struct Instruction_new_tuple_rule :
+    pegtl::seq<
+      seps,
+      var_rule,
+      seps,
+      str_arrow,
+      seps,
+      new_rule,
+      seps,
+      tuple_rule,
+      seps,
+      pegtl::one< '(' >,
+      seps,
+      t_rule,
+      seps,
+      pegtl::one< ')' >,
+      seps
+    > {};
+  
   // Umbrella Instruction Rule(s)
   struct Instruction_rule:
     pegtl::sor<
@@ -386,8 +452,16 @@ namespace IR {
     > {};
   
   /*
-   * te rule
+   * te rules
    */
+
+  // te_br_label_rule
+
+  // te_br_t_rule
+
+  // te_return_rule
+
+  // te_return_t_rule
 
   // Umbrella te Rule(s)
   struct te_rule : 
@@ -398,7 +472,10 @@ namespace IR {
       pegtl::seq< pegtl::at<te_return_t_rule>             , te_return_t_rule              >
     > {};
 
-  // Basic Blocks
+  /* 
+   * Basic Blocks
+   */
+  
   struct Basic_Block_rule:
     pegtl::seq<
       seps,
@@ -419,14 +496,38 @@ namespace IR {
       >
     > {};
 
+  /* 
+   * Function Rule 
+   */
+  
   // Function Components 
+
   struct str_define : TAOCPP_PEGTL_STRING( "define" ) {};
 
   struct function_type : 
     T_rule {};
   
   struct function_name :
-    Label_rule {};
+    label_rule {};
+
+  struct function_arguments_rule :
+    pegtl::sor<
+      pegtl::seq<
+        type_rule,
+        seps,
+        variable_rule,
+        pegtl::star<
+          pegtl::seq<
+            pegtl::one< ',' >,
+            seps,
+            type_rule,
+            seps,
+            variable_rule
+          >
+        >
+      >,
+      seps
+    > {};
 
   // Function Rule
 
@@ -441,7 +542,7 @@ namespace IR {
       seps,
       pegtl::one< '(' >,
       seps,
-      arguments_rule,
+      function_arguments_rule,
       seps,
       pegtl::one< ')' >,
       seps,
@@ -466,6 +567,7 @@ namespace IR {
     pegtl::must< 
       Functions_rule
     > {};
+
 //================================= ACTIONS =================================
   /* 
    * Actions attached to grammar rules.
@@ -484,7 +586,6 @@ namespace IR {
   };
 
 
-  
   Program parse_file (char *fileName){
 
     /* 
