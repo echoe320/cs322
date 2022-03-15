@@ -11,7 +11,7 @@
 	return
 	:call_label_ciao__ciao__ciao_17
 	%i <- %divisor = %dividend
-	//cjump %i = 1 :call_label_ciao__ciao__ciao_18
+	cjump %i = 1 :call_label_ciao__ciao__ciao_18
 	goto :call_label_ciao__ciao__ciao_19
 	:call_label_ciao__ciao__ciao_18
 	rax <- 1
