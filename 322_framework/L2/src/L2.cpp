@@ -324,9 +324,7 @@ namespace L2 {
       if (dynamic_cast<Instruction_label *>(this->instructions[i]) != nullptr) {
         auto inst_temp = static_cast<Instruction_label *>(this->instructions[i]);
         auto label = std::get<0>(inst_temp->get());
-        std::string target = label->toString();
-        label_dict[target] = i;
-        std::cout << target << i << std::endl;
+        label_dict[label->toString()] = i;
       }
     }
 
@@ -334,7 +332,7 @@ namespace L2 {
       // return instruction has no successors
       if (dynamic_cast<Instruction_ret *>(this->instructions[ii]) != nullptr) {
         if (doiprint) std::cout << "return succ" << std::endl;
-        continue;
+        this->instructions[ii]->successor_idx.clear();
       }
 
       // call tensor_error has no successors
@@ -347,12 +345,12 @@ namespace L2 {
         else this->instructions[ii]->successor_idx.insert(ii + 1);
       }
 
-      // goto instruction's successor is the target (label)
-      else if (dynamic_cast<Instruction_goto *>(this->instructions[ii]) != nullptr) {
-        if (doiprint) std::cout << "goto succ" << std::endl;
-        // have to check every instruction to find the target
-        auto inst_temp = dynamic_cast<Instruction_goto *>(this->instructions[ii]);
-        auto target = static_cast<Label *>(std::get<0>(inst_temp->get()));
+      //cjump has two successors: target + instruction right after
+      else if (dynamic_cast<Instruction_cjump *>(this->instructions[ii]) != nullptr) {
+        if (doiprint) std::cout << "cjump succ" << std::endl;
+        this->instructions[ii]->successor_idx.insert(ii + 1);
+        auto inst_temp = dynamic_cast<Instruction_cjump *>(this->instructions[ii]);
+        auto target = static_cast<Label *>(std::get<2>(inst_temp->get()));
         // for (int jj = 0; jj < instructions_len; jj++) {
         //   if (dynamic_cast<Instruction_label *>(this->instructions[jj]) != nullptr) {
         //     auto inst_temp2 = dynamic_cast<Instruction_label *>(this->instructions[jj]);
@@ -362,14 +360,12 @@ namespace L2 {
         // }
         this->instructions[ii]->successor_idx.insert(label_dict[target->toString()]);
       }
-      
-      //cjump has two successors: target + instruction right after
-      else if (dynamic_cast<Instruction_cjump *>(this->instructions[ii]) != nullptr) {
-        if (doiprint) std::cout << "cjump succ" << std::endl;
-        this->instructions[ii]->successor_idx.insert(ii + 1);
-        // have to check every instruction to find the target
-        auto inst_temp = dynamic_cast<Instruction_cjump *>(this->instructions[ii]);
-        auto target = static_cast<Label *>(std::get<2>(inst_temp->get()));
+
+      // goto instruction's successor is the target (label)
+      else if (dynamic_cast<Instruction_goto *>(this->instructions[ii]) != nullptr) {
+        if (doiprint) std::cout << "goto succ" << std::endl;
+        auto inst_temp = dynamic_cast<Instruction_goto *>(this->instructions[ii]);
+        auto target = static_cast<Label *>(std::get<0>(inst_temp->get()));
         // for (int jj = 0; jj < instructions_len; jj++) {
         //   if (dynamic_cast<Instruction_label *>(this->instructions[jj]) != nullptr) {
         //     auto inst_temp2 = dynamic_cast<Instruction_label *>(this->instructions[jj]);

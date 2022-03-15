@@ -314,7 +314,10 @@ namespace L2 {
       seps,
       aop_rule,
       seps,
-      pegtl::sor<t_rule, mem_rule>,
+      pegtl::sor<
+        t_rule, 
+        mem_rule
+      >,
       seps
     > {};
 
@@ -570,7 +573,7 @@ namespace L2 {
     template< typename Input >
 	static void apply( const Input & in, Program & p){
       if (shouldPrint) cout << "number started\n";
-      Number* n = new Number(std::stoi(in.string()));
+      Number* n = new Number(std::stol(in.string()));
       // std::cout << n << "\n";
       parsed_items.push_back(n);
       if (shouldPrint) cout << "number ended\n";
