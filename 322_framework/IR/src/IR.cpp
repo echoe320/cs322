@@ -5,7 +5,7 @@
 #include <string>
 
 // #include <liveness.h>
-#include <L2.h>
+#include <IR.h>
 
 // included libraries
 #include <unordered_set>

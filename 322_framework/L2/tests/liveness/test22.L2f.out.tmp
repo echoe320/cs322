@@ -1,3 +1,8 @@
+line 3 succeeded by: 4
+line 4 succeeded by: 5
+line 5 succeeded by: 6
+line 6 succeeded by: 7
+line 7 succeeded by:
 (
 (in
 (r12 r13 r14 r15 rbp rbx rdi rsi)

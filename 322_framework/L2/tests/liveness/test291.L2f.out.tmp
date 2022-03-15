@@ -1,3 +1,14 @@
+:call_label_ciao_208
+line 3 succeeded by: 4
+line 4 succeeded by: 5
+line 5 succeeded by: 6
+line 6 succeeded by: 7
+line 7 succeeded by: 8
+line 8 succeeded by: 9
+line 9 succeeded by: 10
+line 10 succeeded by: 11
+line 11 succeeded by: 12
+line 12 succeeded by:
 (
 (in
 (r12 r13 r14 r15 rbp rbx rdi)
