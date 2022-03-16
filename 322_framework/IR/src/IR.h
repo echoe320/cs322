@@ -13,6 +13,8 @@ namespace IR {
 
   enum var_type {int64, int64_arr, tup, code};
 
+  enum func_type {int64_f, int64_arr_f, tup_f, code_f, v_f};
+
   enum opCode {op_add, op_minus, op_multiply, op_AND, op_lshift, op_rshift, cmp_lesseq, cmp_greateq, cmp_less, cmp_great, cmp_equals};
 
   class Item {
@@ -84,12 +86,12 @@ namespace IR {
   // Regular Instructions
   class Instruction_def : public Instruction {
     public:
-      Instruction_def(Item *t, Item *v);
+      Instruction_def(Item *t_v);
       void Accept(Visitor *visitor) override;
-      std::tuple<Item*, Item*> get(); //access individual fields by std::get<idx>(element.get())
+      std::tuple<Item*> get(); //access individual fields by std::get<idx>(element.get())
       std::string typeAsString(void) override;
     private:
-      Item *typ, *var; // src = std::get<0>(element.get());
+      Item *var; // src = std::get<0>(element.get());
   };
 
   class Instruction_assignment : public Instruction{
@@ -264,7 +266,7 @@ namespace IR {
   class Basic_Block {
     public:
     Label* label; 
-    std::vector<Instruction*> instructions; 
+    std::vector<Instruction*> instructions;
     Instruction* te; 
   };
 
@@ -273,7 +275,7 @@ namespace IR {
    */
   class Function{
     public:
-      std::string type; 
+      func_type type; 
       std::string name;
       bool isMain;
       std::vector<Variable*> arguments;

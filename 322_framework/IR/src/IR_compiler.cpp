@@ -27,6 +27,8 @@ int main(
   int argc, 
   char **argv
   ){
+
+  bool shouldPrint = true;
   // std::cout << "STARTING FROM THE VERY BEGINNING" << std::endl;
   // auto enable_code_generator = true;
   // auto spill_only = false;
@@ -80,7 +82,9 @@ int main(
    * Parse the input file.
    */
   IR::Program p;
+  if (shouldPrint) std::cout << "parse file started\n";
   p = IR::parse_file(argv[optind]);
+  if (shouldPrint) std::cout << "parse file ended\n";
 
   // L2::Function f;
   //auto p,f;

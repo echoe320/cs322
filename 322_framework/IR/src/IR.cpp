@@ -81,12 +81,11 @@ namespace IR {
   void Instruction_def::Accept (Visitor *visitor) {
     visitor->VisitInstruction(this);
   }
-  Instruction_def::Instruction_def(Item *t, Item *v) {
-    this->typ = t;
-    this->var = v;
+  Instruction_def::Instruction_def(Item *t_v) {
+    this->var = t_v;
   }
-  std::tuple<Item*, Item*> Instruction_def::get() {
-    std::tuple<Item*, Item*> tup(this->typ, this->var);
+  std::tuple<Item*> Instruction_def::get() {
+    std::tuple<Item*> tup(this->var);
     return tup;
   }
   std::string Instruction_def::typeAsString() {
