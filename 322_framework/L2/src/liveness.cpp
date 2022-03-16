@@ -220,18 +220,15 @@ namespace L2 {
   void create_liveness_list(Program p) {
     //Gen and kill 
     auto gen_kill_visitor = new Gen_Kill_Visitors();
-    // std::cout << "gen_kill_visitor initialized" << "\n";
-
     for (auto f : p.functions) {
       for (auto i : f->instructions) {
-        // if (shouldPrint) std::cout << i->typeAsString() << "\n";
         i->Accept(gen_kill_visitor);
         f->GEN.push_back(i->reads);
         f->KILL.push_back(i->writes);
       }
 
       int count = 0;
-    //Print gen & kill methods
+      //Print gen & kill methods
       if (shouldPrint) {
         std::cout << "Gen:" << std::endl;
         for (auto i: f->GEN) {
@@ -243,7 +240,6 @@ namespace L2 {
             } else if (dynamic_cast<Register *>(item) != nullptr) {
               Register* reg_temp = (Register*)item;
               std::cout << reg_temp->toString() << " ";
-              // std::cout << get_enum_string(reg_temp->get()) << std::endl;
             }
           } 
           count++;
@@ -261,7 +257,6 @@ namespace L2 {
             } else if (dynamic_cast<Register *>(item) != nullptr) {
               Register* reg_temp = (Register*)item;
               std::cout << reg_temp->toString() << " ";
-              // std::cout << get_enum_string(reg_temp->get()) << std::endl;
             }
           }
           count++;
@@ -270,10 +265,7 @@ namespace L2 {
       }
 
       // Successor and predecessor
-      // if (shouldPrint) std::cout << "Start of SuccessorsPredecessors" << std::endl;
       f->findSuccessorsPredecessors();
-      // if (shouldPrint) std::cout << "End of SuccessorsPredecessors" << std::endl;
-      // * UNCOMMENT TO PRINT SUCCESSORS
       if (shouldPrint) {
         for (auto f : p.functions) {
           for (int ii = 0; ii < f->instructions.size(); ii++) {
@@ -290,8 +282,6 @@ namespace L2 {
       bool didChange;
       do {
         didChange = false;
-        // int ii = 0; ii < f->instructions.size(); ii++
-        // int ii = f->instructions.size(); ii > 0; ii--
         for (int ii = f->instructions.size() - 1; ii >= 0; ii--) {
           std::unordered_set<Item *> temp_IN = f->instructions[ii]->IN; //set equal to instruction's IN set (this will be the previous iteration's) and compare at end
           std::unordered_set<Item *> temp_OUT = f->instructions[ii]->OUT;
@@ -322,16 +312,11 @@ namespace L2 {
           //! START
           //* GEN[ii]
           if (shouldPrint) std::cout << "adding GEN to IN" << std::endl;
-          // for (auto it = f->GEN[ii].begin(); it != f->GEN[ii].end(); ++it) {
-          //   auto temp = *it;
-          //   f->instructions[ii]->IN.insert(temp);
-          // }
           f->instructions[ii]->IN = f->GEN[ii];
           if (shouldPrint) std::cout << "done adding GEN to IN" << std::endl;
 
           //* OUT[ii] - KILL[ii]
           bool OUTKILLFLAG;
-          // std::cout << "Start of checking OUT and KILL" << std::endl;
           for (auto it1 = f->instructions[ii]->OUT.begin(); it1 != f->instructions[ii]->OUT.end(); ++it1) {
             OUTKILLFLAG = false;
             auto temp1 = *it1;
@@ -359,31 +344,87 @@ namespace L2 {
         }
       } while (didChange);
 
-      // std::cout << "End of INOUTSETS" << std::endl;
+      for (auto i : f->instructions) {
+        f->IN.push_back(i->IN);
+        f->OUT.push_back(i->OUT);
+      }
 
-      //* UNCOMMENT TO PRINT IN AND OUT SETS
+      //* UNCOMMENT TO PRINT IN AND OUT SETS (OLD ONE)
+      // std::cout << "(" << std::endl;
+      // std::cout << "(in " << std::endl;
+      // count = 0;
+      // for (int kk = 0; kk < f->instructions.size(); kk++) {
+      //   // std::cout << std::to_string(count) << ": ";
+      //   std::vector<std::string> in_sorted;
+      //   std::cout << "(";
+      //   for (auto it = f->instructions[kk]->IN.begin(); it != f->instructions[kk]->IN.end(); ++it) {
+      //     // if (dynamic_cast<Variable *>(*it) != nullptr) {
+      //     //   Variable* var_temp = (Variable*) *it;
+      //     //   in_sorted.push_back(var_temp->toString());
+      //     // }
+      //     // else if (dynamic_cast<Register *>(*it) != nullptr) {
+      //     //   Register* reg_temp = (Register*) *it;
+      //     //   in_sorted.push_back(reg_temp->toString());
+      //     // }
+      //     auto temp = *it;
+      //     in_sorted.push_back(temp->toString());
+      //   }
+      //   count++;
+      //   std::sort(in_sorted.begin(), in_sorted.end());
+      //   for (std::string i: in_sorted)
+      //     if (i == in_sorted.back()) {
+      //       std::cout << i;
+      //     } else {
+      //       std::cout << i << ' ';
+      //     }
+      //   std::cout << ")" << std::endl;
+      // }
+      // std::cout << ")\n" << "\n";
+      // std::cout << "(out " << std::endl;
+      // count = 0;
+      // for (int kk = 0; kk < f->instructions.size(); kk++) {
+      //   std::vector<std::string> out_sorted;
+      //   std::cout << "(";
+      //   for (auto it = f->instructions[kk]->OUT.begin(); it != f->instructions[kk]->OUT.end(); ++it) {
+      //     // if (dynamic_cast<Variable *>(*it) != nullptr) {
+      //     //   Variable* var_temp = (Variable*) *it;
+      //     //   out_sorted.push_back(var_temp->toString());
+      //     // }
+      //     // else if (dynamic_cast<Register *>(*it) != nullptr) {
+      //     //   Register* reg_temp = (Register*) *it;
+      //     //   out_sorted.push_back(reg_temp->toString());
+      //     // }
+      //     auto temp = *it;
+      //     out_sorted.push_back(temp->toString());
+      //   }
+      //   count++;
+      //   std::sort(out_sorted.begin(), out_sorted.end());
+      //   for (std::string i: out_sorted)
+      //     if (i == out_sorted.back()) {
+      //       std::cout << i;
+      //     } else {
+      //       std::cout << i << ' ';
+      //     }
+      //   std::cout << ")" << std::endl;
+      // }
+      // std::cout << ")" << std::endl;
+      // std::cout << "\n" << ")\n" << "\n";
+
+      //* NEW ONE
       std::cout << "(" << std::endl;
       std::cout << "(in " << std::endl;
       count = 0;
-      for (int kk = 0; kk < f->instructions.size(); kk++) {
+      for (auto in : f->IN) {
         // std::cout << std::to_string(count) << ": ";
         std::vector<std::string> in_sorted;
         std::cout << "(";
-        for (auto it = f->instructions[kk]->IN.begin(); it != f->instructions[kk]->IN.end(); ++it) {
-          if (dynamic_cast<Variable *>(*it) != nullptr) {
-            Variable* var_temp = (Variable*) *it;
-            in_sorted.push_back(var_temp->toString());
-            // std::cout << var_temp->toString() << " ";
-          }
-          else if (dynamic_cast<Register *>(*it) != nullptr) {
-            Register* reg_temp = (Register*) *it;
-            in_sorted.push_back(reg_temp->toString());
-            // std::cout << reg_temp->toString() << " ";
-          }
+        for (auto it = in.begin(); it != in.end(); ++it) {
+          auto temp = *it;
+          in_sorted.push_back(temp->toString());
         }
         count++;
         std::sort(in_sorted.begin(), in_sorted.end());
-        for (std::string i: in_sorted)
+        for (std::string i : in_sorted)
           if (i == in_sorted.back()) {
             std::cout << i;
           } else {
@@ -394,21 +435,12 @@ namespace L2 {
       std::cout << ")\n" << "\n";
       std::cout << "(out " << std::endl;
       count = 0;
-      for (int kk = 0; kk < f->instructions.size(); kk++) {
-        // std::cout << std::to_string(count) << ": ";
+      for (auto out : f->OUT) {
         std::vector<std::string> out_sorted;
         std::cout << "(";
-        for (auto it = f->instructions[kk]->OUT.begin(); it != f->instructions[kk]->OUT.end(); ++it) {
-          if (dynamic_cast<Variable *>(*it) != nullptr) {
-            Variable* var_temp = (Variable*) *it;
-            out_sorted.push_back(var_temp->toString());
-            // std::cout << var_temp->toString() << " ";
-          }
-          else if (dynamic_cast<Register *>(*it) != nullptr) {
-            Register* reg_temp = (Register*) *it;
-            out_sorted.push_back(reg_temp->toString());
-            // std::cout << reg_temp->toString() << " ";
-          }
+        for (auto it = out.begin(); it != out.end(); ++it) {
+          auto temp = *it;
+          out_sorted.push_back(temp->toString());
         }
         count++;
         std::sort(out_sorted.begin(), out_sorted.end());

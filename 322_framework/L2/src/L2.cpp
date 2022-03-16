@@ -351,13 +351,6 @@ namespace L2 {
         this->instructions[ii]->successor_idx.insert(ii + 1);
         auto inst_temp = dynamic_cast<Instruction_cjump *>(this->instructions[ii]);
         auto target = static_cast<Label *>(std::get<2>(inst_temp->get()));
-        // for (int jj = 0; jj < instructions_len; jj++) {
-        //   if (dynamic_cast<Instruction_label *>(this->instructions[jj]) != nullptr) {
-        //     auto inst_temp2 = dynamic_cast<Instruction_label *>(this->instructions[jj]);
-        //     auto target2 = static_cast<Label *>(std::get<0>(inst_temp2->get()));
-        //     if (target->get() == target2->get()) this->instructions[ii]->successor_idx.insert(jj);
-        //   }
-        // }
         this->instructions[ii]->successor_idx.insert(label_dict[target->toString()]);
       }
 
@@ -366,13 +359,6 @@ namespace L2 {
         if (doiprint) std::cout << "goto succ" << std::endl;
         auto inst_temp = dynamic_cast<Instruction_goto *>(this->instructions[ii]);
         auto target = static_cast<Label *>(std::get<0>(inst_temp->get()));
-        // for (int jj = 0; jj < instructions_len; jj++) {
-        //   if (dynamic_cast<Instruction_label *>(this->instructions[jj]) != nullptr) {
-        //     auto inst_temp2 = dynamic_cast<Instruction_label *>(this->instructions[jj]);
-        //     auto target2 = static_cast<Label *>(std::get<0>(inst_temp2->get()));
-        //     if (target->get() == target2->get()) this->instructions[ii]->successor_idx.insert(jj);
-        //   }
-        // }
         this->instructions[ii]->successor_idx.insert(label_dict[target->toString()]);
       }
 

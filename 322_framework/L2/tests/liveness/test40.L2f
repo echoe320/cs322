@@ -1,5 +1,5 @@
 (:prime
-	//1
+	1
 	//cjump rdi = 2 :is_prime
 	//%halfarg <- rdi
 	//%arg <- rdi
