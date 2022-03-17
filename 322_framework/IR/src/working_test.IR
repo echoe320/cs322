@@ -1,0 +1,6 @@
+define void :main (){
+  :entry
+  int64 %var
+  %var <- 5
+  return
+}
