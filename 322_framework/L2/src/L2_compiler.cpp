@@ -14,6 +14,8 @@
 
 #include <L2.h>
 #include <liveness.h>
+#include <interference.h>
+#include <spiller.h>
 #include <L2_parser.h>
 
 using namespace std;
@@ -117,7 +119,7 @@ int main(
    * Special cases.
    */
   if (spill_only){
-    // TODO
+    L2::spill_one_var(p.functions[0], p.toSpill, p.prefix);
     return 0;
   }
 
@@ -126,6 +128,7 @@ int main(
    */
   if (liveness_only){
     L2::create_liveness_list(p);
+    for (auto f : p.functions) f->printINOUTsets();
     return 0;
   }
 
@@ -133,7 +136,9 @@ int main(
    * Interference graph test.
    */
   if (interference_only){
-    // TODO
+    L2::create_liveness_list(p);
+    L2::create_interference_graph(p);
+    // for (auto f : p.functions) f->printInterferenceGraph();
     return 0;
   }
 

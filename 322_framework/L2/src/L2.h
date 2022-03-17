@@ -2,7 +2,9 @@
 
 #include <vector>
 #include <string>
+#include <algorithm>
 
+#include <unordered_map>
 #include <unordered_set>
 #include <set>
 
@@ -17,14 +19,6 @@ namespace L2 {
   
   enum runtimeCode {rt_print, rt_input, rt_allocate, rt_tensor_error};
 
-  // bool strComp(const Item *a, const Item *b) {
-  //   return a->toString() > b->toString();
-  // }
-  // auto strComp [](Item *a, Item *b) {return a->toString() < b->toString()};
-
-  // static const int* caller_reg_list[] = {reg::r10, reg::r11, reg::r8, reg::r9, reg::rax, reg::rcx, reg::rdi, reg::rdx, reg::rsi};
-  // static const int* callee_reg_list[] = {reg::r12, reg::r13, reg::r14, reg::r15, reg::rbp, reg::rbx};
-  // static const int* arg_reg_list[] = {reg::rdi, reg::rsi, reg::rdx, reg::rcx, reg::r8, reg::r9};
 
   //Item Class + subclasses
   class Item {
@@ -105,7 +99,6 @@ namespace L2 {
     public:
       virtual void Accept(Visitor *visitor) = 0;
       virtual std::string typeAsString(void) = 0;
-      //virtual std::string toString(void) = 0;
 
       std::set<int> predecessor_idx;
       std::set<int> successor_idx;
@@ -113,8 +106,6 @@ namespace L2 {
       std::unordered_set<Item *> writes; // Kill
       std::unordered_set<Item *> IN; // IN
       std::unordered_set<Item *> OUT; // OUT
-      // std::set<Item *, decltype(&strComp)*> IN(&strComp); // IN
-      // std::set<Item *, decltype(&strComp)*> OUT(&strComp); // OUT
   };
 
   class Instruction_ret : public Instruction{
@@ -265,24 +256,6 @@ namespace L2 {
       virtual void VisitInstruction(Instruction_stackarg *element) = 0;
   };
 
-  // class Visitor_Liveness : public Visitor {
-  //   public:
-  //     void VisitInstruction(const Instruction_assignment *element) const override;
-      
-  //     void VisitInstruction(const Instruction_calls *element) const override;
-  // };
-
-  //* don't need this yet
-  // class Visitor_Interference : public Visitor {
-  //   public:
-  //     void VisitConcreteComponentA(const ConcreteComponentA *element) const override {
-  //       std::cout << element->ExclusiveMethodOfConcreteComponentA() << " + ConcreteVisitor2\n";
-  //     }
-  //     void VisitConcreteComponentB(const ConcreteComponentB *element) const override {
-  //       std::cout << element->SpecialMethodOfConcreteComponentB() << " + ConcreteVisitor2\n";
-  //     }
-  // };
-
   /*
    * Function.
    */
@@ -290,15 +263,17 @@ namespace L2 {
     public:
       std::string name;
       int64_t arguments;
-      //int64_t locals; //! FUNCTION DOES NOT HAVE LOCALS IN L2
       std::vector<Instruction *> instructions;
+      void findSuccessorsPredecessors();
       //Initialize vectors
-      //! PROBLEM: these sets (GEN, KILL, IN, OUT) are unique to each function, but we only have one of each for a program
       std::vector<std::unordered_set<Item *>> GEN; //* GEN[i] = all variables read by instruction i
       std::vector<std::unordered_set<Item *>> KILL;//* KILL[i] = all variables written/defined by instruction i
       std::vector<std::unordered_set<Item *>> IN;
       std::vector<std::unordered_set<Item *>> OUT;
-      void findSuccessorsPredecessors(); // could be a vistor pattern function, take a look after finish
+      void printINOUTsets();
+
+      // std::unordered_map<std::string, std::set<std::string>> interference_graph;
+      // void printInterferenceGraph();
   };
 
   /*
@@ -308,6 +283,8 @@ namespace L2 {
     public:
       std::string entryPointLabel;
       std::vector<Function *> functions;
+      std::string toSpill;
+      std::string prefix;
   };
 
   std::string get_enum_string (int enum_value);

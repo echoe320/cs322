@@ -349,29 +349,20 @@ namespace L2 {
         f->OUT.push_back(i->OUT);
       }
 
-      //* UNCOMMENT TO PRINT IN AND OUT SETS (OLD ONE)
+      //! PRINTING MOVED TO A SEPARATE METHOD -> L2::Function::printINOUTsets()
       // std::cout << "(" << std::endl;
       // std::cout << "(in " << std::endl;
       // count = 0;
-      // for (int kk = 0; kk < f->instructions.size(); kk++) {
-      //   // std::cout << std::to_string(count) << ": ";
+      // for (auto in : f->IN) {
       //   std::vector<std::string> in_sorted;
       //   std::cout << "(";
-      //   for (auto it = f->instructions[kk]->IN.begin(); it != f->instructions[kk]->IN.end(); ++it) {
-      //     // if (dynamic_cast<Variable *>(*it) != nullptr) {
-      //     //   Variable* var_temp = (Variable*) *it;
-      //     //   in_sorted.push_back(var_temp->toString());
-      //     // }
-      //     // else if (dynamic_cast<Register *>(*it) != nullptr) {
-      //     //   Register* reg_temp = (Register*) *it;
-      //     //   in_sorted.push_back(reg_temp->toString());
-      //     // }
+      //   for (auto it = in.begin(); it != in.end(); ++it) {
       //     auto temp = *it;
       //     in_sorted.push_back(temp->toString());
       //   }
       //   count++;
       //   std::sort(in_sorted.begin(), in_sorted.end());
-      //   for (std::string i: in_sorted)
+      //   for (std::string i : in_sorted)
       //     if (i == in_sorted.back()) {
       //       std::cout << i;
       //     } else {
@@ -382,18 +373,10 @@ namespace L2 {
       // std::cout << ")\n" << "\n";
       // std::cout << "(out " << std::endl;
       // count = 0;
-      // for (int kk = 0; kk < f->instructions.size(); kk++) {
+      // for (auto out : f->OUT) {
       //   std::vector<std::string> out_sorted;
       //   std::cout << "(";
-      //   for (auto it = f->instructions[kk]->OUT.begin(); it != f->instructions[kk]->OUT.end(); ++it) {
-      //     // if (dynamic_cast<Variable *>(*it) != nullptr) {
-      //     //   Variable* var_temp = (Variable*) *it;
-      //     //   out_sorted.push_back(var_temp->toString());
-      //     // }
-      //     // else if (dynamic_cast<Register *>(*it) != nullptr) {
-      //     //   Register* reg_temp = (Register*) *it;
-      //     //   out_sorted.push_back(reg_temp->toString());
-      //     // }
+      //   for (auto it = out.begin(); it != out.end(); ++it) {
       //     auto temp = *it;
       //     out_sorted.push_back(temp->toString());
       //   }
@@ -409,52 +392,6 @@ namespace L2 {
       // }
       // std::cout << ")" << std::endl;
       // std::cout << "\n" << ")\n" << "\n";
-
-      //* NEW ONE
-      std::cout << "(" << std::endl;
-      std::cout << "(in " << std::endl;
-      count = 0;
-      for (auto in : f->IN) {
-        // std::cout << std::to_string(count) << ": ";
-        std::vector<std::string> in_sorted;
-        std::cout << "(";
-        for (auto it = in.begin(); it != in.end(); ++it) {
-          auto temp = *it;
-          in_sorted.push_back(temp->toString());
-        }
-        count++;
-        std::sort(in_sorted.begin(), in_sorted.end());
-        for (std::string i : in_sorted)
-          if (i == in_sorted.back()) {
-            std::cout << i;
-          } else {
-            std::cout << i << ' ';
-          }
-        std::cout << ")" << std::endl;
-      }
-      std::cout << ")\n" << "\n";
-      std::cout << "(out " << std::endl;
-      count = 0;
-      for (auto out : f->OUT) {
-        std::vector<std::string> out_sorted;
-        std::cout << "(";
-        for (auto it = out.begin(); it != out.end(); ++it) {
-          auto temp = *it;
-          out_sorted.push_back(temp->toString());
-        }
-        count++;
-        std::sort(out_sorted.begin(), out_sorted.end());
-        for (std::string i: out_sorted)
-          if (i == out_sorted.back()) {
-            std::cout << i;
-          } else {
-            std::cout << i << ' ';
-          }
-        std::cout << ")" << std::endl;
-      }
-      std::cout << ")" << std::endl;
-      std::cout << "\n" << ")\n" << "\n";
-    //TODO: have another for loop to push_back the instruction's IN and OUT sets to the function's IN and OUT vectors (AFTER all the do-while)
     }
   }
 }

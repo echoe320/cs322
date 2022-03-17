@@ -7,10 +7,6 @@
 // #include <liveness.h>
 #include <L2.h>
 
-// included libraries
-#include <unordered_set>
-#include <unordered_map>
-
 // using namespace std;
 bool doiprint = false;
 
@@ -305,10 +301,6 @@ namespace L2 {
     return "stackarg instruction";
   }
 
-  /*
-   * defining enum to string
-   * don't think we need this because i defined a Register.toString() method
-   */
   std::string get_enum_string (int enum_value) {
     return (reg_enum_str[enum_value]);
   }
@@ -369,4 +361,59 @@ namespace L2 {
       }
     }
   }
+
+  void Function::printINOUTsets() {
+      std::cout << "(" << std::endl;
+      std::cout << "(in " << std::endl;
+      int count = 0;
+      for (auto in : this->IN) {
+        std::vector<std::string> in_sorted;
+        std::cout << "(";
+        for (auto it = in.begin(); it != in.end(); ++it) {
+          auto temp = *it;
+          in_sorted.push_back(temp->toString());
+        }
+        count++;
+        std::sort(in_sorted.begin(), in_sorted.end());
+        for (std::string i : in_sorted)
+          if (i == in_sorted.back()) {
+            std::cout << i;
+          } else {
+            std::cout << i << ' ';
+          }
+        std::cout << ")" << std::endl;
+      }
+      std::cout << ")\n" << "\n";
+      std::cout << "(out " << std::endl;
+      count = 0;
+      for (auto out : this->OUT) {
+        std::vector<std::string> out_sorted;
+        std::cout << "(";
+        for (auto it = out.begin(); it != out.end(); ++it) {
+          auto temp = *it;
+          out_sorted.push_back(temp->toString());
+        }
+        count++;
+        std::sort(out_sorted.begin(), out_sorted.end());
+        for (std::string i: out_sorted)
+          if (i == out_sorted.back()) {
+            std::cout << i;
+          } else {
+            std::cout << i << ' ';
+          }
+        std::cout << ")" << std::endl;
+      }
+      std::cout << ")" << std::endl;
+      std::cout << "\n" << ")\n" << "\n";
+  }
+
+  // void Function::printInterferenceGraph() {
+  //   for (auto it = this->interference_graph.begin(); it != this->interference_graph.end(); ++it) {
+  //     std::cout << it->first << " ";
+  //     for (auto item : it->second) {
+  //       std::cout << item << " ";
+  //     }
+  //     std::cout << std::endl;
+  //   }
+  // }
 }

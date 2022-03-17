@@ -521,16 +521,32 @@ namespace L2 {
     pegtl::must<
       entry_point_rule
     > {};
-    // pegtl::sor< 
-    //   pegtl::seq< pegtl::at<entry_point_rule>, 
-    //   entry_point_rule>,
-    //   pegtl::seq< pegtl::at<Function_rule>, 
-    //   Function_rule>
-    // > {};
 
-  struct function_file_grammer :
+
+  struct function_file_grammar :
     pegtl::must< 
       Function_rule
+    > {};
+
+  struct spill_prefix :
+    pegtl::seq<
+      pegtl::one<'%'>,
+      name
+    > {};
+
+  struct spill_var :
+    pegtl::seq<
+      pegtl::one<'%'>,
+      name
+    > {};
+
+  struct spill_file_grammar : 
+    pegtl::seq<
+      Function_rule,
+      seps,
+      spill_var,
+      seps,
+      spill_prefix
     > {};
 //================================= ACTIONS =================================
   /* 
@@ -566,6 +582,20 @@ namespace L2 {
       if (shouldPrint) cout << "argument_number (no end)\n";
       auto currentF = p.functions.back();
       currentF->arguments = std::stoll(in.string());
+    }
+  };
+
+  template<> struct action < spill_var > {
+    template< typename Input >
+	static void apply( const Input & in, Program & p){
+      p.toSpill = in.string();
+    }
+  };
+
+  template<> struct action < spill_prefix > {
+    template< typename Input >
+	static void apply( const Input & in, Program & s){
+      s.prefix = in.string();
     }
   };
 
@@ -1235,7 +1265,7 @@ namespace L2 {
      * Check the grammar for some possible issues.
      */
     if (shouldPrint) std::cout << "checking grammar for possible issues" << std::endl;
-    pegtl::analyze< function_file_grammer >();
+    pegtl::analyze< function_file_grammar >();
 
     /*
      * Parse.
@@ -1243,7 +1273,7 @@ namespace L2 {
     if (shouldPrint) std::cout << "begin parsing" << std::endl;
     file_input< > fileInput(fileName);
     Program p;
-    parse< function_file_grammer, action >(fileInput, p);
+    parse< function_file_grammar, action >(fileInput, p);
     if (shouldPrint) std::cout << "end parsing" << std::endl;
 
     return p;
@@ -1260,9 +1290,9 @@ namespace L2 {
      * Parse.
      */   
     file_input< > fileInput(fileName);
-    Program p;
-    parse< grammar, action >(fileInput, p);
+    Program s;
+    parse< spill_file_grammar, action >(fileInput, s);
 
-    return p;
+    return s;
   }
 }
