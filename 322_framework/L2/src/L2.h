@@ -21,6 +21,8 @@ namespace L2 {
 
   enum runtimeCode {rt_print, rt_input, rt_allocate, rt_tensor_error};
 
+  static const char* rt_enum_str[] = {"print", "input", "allocate", "tensor-error"};
+
 
   //Item Class + subclasses
   class Item {
@@ -305,4 +307,6 @@ namespace L2 {
   std::string get_enum_string (int enum_value);
 
   std::string get_op_string (int enum_value);
+
+  std::string get_rt_string (int enum_value);
 }

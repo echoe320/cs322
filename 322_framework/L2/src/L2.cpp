@@ -95,7 +95,7 @@ namespace L2 {
     return this->runtime;
   }
   std::string Runtime::toString(void) {
-    return "";
+    return get_rt_string(this->runtime);
   }
 
 
@@ -267,7 +267,7 @@ namespace L2 {
     return "calls instruction";
   }
   std::string Instruction_calls::toString() {
-    return "call " + this->u->toString() + this->N->toString();
+    return "call " + this->u->toString() + " " + this->N->toString();
   }
 
   // RUNTIME INSTRUCTION
@@ -284,6 +284,9 @@ namespace L2 {
   std::string Instruction_runtime::typeAsString() {
     return "runtime call instruction";
   }
+  std::string Instruction_runtime::toString() {
+    return "call " + this->runtime->toString() + this->N->toString();
+  }
 
   // LABEL INSTRUCTION
   void Instruction_label::Accept (Visitor *visitor) {
@@ -298,6 +301,9 @@ namespace L2 {
   std::string Instruction_label::typeAsString() {
     return "label instruction";
   }
+  std::string Instruction_label::toString() {
+    return this->label->toString();
+  }
 
   // GOTO INSTRUCTION
   void Instruction_goto::Accept (Visitor *visitor) {
@@ -311,6 +317,9 @@ namespace L2 {
   }
   std::string Instruction_goto::typeAsString() {
     return "goto instruction";
+  }
+  std::string Instruction_goto::toString() {
+    return "goto " + this->label->toString();
   }
 
   // STACK-ARG INSTRUCTION
@@ -337,6 +346,10 @@ namespace L2 {
 
   std::string get_op_string (int enum_value) {
     return (op_enum_str[enum_value]);
+  }
+
+  std::string get_rt_string (int enum_value) {
+    return (rt_enum_str[enum_value]);
   }
 
 
