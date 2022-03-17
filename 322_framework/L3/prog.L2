@@ -1,0 +1,13 @@
+(:main
+  (:main
+    0
+    %var <- 5
+    return
+  )
+  (:myf
+    0
+    %var <- 5
+    rax <- %var
+    return
+  )
+)

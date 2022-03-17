@@ -4,3 +4,10 @@ define void :main (){
   %var <- 5
   return
 }
+
+define int64 :myf (){
+  :entry
+  int64 %var
+  %var <- 5
+  return %var
+}

@@ -522,8 +522,8 @@ namespace IR {
     pegtl::sor<
       pegtl::seq< pegtl::at<te_br_label_rule>             , te_br_label_rule              >,
       pegtl::seq< pegtl::at<te_br_t_rule>                 , te_br_t_rule                  >,
-      pegtl::seq< pegtl::at<te_return_rule>               , te_return_rule                >,
-      pegtl::seq< pegtl::at<te_return_t_rule>             , te_return_t_rule              >
+      pegtl::seq< pegtl::at<te_return_t_rule>             , te_return_t_rule              >,
+      pegtl::seq< pegtl::at<te_return_rule>               , te_return_rule                >
     > {};
 
   /* 
@@ -665,18 +665,18 @@ namespace IR {
     }
   };
 
-  // // Item rule actions
+  // Item rule actions
 
-  // template<> struct action < number_rule > {
-  //   template< typename Input >
-	// static void apply( const Input & in, Program & p){
-  //     if (shouldPrint) cout << "number_rule started\n";
-  //     Number* n = new Number(std::stol(in.string()));
-  //     // std::cout << n << "\n";
-  //     parsed_items.push_back(n);
-  //     if (shouldPrint) cout << "number_rule ended\n";
-  //   }
-  // };
+  template<> struct action < number_rule > {
+    template< typename Input >
+	static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "number_rule started\n";
+      Number* n = new Number(std::stol(in.string()));
+      // std::cout << n << "\n";
+      parsed_items.push_back(n);
+      if (shouldPrint) cout << "number_rule ended\n";
+    }
+  };
 
   template<> struct action < label_rule > {
     template< typename Input >
@@ -879,33 +879,33 @@ namespace IR {
     }
   };
 
-  // template<> struct action < Instruction_assignment_rule > {
-  //   template< typename Input >
-	// static void apply( const Input & in, Program & p){
-  //     if (shouldPrint) cout << "Instruction_assignment_rule started\n";
+  template<> struct action < Instruction_assignment_rule > {
+    template< typename Input >
+	static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "Instruction_assignment_rule started\n";
 
-  //     /* 
-  //      * Fetch the current function.
-  //      */ 
-  //     auto currentF = p.functions.back();
-  //     auto b = currentF->basicblocks.back();
+      /* 
+       * Fetch the current function.
+       */ 
+      auto currentF = p.functions.back();
+      auto b = currentF->basicblocks.back();
 
-  //     /* 
-  //      * Create the instruction.
-  //      */ 
-  //     auto src = parsed_items.back();
-  //     parsed_items.pop_back();
-  //     auto dst = parsed_items.back();
-  //     parsed_items.pop_back();
-  //     auto i = new Instruction_assignment(dst, src);
+      /* 
+       * Create the instruction.
+       */ 
+      auto src = parsed_items.back();
+      parsed_items.pop_back();
+      auto dst = parsed_items.back();
+      parsed_items.pop_back();
+      auto i = new Instruction_assignment(dst, src);
 
-  //     /* 
-  //      * Add the just-created instruction to the current function.
-  //      */ 
-  //     b->instructions.push_back(i);
-  //     if (shouldPrint) cout << "Instruction_assignment_rule ended\n";
-  //   }
-  // };
+      /* 
+       * Add the just-created instruction to the current function.
+       */ 
+      b->instructions.push_back(i);
+      if (shouldPrint) cout << "Instruction_assignment_rule ended\n";
+    }
+  };
 
   // // Arithmetic actions
   // template<> struct action < Instruction_op_rule > {
@@ -1215,7 +1215,55 @@ namespace IR {
 
   //te rules
 
-  
+  template<> struct action < te_return_rule > {
+    template< typename Input >
+	static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "te_return_rule started\n";
+
+      /* 
+       * Fetch the current function.
+       */ 
+      auto currentF = p.functions.back();
+      auto b = currentF->basicblocks.back();
+
+      /* 
+       * Create the instruction.
+       */ 
+      auto i = new te_return();
+
+      /* 
+       * Add the just-created instruction to the current function.
+       */ 
+      b->instructions.push_back(i);
+      if (shouldPrint) cout << "te_return_rule ended\n";
+    }
+  };
+
+  template<> struct action < te_return_t_rule > {
+    template< typename Input >
+	static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "te_return_t_rule started\n";
+
+      /* 
+       * Fetch the current function.
+       */ 
+      auto currentF = p.functions.back();
+      auto b = currentF->basicblocks.back();
+
+      /* 
+       * Create the instruction.
+       */ 
+      auto arg = parsed_items.back();
+      parsed_items.pop_back();
+      auto i = new te_return_t(arg);
+
+      /* 
+       * Add the just-created instruction to the current function.
+       */ 
+      b->instructions.push_back(i);
+      if (shouldPrint) cout << "te_return_t_rule ended\n";
+    }
+  };
 
   Program parse_file (char *fileName){
 

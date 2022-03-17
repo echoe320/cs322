@@ -116,7 +116,7 @@ namespace IR {
     return tup;
   }
   std::string Instruction_assignment::typeAsString() {
-    return "assignment instruction";
+    return "Instruction_assignment";
   }
 
   // Instruction_op
