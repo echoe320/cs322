@@ -692,7 +692,6 @@ namespace L2 {
       parsed_items.pop_back();
       Memory* mem = new Memory(rv, os);
       if (shouldPrint) cout << "mem_rule ended\n";
-
       parsed_items.push_back(mem);
     }
   };

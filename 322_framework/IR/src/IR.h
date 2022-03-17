@@ -5,6 +5,7 @@
 
 #include <unordered_set>
 #include <set>
+#include <map>
 
 namespace IR {
   /*
@@ -17,6 +18,8 @@ namespace IR {
 
   enum opCode {op_add, op_minus, op_multiply, op_AND, op_lshift, op_rshift, cmp_lesseq, cmp_greateq, cmp_less, cmp_great, cmp_equals};
 
+  enum calleeCode {cc_print, cc_input, cc_tensor_error};
+  
   class Item {
     public:
       virtual std::string toString(void) = 0;
@@ -68,6 +71,15 @@ namespace IR {
   class Tuple: public Variable {
     public:
       Tuple(std::string name);
+  };
+
+  class Callee : public Item {
+    public:
+      Callee(calleeCode cc);
+      calleeCode get(void);
+      std::string toString(void) override;
+    private:
+      calleeCode ce;
   };
 
   // Declare Visitor first
@@ -179,13 +191,12 @@ namespace IR {
 
   class Instruction_tuple: public Instruction {
     public:
-      Instruction_tuple(Item *dest, std::vector<Item*> as);
+      Instruction_tuple(Item *dest, Item * as);
       void Accept(Visitor *visitor) override;
-      std::tuple<Item*, std::vector<Item*>> get();
+      std::tuple<Item*, Item *> get();
       std::string typeAsString(void) override;
     private:
-      Item* dst; 
-      std::vector<Item*> args;
+      Item* dst, * arg;
   };
 
   class Instruction_label : public Instruction{
@@ -278,8 +289,9 @@ namespace IR {
       func_type type; 
       std::string name;
       bool isMain;
-      std::vector<Variable*> arguments;
-      std::vector<Basic_Block*> basicblocks;
+      std::vector<Variable *> arguments;
+      std::vector<Basic_Block *> basicblocks;
+      std::map<std::string, Variable *> existing_vars;
   };
 
   /*
