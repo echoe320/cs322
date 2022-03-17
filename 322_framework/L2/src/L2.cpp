@@ -40,7 +40,7 @@ namespace L2 {
     return res; // res.first
   }
   std::string Memory::toString(void) {
-    return "MEMORY AHHHHHHHHHHHH";
+    return "mem " + this->rv->toString() + " " + this->offset->toString();
   }
 
   //Number
@@ -84,7 +84,7 @@ namespace L2 {
     return this->opName;
   }
   std::string Operation::toString(void) {
-    return "";
+    return get_op_string(this->opName);
   }
 
   //Runtime
@@ -108,6 +108,9 @@ namespace L2 {
   std::string Instruction_ret::typeAsString() {
     return "return instruction";
   }
+  std::string Instruction_ret::toString() {
+    return "return";
+  }
 
   // ASSIGNMENT INSTRUCTION
   void Instruction_assignment::Accept (Visitor *visitor) {
@@ -129,6 +132,9 @@ namespace L2 {
   std::string Instruction_assignment::typeAsString() {
     return "assignment instruction";
   }
+  std::string Instruction_assignment::toString() {
+    return this->dst->toString() + " <- " + this->src->toString();
+  }
 
   // ARITHMETIC INSTRUCTION
   void Instruction_arithmetic::Accept (Visitor *visitor) {
@@ -145,6 +151,9 @@ namespace L2 {
   std::string Instruction_arithmetic::typeAsString() {
     return "arithmetic instruction";
   }
+  std::string Instruction_arithmetic::toString() {
+    return this->dst->toString() + " " + this->op->toString() + " " + this->src->toString();
+  }
 
   // CREMENT INSTRUCTION
   void Instruction_crement::Accept (Visitor *visitor) {
@@ -159,6 +168,9 @@ namespace L2 {
   }
   std::string Instruction_crement::typeAsString() {
     return "crement instruction";
+  }
+  std::string Instruction_crement::toString() {
+    return this->dst->toString() + this->op->toString();
   }
 
   // SHIFT INSTRUCTION
@@ -175,6 +187,9 @@ namespace L2 {
   }
   std::string Instruction_shift::typeAsString() {
     return "shift instruction";
+  }
+  std::string Instruction_shift::toString() {
+    return this->dst->toString() + " " + this->op->toString() + " " + this->src->toString();
   }
 
   // COMPARE INSTRUCTION
@@ -193,6 +208,9 @@ namespace L2 {
   std::string Instruction_cmp::typeAsString() {
     return "compare instruction";
   }
+  std::string Instruction_cmp::toString() {
+    return this->dst->toString() + " <- " + this->arg1->toString() + " " + this->op->toString() + " " + this->arg2->toString();
+  }
 
   // CONDITIONAL JUMP INSTRUCTION
   void Instruction_cjump::Accept (Visitor *visitor) {
@@ -209,6 +227,9 @@ namespace L2 {
   }
   std::string Instruction_cjump::typeAsString() {
     return "conditional jump instruction";
+  }
+  std::string Instruction_cjump::toString() {
+    return "cjump " + this->arg1->toString() + " " + this->op->toString() + " " + this->arg2->toString() + " " + this->label->toString();
   }
 
   // LEA INSTRUCTION
@@ -227,6 +248,9 @@ namespace L2 {
   std::string Instruction_lea::typeAsString() {
     return "lea instruction";
   }
+  std::string Instruction_lea::toString() {
+    return this->dst->toString() + " @ " + this->arg1->toString() + " " + this->arg2->toString() + " " + this->mult->toString();
+  }
 
   // CALL INSTRUCTION
   void Instruction_calls::Accept (Visitor *visitor) {
@@ -241,6 +265,9 @@ namespace L2 {
   }
   std::string Instruction_calls::typeAsString() {
     return "calls instruction";
+  }
+  std::string Instruction_calls::toString() {
+    return "call " + this->u->toString() + this->N->toString();
   }
 
   // RUNTIME INSTRUCTION
@@ -300,9 +327,16 @@ namespace L2 {
   std::string Instruction_stackarg::typeAsString() {
     return "stackarg instruction";
   }
+  std::string Instruction_stackarg::toString() {
+    return this->dst->toString() + " <- " + this->M->toString();
+  }
 
   std::string get_enum_string (int enum_value) {
     return (reg_enum_str[enum_value]);
+  }
+
+  std::string get_op_string (int enum_value) {
+    return (op_enum_str[enum_value]);
   }
 
 

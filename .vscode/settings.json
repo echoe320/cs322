@@ -83,7 +83,8 @@
       "cinttypes": "cpp",
       "typeindex": "cpp",
       "valarray": "cpp",
-      "regex": "cpp"
+      "regex": "cpp",
+      "__bits": "cpp"
     },
     "editor.tabSize": 2,
     "editor.detectIndentation": false

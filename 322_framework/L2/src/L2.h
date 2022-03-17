@@ -17,6 +17,8 @@ namespace L2 {
 
   enum opCode {op_add, op_minus, op_multiply, op_AND, op_lshift, op_rshift, op_inc, op_dec, cmp_equals, cmp_less, cmp_lesseq};
   
+  static const char* op_enum_str[] = {"+=", "-=", "*=", "&=", "<<=", ">>=", "++", "--", "=", "<", "<="};
+
   enum runtimeCode {rt_print, rt_input, rt_allocate, rt_tensor_error};
 
 
@@ -99,6 +101,7 @@ namespace L2 {
     public:
       virtual void Accept(Visitor *visitor) = 0;
       virtual std::string typeAsString(void) = 0;
+      virtual std::string toString(void) = 0;
 
       std::set<int> predecessor_idx;
       std::set<int> successor_idx;
@@ -113,6 +116,7 @@ namespace L2 {
       Instruction_ret();
       void Accept(Visitor *visitor) override;
       std::string typeAsString(void) override;
+      std::string toString(void) override;
   };
 
   class Instruction_assignment : public Instruction{
@@ -121,6 +125,7 @@ namespace L2 {
       void Accept(Visitor *visitor) override;
       std::tuple<Item*, Item*> get(); //access individual fields by std::get<idx>(element.get())
       std::string typeAsString(void) override;
+      std::string toString(void) override;
     private:
       Item *src, *dst; // src = std::get<0>(element.get());
   };
@@ -131,7 +136,7 @@ namespace L2 {
       void Accept(Visitor *visitor) override;
       std::tuple<Item*, Item*, Item*> get();
       std::string typeAsString(void) override;
-
+      std::string toString(void) override;
     private:
       Item *src, *dst, *op;
   };
@@ -142,6 +147,7 @@ namespace L2 {
       void Accept(Visitor *visitor) override;
       std::tuple<Item*, Item*> get();
       std::string typeAsString(void) override;
+      std::string toString(void) override;
     private:
       Item *dst, *op;
   };
@@ -152,6 +158,7 @@ namespace L2 {
       void Accept(Visitor *visitor) override;
       std::tuple<Item*, Item*, Item*> get();
       std::string typeAsString(void) override;
+      std::string toString(void) override;
     private:
       Item *src, *dst, *op;
   };
@@ -162,6 +169,7 @@ namespace L2 {
       void Accept(Visitor *visitor) override;
       std::tuple<Item*, Item*, Item*, Item*> get();
       std::string typeAsString(void) override;
+      std::string toString(void) override;
     private:
       Item *dst, *arg1, *arg2, *op;
   };
@@ -172,6 +180,7 @@ namespace L2 {
       void Accept(Visitor *visitor) override;
       std::tuple<Item*, Item*, Item*, Item*> get();
       std::string typeAsString(void) override;
+      std::string toString(void) override;
     private:
       Item *arg1, *arg2, *label, *op;
   };
@@ -182,6 +191,7 @@ namespace L2 {
       void Accept(Visitor *visitor) override;
       std::tuple<Item*, Item*, Item*, Item*> get();
       std::string typeAsString(void) override;
+      std::string toString(void) override;
     private:
       Item *dst, *arg1, *arg2, *mult;
   };
@@ -192,6 +202,7 @@ namespace L2 {
       void Accept(Visitor *visitor) override;
       std::tuple<Item*, Item*> get();
       std::string typeAsString(void) override;
+      std::string toString(void) override;
     private:
       Item *u, *N; //call u N
   };
@@ -202,6 +213,7 @@ namespace L2 {
       void Accept(Visitor *visitor) override;
       std::tuple<Item*, Item*> get();
       std::string typeAsString(void) override;
+      std::string toString(void) override;
     private:
       Item *runtime, *N;
   };
@@ -212,6 +224,7 @@ namespace L2 {
       void Accept(Visitor *visitor) override;
       std::tuple<Item*> get();
       std::string typeAsString(void) override;
+      std::string toString(void) override;
     private:
       Item *label;
   };
@@ -222,6 +235,7 @@ namespace L2 {
       void Accept(Visitor *visitor) override;
       std::tuple<Item*> get();
       std::string typeAsString(void) override;
+      std::string toString(void) override;
     private:
       Item *label;
   };
@@ -232,6 +246,7 @@ namespace L2 {
       void Accept(Visitor *visitor) override;
       std::tuple<Item*, Item*> get();
       std::string typeAsString(void) override;
+      std::string toString(void) override;
     private:
       Item *dst, *M;
   };
@@ -288,4 +303,6 @@ namespace L2 {
   };
 
   std::string get_enum_string (int enum_value);
+
+  std::string get_op_string (int enum_value);
 }
