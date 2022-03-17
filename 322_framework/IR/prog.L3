@@ -1,0 +1,10 @@
+define :main (){
+	%var <- 5
+	return
+}
+
+define :myf (){
+	%var <- 5
+	return %var
+}
+

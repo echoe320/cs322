@@ -14,7 +14,7 @@
 
 #include <IR.h>
 #include <IR_parser.h>
-// #include <liveness.h>
+#include <code_generator.h>
 
 using namespace std;
 
@@ -27,6 +27,8 @@ int main(
   int argc, 
   char **argv
   ){
+
+  bool shouldPrint = true;
   // std::cout << "STARTING FROM THE VERY BEGINNING" << std::endl;
   // auto enable_code_generator = true;
   // auto spill_only = false;
@@ -80,7 +82,19 @@ int main(
    * Parse the input file.
    */
   IR::Program p;
+  if (shouldPrint) std::cout << "parse file started\n";
   p = IR::parse_file(argv[optind]);
+  if (shouldPrint) std::cout << "parse file ended\n";
+
+  /* TODO : linearize */
+
+
+
+  /* Generate L3 code */
+
+  if (shouldPrint) std::cout << "generate code started\n";
+  IR::generate_code(p);
+  if (shouldPrint) std::cout << "generate code ended\n";
 
   // L2::Function f;
   //auto p,f;

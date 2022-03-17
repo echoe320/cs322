@@ -75,18 +75,28 @@ namespace IR {
   Tuple::Tuple(std::string name) : Variable(tup, name){
   }
 
+  //Callee
+  Callee::Callee(calleeCode cc){
+    this->ce = cc;
+  }
+  calleeCode Callee::get(void){
+    return this->ce;
+  }
+  std::string Callee::toString(void) {
+    return "callee";
+  }
+
   //* ============================= INSTRUCTIONS =============================
 
   // Instruction_def
   void Instruction_def::Accept (Visitor *visitor) {
     visitor->VisitInstruction(this);
   }
-  Instruction_def::Instruction_def(Item *t, Item *v) {
-    this->typ = t;
-    this->var = v;
+  Instruction_def::Instruction_def(Item *t_v) {
+    this->var = t_v;
   }
-  std::tuple<Item*, Item*> Instruction_def::get() {
-    std::tuple<Item*, Item*> tup(this->typ, this->var);
+  std::tuple<Item*> Instruction_def::get() {
+    std::tuple<Item*> tup(this->var);
     return tup;
   }
   std::string Instruction_def::typeAsString() {
@@ -106,7 +116,7 @@ namespace IR {
     return tup;
   }
   std::string Instruction_assignment::typeAsString() {
-    return "assignment instruction";
+    return "Instruction_assignment";
   }
 
   // Instruction_op
@@ -229,12 +239,12 @@ namespace IR {
   void Instruction_tuple::Accept (Visitor *visitor) {
     visitor->VisitInstruction(this);
   }
-  Instruction_tuple::Instruction_tuple(Item *dest, std::vector<Item*> as) {
+  Instruction_tuple::Instruction_tuple(Item *dest, Item *as) {
     this->dst = dest;
-    this->args = as;
+    this->arg = as;
   }
-  std::tuple<Item*, std::vector<Item*>> Instruction_tuple::get() {
-    std::tuple<Item*, std::vector<Item*>> tup(this->dst, this->args);
+  std::tuple<Item*, Item *> Instruction_tuple::get() {
+    std::tuple<Item*, Item *> tup(this->dst, this->arg);
     return tup;
   }
   std::string Instruction_tuple::typeAsString() {
