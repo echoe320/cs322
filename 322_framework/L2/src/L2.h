@@ -23,6 +23,8 @@ namespace L2 {
 
   static const char* rt_enum_str[] = {"print", "input", "allocate", "tensor-error"};
 
+  static const char* all_color_list[] = {"red", "orange", "yellow", "green", "blue", "indigo", "purple", "pink", "brown", "black", "white", "gray", "maroon", "navy", "periwinkle"};
+
 
   //Item Class + subclasses
   class Item {
@@ -280,6 +282,7 @@ namespace L2 {
     public:
       std::string name;
       int64_t arguments;
+      int64_t num_locals;
       std::vector<Instruction *> instructions;
       void findSuccessorsPredecessors();
       //Initialize vectors
@@ -288,9 +291,6 @@ namespace L2 {
       std::vector<std::unordered_set<Item *>> IN;
       std::vector<std::unordered_set<Item *>> OUT;
       void printINOUTsets();
-
-      // std::unordered_map<std::string, std::set<std::string>> interference_graph;
-      // void printInterferenceGraph();
   };
 
   /*

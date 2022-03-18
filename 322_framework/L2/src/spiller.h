@@ -3,15 +3,16 @@
 #include <L2.h>
 
 namespace L2{
-  void spill_one_var(Function* f, std::string toSpill, std::string prefix);
+  Function* spill_one_var(Function* f, std::string toSpill, std::string prefix, int spill_count);
+  Function* spill_mult_var(Function* f, std::vector<Variable*> toSpill, std::string prefix);
 
   class Spill_Visitors : public Visitor {
     public:
-      Spill_Visitors(std::string toSpill, std::string prefix);
+      Spill_Visitors(std::string toSpill, std::string prefix, int spill_count);
       int getCount();
-      int numSpilled = 0;
+      bool didSpill = false;
+      int spill_count = 0;
       std::vector<Instruction*> getInstructions();
-      // std::vector<std::pair<bool, bool>> get_spill_use();
       void VisitInstruction (Instruction_ret *element) override;
       void VisitInstruction (Instruction_assignment *element) override;
       void VisitInstruction (Instruction_arithmetic *element) override;

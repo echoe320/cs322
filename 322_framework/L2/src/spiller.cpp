@@ -13,9 +13,10 @@
 
 
 namespace L2 {
-    Spill_Visitors::Spill_Visitors(std::string toSpill, std::string prefix) {
+    Spill_Visitors::Spill_Visitors(std::string toSpill, std::string prefix, int spill_count) {
         this->var = toSpill;
         this->prefix = prefix;
+        this->spill_count = spill_count;
     }
 
     int Spill_Visitors::getCount() {
@@ -26,13 +27,10 @@ namespace L2 {
       return this->new_inst;
     }
 
-    // std::vector<std::pair<bool, bool>> Spill_Visitors::get_spill_use() {
-    //   return this->RWflags;
-    // }
-
     Instruction* Spill_Visitors::loadvar() {
+      this->didSpill = true;
       Register* reg = new Register(rsp);
-      Number* offset = new Number(0);
+      Number* offset = new Number(this->spill_count*8);
       Memory* mem = new Memory(reg, offset);
 
       std::string var_name = this->prefix + std::to_string(this->count);
@@ -43,8 +41,9 @@ namespace L2 {
     }
 
     Instruction* Spill_Visitors::storevar() {
+      this->didSpill = true;
       Register* reg = new Register(rsp);
-      Number* offset = new Number(0);
+      Number* offset = new Number(this->spill_count*8);
       Memory* mem = new Memory(reg, offset);
 
       std::string var_name = this->prefix + std::to_string(this->count);
@@ -345,22 +344,40 @@ namespace L2 {
       if (didRead || didWrite) this->count++;
     }
 
-  void spill_one_var(Function* f, std::string toSpill, std::string prefix) {
-    auto spill_visitor = new Spill_Visitors(toSpill, prefix);
+  Function* spill_one_var(Function* f, std::string toSpill, std::string prefix, int spill_count) {
+    auto spill_visitor = new Spill_Visitors(toSpill, prefix, spill_count);
     for (auto inst : f->instructions) {
         inst->Accept(spill_visitor);
     }
 
-    if (spill_visitor->getCount() != 0) spill_visitor->numSpilled++;
-
-    // start printing to cout
-    std::cout << "(" << f->name << "\n\t";
-    std::cout << std::to_string(f->arguments) << " " << std::to_string(spill_visitor->numSpilled) << "\n";
-    
-    for (auto i : spill_visitor->getInstructions()) {
-      std::cout << "\t" << i->toString() << "\n";
+    if (spill_visitor->didSpill) {
+      spill_visitor->spill_count++;
     }
 
-    std::cout << ")" << std::endl;
+    //* NEW STUFF
+    Function* spilled_func = new Function();
+    spilled_func->name = f->name;
+    spilled_func->arguments = f->arguments;
+    spilled_func->num_locals = spill_visitor->spill_count;
+    spilled_func->instructions = spill_visitor->getInstructions();
+
+    return spilled_func;
+  }
+
+  Function* spill_mult_var(Function* f, std::vector<Variable*> toSpill, std::string prefix) {
+    Function* temp_func = f;
+    int spill_count = 0;
+    for (auto var : toSpill) {
+      temp_func = spill_one_var(temp_func, var->toString(), prefix, spill_count);
+      spill_count += temp_func->num_locals;
+    }
+
+    Function* spilled_func = new Function();
+    spilled_func->name = temp_func->name;
+    spilled_func->arguments = temp_func->arguments;
+    spilled_func->num_locals = spill_count;
+    spilled_func->instructions = temp_func->instructions;
+
+    return spilled_func;
   }
 }

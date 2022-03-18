@@ -16,6 +16,7 @@
 #include <liveness.h>
 #include <interference.h>
 #include <spiller.h>
+#include <graph_coloring.h>
 #include <L2_parser.h>
 
 using namespace std;
@@ -119,7 +120,16 @@ int main(
    * Special cases.
    */
   if (spill_only){
-    L2::spill_one_var(p.functions[0], p.toSpill, p.prefix);
+    auto func = L2::spill_one_var(p.functions[0], p.toSpill, p.prefix, 0);
+    // have to print func separately
+    std::cout << "(" << func->name << "\n\t";
+    std::cout << std::to_string(func->arguments) << " " << std::to_string(func->num_locals) << "\n";
+    
+    for (auto i : func->instructions) {
+      std::cout << "\t" << i->toString() << "\n";
+    }
+
+    std::cout << ")" << std::endl;
     return 0;
   }
 
@@ -137,7 +147,18 @@ int main(
    */
   if (interference_only){
     L2::create_liveness_list(p);
-    L2::create_interference_graph(p);
+    for (auto f : p.functions) {
+      auto graph = L2::create_interference_graph(f);
+      // for (auto it = graph->g.begin(); it != graph->g.end(); ++it) {
+      //   auto temp = *it;
+      //   std::cout << temp.first->name << " ";
+      //   for (auto item : temp.second) {
+      //     std::cout << item->name << " ";
+      //   }
+      //   std::cout << std::endl;
+      // }
+      auto colorGraph = L2::registerAllocate(graph);
+    }
     // for (auto f : p.functions) f->printInterferenceGraph();
     return 0;
   }
