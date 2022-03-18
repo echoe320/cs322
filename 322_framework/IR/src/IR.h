@@ -18,7 +18,11 @@ namespace IR {
 
   enum opCode {op_add, op_minus, op_multiply, op_AND, op_lshift, op_rshift, cmp_lesseq, cmp_greateq, cmp_less, cmp_great, cmp_equals};
 
+  static const char* op_enum_str[] = {" + ", " - ", " * ", " & ", " << ", " >> ", " <= ", " >= ", " < ", " > ", " = "};
+
   enum calleeCode {cc_print, cc_input, cc_tensor_error};
+
+  std::string get_enum_string (int enum_value);
   
   class Item {
     public:

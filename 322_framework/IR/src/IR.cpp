@@ -318,4 +318,8 @@ namespace IR {
     return "te_return_t instruction";
   }
 
+  std::string get_enum_string (int enum_value) {
+    return (op_enum_str[enum_value]);
+  }
+
 }

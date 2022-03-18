@@ -24,7 +24,7 @@ using namespace pegtl;
 using namespace std;
 
 namespace IR {
-  bool shouldPrint = false;
+  bool shouldPrint = true;
   // var_type vType_curr;
 
   /* 
@@ -443,7 +443,6 @@ namespace IR {
   struct Instruction_rule:
     pegtl::sor<
       pegtl::seq< pegtl::at<Instruction_define_rule>      , Instruction_define_rule       >,
-      pegtl::seq< pegtl::at<Instruction_assignment_rule>  , Instruction_assignment_rule   >,
       pegtl::seq< pegtl::at<Instruction_op_rule>          , Instruction_op_rule           >,
       pegtl::seq< pegtl::at<Instruction_load_rule>        , Instruction_load_rule         >,
       pegtl::seq< pegtl::at<Instruction_store_rule>       , Instruction_store_rule        >,
@@ -451,7 +450,8 @@ namespace IR {
       pegtl::seq< pegtl::at<Instruction_call_rule>        , Instruction_call_rule         >,
       pegtl::seq< pegtl::at<Instruction_call_assign_rule> , Instruction_call_assign_rule  >,
       pegtl::seq< pegtl::at<Instruction_new_array_rule>   , Instruction_new_array_rule    >,
-      pegtl::seq< pegtl::at<Instruction_new_tuple_rule>   , Instruction_new_tuple_rule    >
+      pegtl::seq< pegtl::at<Instruction_new_tuple_rule>   , Instruction_new_tuple_rule    >,
+      pegtl::seq< pegtl::at<Instruction_assignment_rule>  , Instruction_assignment_rule   >
     > {};
 
   struct Instructions_rule:
@@ -724,118 +724,118 @@ namespace IR {
     }
   };
 
-  // /* Operation rule actions */
+  /* Operation rule actions */
 
-  // template<> struct action < plus_rule > {
-  //   template< typename Input >
-  //   static void apply( const Input & in, Program & p){
-  //     if (shouldPrint) cout << "plus_rule started\n";
-  //     Operation* op = new Operation(op_add);
-  //     parsed_items.push_back(op);
-  //     if (shouldPrint) cout << "plus_rule ended\n";
-  //   }
-  // };
+  template<> struct action < plus_rule > {
+    template< typename Input >
+    static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "plus_rule started\n";
+      Operation* op = new Operation(op_add);
+      parsed_items.push_back(op);
+      if (shouldPrint) cout << "plus_rule ended\n";
+    }
+  };
 
-  // template<> struct action < minus_rule > {
-  //   template< typename Input >
-  //   static void apply( const Input & in, Program & p){
-  //     if (shouldPrint) cout << "minus_rule started\n";
-  //     Operation* op = new Operation(op_minus);
-  //     parsed_items.push_back(op);
-  //     if (shouldPrint) cout << "minus_rule ended\n";
-  //   }
-  // };
+  template<> struct action < minus_rule > {
+    template< typename Input >
+    static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "minus_rule started\n";
+      Operation* op = new Operation(op_minus);
+      parsed_items.push_back(op);
+      if (shouldPrint) cout << "minus_rule ended\n";
+    }
+  };
 
-  // template<> struct action < mult_rule > {
-  //   template< typename Input >
-  //   static void apply( const Input & in, Program & p){
-  //     if (shouldPrint) cout << "mult_rule started\n";
-  //     Operation* op = new Operation(op_multiply);
-  //     parsed_items.push_back(op);
-  //     if (shouldPrint) cout << "mult_rule ended\n";
-  //   }
-  // };
+  template<> struct action < mult_rule > {
+    template< typename Input >
+    static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "mult_rule started\n";
+      Operation* op = new Operation(op_multiply);
+      parsed_items.push_back(op);
+      if (shouldPrint) cout << "mult_rule ended\n";
+    }
+  };
 
-  // template<> struct action < bitAND_rule > {
-  //   template< typename Input >
-  //   static void apply( const Input & in, Program & p){
-  //     if (shouldPrint) cout << "bitAND_rule started\n";
-  //     Operation* op = new Operation(op_AND);
-  //     parsed_items.push_back(op);
-  //     if (shouldPrint) cout << "bitAND_rule ended\n";
-  //   }
-  // };
+  template<> struct action < bitAND_rule > {
+    template< typename Input >
+    static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "bitAND_rule started\n";
+      Operation* op = new Operation(op_AND);
+      parsed_items.push_back(op);
+      if (shouldPrint) cout << "bitAND_rule ended\n";
+    }
+  };
 
-  // // sop_rule -> push
-  // template<> struct action < Lshift_rule > {
-  //   template< typename Input >
-  //   static void apply( const Input & in, Program & p){
-  //     if (shouldPrint) cout << "Lshift_rule started\n";
-  //     Operation* op = new Operation(op_lshift);
-  //     parsed_items.push_back(op);
-  //     if (shouldPrint) cout << "Lshift_rule ended\n";
-  //   }
-  // };
+  // sop_rule -> push
+  template<> struct action < Lshift_rule > {
+    template< typename Input >
+    static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "Lshift_rule started\n";
+      Operation* op = new Operation(op_lshift);
+      parsed_items.push_back(op);
+      if (shouldPrint) cout << "Lshift_rule ended\n";
+    }
+  };
 
-  // template<> struct action < Rshift_rule > {
-  //   template< typename Input >
-  //   static void apply( const Input & in, Program & p){
-  //     if (shouldPrint) cout << "Rshift_rule started\n";
-  //     Operation* op = new Operation(op_rshift);
-  //     parsed_items.push_back(op);
-  //     if (shouldPrint) cout << "Rshift_rule ended\n";
-  //   }
-  // };
+  template<> struct action < Rshift_rule > {
+    template< typename Input >
+    static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "Rshift_rule started\n";
+      Operation* op = new Operation(op_rshift);
+      parsed_items.push_back(op);
+      if (shouldPrint) cout << "Rshift_rule ended\n";
+    }
+  };
 
-  // template<> struct action < lessEq_rule > {
-  //   template< typename Input >
-  //   static void apply( const Input & in, Program & p){
-  //     if (shouldPrint) std::cout << "lessEq_rule started\n";
-  //     Operation* op = new Operation(cmp_lesseq);
-  //     parsed_items.push_back(op);
-  //     if (shouldPrint) std::cout << "lessEq_rule ended\n";
-  //   }
-  // };
+  template<> struct action < lessEq_rule > {
+    template< typename Input >
+    static void apply( const Input & in, Program & p){
+      if (shouldPrint) std::cout << "lessEq_rule started\n";
+      Operation* op = new Operation(cmp_lesseq);
+      parsed_items.push_back(op);
+      if (shouldPrint) std::cout << "lessEq_rule ended\n";
+    }
+  };
   
-  // template<> struct action < greatEq_rule > {
-  //   template< typename Input >
-  //   static void apply( const Input & in, Program & p){
-  //     if (shouldPrint) std::cout << "greatEq_rule started\n";
-  //     Operation* op = new Operation(cmp_greateq);
-  //     parsed_items.push_back(op);
-  //     if (shouldPrint) std::cout << "greatEq_rule ended\n";
-  //   }
-  // };
+  template<> struct action < greatEq_rule > {
+    template< typename Input >
+    static void apply( const Input & in, Program & p){
+      if (shouldPrint) std::cout << "greatEq_rule started\n";
+      Operation* op = new Operation(cmp_greateq);
+      parsed_items.push_back(op);
+      if (shouldPrint) std::cout << "greatEq_rule ended\n";
+    }
+  };
 
-  // template<> struct action < less_rule > {
-  //   template< typename Input >
-  //   static void apply( const Input & in, Program & p){
-  //     if (shouldPrint) std::cout << "less_rule started\n";
-  //     Operation* op = new Operation(cmp_less);
-  //     parsed_items.push_back(op);
-  //     if (shouldPrint) std::cout << "less_rule ended\n";
-  //   }
-  // };
+  template<> struct action < less_rule > {
+    template< typename Input >
+    static void apply( const Input & in, Program & p){
+      if (shouldPrint) std::cout << "less_rule started\n";
+      Operation* op = new Operation(cmp_less);
+      parsed_items.push_back(op);
+      if (shouldPrint) std::cout << "less_rule ended\n";
+    }
+  };
   
-  // template<> struct action < great_rule > {
-  //   template< typename Input >
-  //   static void apply( const Input & in, Program & p){
-  //     if (shouldPrint) std::cout << "great_rule started\n";
-  //     Operation* op = new Operation(cmp_great);
-  //     parsed_items.push_back(op);
-  //     if (shouldPrint) std::cout << "great_rule ended\n";
-  //   }
-  // };
+  template<> struct action < great_rule > {
+    template< typename Input >
+    static void apply( const Input & in, Program & p){
+      if (shouldPrint) std::cout << "great_rule started\n";
+      Operation* op = new Operation(cmp_great);
+      parsed_items.push_back(op);
+      if (shouldPrint) std::cout << "great_rule ended\n";
+    }
+  };
 
-  // template<> struct action < equal_rule > {
-  //   template< typename Input >
-  //   static void apply( const Input & in, Program & p){
-  //     if (shouldPrint) std::cout << "equal_rule started\n";
-  //     Operation* op = new Operation(cmp_equals);
-  //     parsed_items.push_back(op);
-  //     if (shouldPrint) std::cout << "equal_rule ended\n";
-  //   }
-  // };
+  template<> struct action < equal_rule > {
+    template< typename Input >
+    static void apply( const Input & in, Program & p){
+      if (shouldPrint) std::cout << "equal_rule started\n";
+      Operation* op = new Operation(cmp_equals);
+      parsed_items.push_back(op);
+      if (shouldPrint) std::cout << "equal_rule ended\n";
+    }
+  };
 
   /* Instruction rule actions */
   template<> struct action < Instruction_label_rule > { 
@@ -907,37 +907,37 @@ namespace IR {
     }
   };
 
-  // // Arithmetic actions
-  // template<> struct action < Instruction_op_rule > {
-  //   template< typename Input >
-	// static void apply( const Input & in, Program & p){
-  //     if (shouldPrint) cout << "Instruction_op_rule started\n";
-  //     /* 
-  //      * Fetch the current function.
-  //      */ 
-  //     auto currentF = p.functions.back();
-  //     auto b = currentF->basicblocks.back();
+  // Arithmetic actions
+  template<> struct action < Instruction_op_rule > {
+    template< typename Input >
+	static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "Instruction_op_rule started\n";
+      /* 
+       * Fetch the current function.
+       */ 
+      auto currentF = p.functions.back();
+      auto b = currentF->basicblocks.back();
 
-  //     /* 
-  //      * Create the instruction.
-  //      */ 
-  //     auto a2 = parsed_items.back();
-  //     parsed_items.pop_back();
-  //     auto op = parsed_items.back();
-  //     parsed_items.pop_back();
-  //     auto a1 = parsed_items.back();
-  //     parsed_items.pop_back();
-  //     auto dst = parsed_items.back();
-  //     parsed_items.pop_back();
-  //     auto i = new Instruction_op(dst, a1, op, a2);
+      /* 
+       * Create the instruction.
+       */ 
+      auto a2 = parsed_items.back();
+      parsed_items.pop_back();
+      auto op = parsed_items.back();
+      parsed_items.pop_back();
+      auto a1 = parsed_items.back();
+      parsed_items.pop_back();
+      auto dst = parsed_items.back();
+      parsed_items.pop_back();
+      auto i = new Instruction_op(dst, a1, op, a2);
 
-  //     /* 
-  //      * Add the just-created instruction to the current function.
-  //      */ 
-  //     b->instructions.push_back(i);
-  //     if (shouldPrint) cout << "Instruction_op_rule ended\n";
-  //   }
-  // };
+      /* 
+       * Add the just-created instruction to the current function.
+       */ 
+      b->instructions.push_back(i);
+      if (shouldPrint) cout << "Instruction_op_rule ended\n";
+    }
+  };
 
   // template<> struct action < Instruction_load_rule > {
   //   template< typename Input >

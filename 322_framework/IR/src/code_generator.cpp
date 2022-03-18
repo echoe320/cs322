@@ -47,7 +47,32 @@ namespace IR {
     outputFile << "\t" << dst_temp->toString() << " <- " << src->toString() << std::endl;
   }
   void IR_Visitors::VisitInstruction(Instruction_op *element) {
-    return;
+    auto fields = element->get();
+    auto dst = std::get<0>(fields);
+    auto arg1 = std::get<1>(fields);
+    auto op = std::get<2>(fields);
+    auto arg2 = std::get<3>(fields);
+
+    auto dst_temp = dynamic_cast<Variable *>(dst);
+
+    auto op_temp = dynamic_cast<Operation *>(op);
+    auto op_val = op_temp->get();
+    
+    if (dynamic_cast<Variable *>(arg1) != nullptr) {
+      arg1 = dynamic_cast<Variable *>(arg1);
+    } else if (dynamic_cast<Number *>(arg1) != nullptr)
+    {
+      arg1 = dynamic_cast<Number *>(arg1);
+    }
+
+    if (dynamic_cast<Variable *>(arg2) != nullptr) {
+      arg2 = dynamic_cast<Variable *>(arg2);
+    } else if (dynamic_cast<Number *>(arg2) != nullptr)
+    {
+      arg2 = dynamic_cast<Number *>(arg2);
+    }
+    
+    outputFile << "\t" << dst_temp->toString() << " <- " << arg1->toString() << get_enum_string(op_val) << arg2->toString() << std::endl;
   }
   void IR_Visitors::VisitInstruction(Instruction_load *element) {
     return;
@@ -74,10 +99,10 @@ namespace IR {
     return;
   }
   void IR_Visitors::VisitInstruction(te_br_label *element) {
-    return;
+    outputFile << "\t" << "return" << std::endl;
   }
   void IR_Visitors::VisitInstruction(te_br_t *element) {
-    return;
+    outputFile << "\t" << "return" << std::endl;
   }
   void IR_Visitors::VisitInstruction(te_return *element) {
     outputFile << "\t" << "return" << std::endl;
