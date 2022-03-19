@@ -109,8 +109,10 @@ namespace L2 {
     while (!this->poppedNodes.empty()) {
       // Node* popped = this->g->lookupNode(this->poppedNodes.top());
       Node* popped = this->poppedNodes.top();
-      std::set<Node*> n = this->Node_neighbors.top();
-      popped->color = this->colorSelector(this->g->g[popped]);
+      // std::set<Node*> n = this->Node_neighbors.top();
+      popped = this->g->lookupNode(popped->name);
+      std::set<Node*> popped_neighbors = this->g->g[popped];
+      popped->color = this->colorSelector(popped_neighbors);
       popped->didPop = false;
       // std::cout << popped->name << " " << popped->color << ": ";
       for (auto it = this->g->g[popped].begin(); it != this->g->g[popped].end(); ++it) {
@@ -122,7 +124,10 @@ namespace L2 {
       }
       // std::cout << std::endl;
       // std::cout << popped->name << " is " << popped->color << std::endl;
-      if (popped->color == "none") this->failedToColor.push_back(popped);
+      if (popped->color == "none") {
+        this->failedToColor.push_back(popped);
+        // popped->isSpill = true;
+      }
       else this->coloredAny = true;
       this->poppedNodes.pop();
     }
@@ -133,23 +138,14 @@ namespace L2 {
     ColorGraph* cgraph = new ColorGraph(interference_graph);
     cgraph->emptyGraph();
     cgraph->assignColors();
-    // for (auto it = cgraph->g->g.begin(); it != cgraph->g->g.end(); ++it) {
-    //   auto temp = *it;
-    //   std::cout << temp.first->name << "=" << temp.first->color << " ";
-    //   for (auto item : temp.second) {
-    //     if (!item->isRegister) std::cout << item->name << "=" << item->color << " ";
-    //   }
-    //   std::cout << std::endl;
-    // }
-    // for (auto node : cgraph->failedToColor) {
-    //   std::cout << node->name << " ";
-    // }
-    // std::cout << std::endl;
-    std::cout << "variables to be spilled: ";
+
+    // std::cout << "variables to be spilled: ";
     for (auto node : cgraph->failedToColor) {
-      std::cout << node->name << " ";
-      Variable* temp_var = new Variable(node->name);
-      cgraph->tobeSpilled.push_back(temp_var);
+      // std::cout << node->name << " ";
+      if (!node->isSpill) {
+        Variable* temp_var = new Variable(node->name);
+        cgraph->tobeSpilled.push_back(temp_var);
+      }
     }
     std::cout << std::endl;
     return cgraph;

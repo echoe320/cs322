@@ -18,6 +18,7 @@ namespace L2 {
       std::string color = "none";
       std::string toString() override;
       bool isRegister = false;
+      bool isSpill = false;
       bool didPop = false;
   };
 

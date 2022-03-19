@@ -40,7 +40,9 @@ namespace L2 {
     return res; // res.first
   }
   std::string Memory::toString(void) {
-    return "mem " + this->rv->toString() + " " + this->offset->toString();
+    auto reg_temp = dynamic_cast<Register *>(this->rv);
+    auto num_temp = dynamic_cast<Number *>(this->offset);
+    return "mem " + reg_temp->toString() + " " + num_temp->toString();
   }
 
   //Number
@@ -285,7 +287,9 @@ namespace L2 {
     return "runtime call instruction";
   }
   std::string Instruction_runtime::toString() {
-    return "call " + this->runtime->toString() + this->N->toString();
+    auto rt_temp = dynamic_cast<Runtime*>(this->runtime);
+    auto num_temp = dynamic_cast<Number*>(this->N); 
+    return "call " + rt_temp->toString() + " " + num_temp->toString();
   }
 
   // LABEL INSTRUCTION

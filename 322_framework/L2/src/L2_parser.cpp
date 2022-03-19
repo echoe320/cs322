@@ -696,8 +696,10 @@ namespace L2 {
     template< typename Input >
     static void apply( const Input & in, Program & p){
       if (shouldPrint) cout << "var started\n";
+      auto currentF = p.functions.back();
       Variable* v = new Variable(in.string());
       parsed_items.push_back(v);
+      currentF->func_vars.insert(v);
       if (shouldPrint) cout << "var ended\n";
     }
   };

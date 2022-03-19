@@ -122,15 +122,6 @@ namespace L2 {
         graph->addEdge(node1, node2);
       }
     }
-    // for (auto reg1 : all_gp_list) {
-    //   Node* node1 = graph->lookupNode(reg1);
-    //   node1->isRegister = true;
-    //   for (auto reg2 : all_gp_list) {
-    //     Node* node2 = graph->lookupNode(reg2);
-    //     node2->isRegister = true;
-    //     graph->addEdge(node1, node2);
-    //   }
-    // }
     
     // iterate over instructions
     for (int idx = 0; idx < f->instructions.size(); idx++) {

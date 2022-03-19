@@ -8,10 +8,12 @@ namespace L2{
 
   class Spill_Visitors : public Visitor {
     public:
-      Spill_Visitors(std::string toSpill, std::string prefix, int spill_count);
+      Spill_Visitors(std::string toSpill, std::string prefix, int num_vars_spilled, int spill_count);
       int getCount();
       bool didSpill = false;
-      int spill_count = 0;
+      int num_vars_spilled = 0;
+      int count = 0;
+      std::set<Variable*> func_vars;
       std::vector<Instruction*> getInstructions();
       void VisitInstruction (Instruction_ret *element) override;
       void VisitInstruction (Instruction_assignment *element) override;
@@ -30,7 +32,6 @@ namespace L2{
     private:
       std::string var;
       std::string prefix;
-      int count = 0;
       std::vector<std::pair<bool, bool>> RWflags;
       std::vector<Instruction*> new_inst;
       Instruction* loadvar();

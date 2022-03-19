@@ -32,6 +32,7 @@ namespace L2 {
   class Item {
     public:
       virtual std::string toString(void) = 0;
+      bool isSpill;
   };
 
   class Register : public Item {
@@ -75,6 +76,7 @@ namespace L2 {
       Variable(std::string vn);
       std::string get(void);
       std::string toString(void) override;
+      bool isSpill = false;
     private:
       std::string varName;
   };
@@ -293,6 +295,10 @@ namespace L2 {
       std::vector<std::unordered_set<Item *>> IN;
       std::vector<std::unordered_set<Item *>> OUT;
       void printINOUTsets();
+
+      std::set<Variable*> func_vars;
+      bool allVarsSpilled = false;
+      int spill_count = 0;
   };
 
   /*
