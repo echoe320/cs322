@@ -5,6 +5,7 @@
 #include <string>
 
 #include <graph_coloring.h>
+#include <L2.h>
 
 // in this order: r10, r11, r8, r9, rax, rcx, rdi, rdx, rsi, r12, r13, r14, r15, rbp, rbx
 // std::string all_color_list[] = {"red", "orange", "yellow", "green", "blue", "indigo", "purple", "pink", "brown", "black", "white", "gray", "maroon", "navy", "periwinkle"};
@@ -15,14 +16,19 @@ namespace L2 {
   }
 
   std::string ColorGraph::colorSelector(std::set<Node*> edges) {
-    for (int idx = 0; idx < 15; idx++) {
-      std::string color = all_color_list[idx];
+    // for (int idx = 0; idx < 15; idx++) {
+    for (auto i : all_color_list) {
+      bool color_present = false;
       for (auto it = edges.begin(); it != edges.end(); ++it) {
         auto temp = *it;
         Node* adj_node = this->g->lookupNode(temp->name);
-        if (color == adj_node->color) break;
-        return color;
+        if (adj_node->color == i) { 
+          color_present = true;
+          break;
+        }
+        // if (color == adj_node->color) break;
       }
+      if (color_present == false) return i;
     }
     return "none";
   }
@@ -40,32 +46,6 @@ namespace L2 {
   // dont conflict with any connected nodes. im gonna take a nap so i can get
   // some studying done for my final. if you cant figure this out by the time
   // im done with my final, i think we're doomed and we just take the L :(
-  void ColorGraph::emptyGraph() {
-    int deg = 14;
-    while (deg >= 0) {
-      auto curr_nodes = this->g->degree_dict[deg];
-      for (auto it = curr_nodes.begin(); it != curr_nodes.end(); ++it) {
-        auto temp = *it;
-        if (!temp->isRegister) {
-          std::string popped = this->g->popNode(temp); //* popped is a pair<Node*, unordered_set<Node*>>
-          this->poppedNodes.push(popped);
-        }
-      }
-      deg--;
-    }
-    deg = this->g->degree_dict.size() - 1;
-    while (deg >= 0) {
-      auto curr_nodes = this->g->degree_dict[deg];
-      for (auto it = curr_nodes.begin(); it != curr_nodes.end(); ++it) {
-        auto temp = *it;
-        if (!temp->isRegister) {
-          std::string popped = this->g->popNode(temp); //* popped is a pair<Node*, unordered_set<Node*>>
-          this->poppedNodes.push(popped);
-        }
-      }
-      deg--;
-    }
-  }
   // void ColorGraph::emptyGraph() {
   //   int deg = 14;
   //   while (deg >= 0) {
@@ -73,7 +53,7 @@ namespace L2 {
   //     for (auto it = curr_nodes.begin(); it != curr_nodes.end(); ++it) {
   //       auto temp = *it;
   //       if (!temp->isRegister) {
-  //         auto popped = this->g->popNode(temp); //* popped is a pair<Node*, unordered_set<Node*>>
+  //         std::string popped = this->g->popNode(temp); //* popped is a pair<Node*, unordered_set<Node*>>
   //         this->poppedNodes.push(popped);
   //       }
   //     }
@@ -85,19 +65,53 @@ namespace L2 {
   //     for (auto it = curr_nodes.begin(); it != curr_nodes.end(); ++it) {
   //       auto temp = *it;
   //       if (!temp->isRegister) {
-  //         auto popped = this->g->popNode(temp); //* popped is a pair<Node*, unordered_set<Node*>>
+  //         std::string popped = this->g->popNode(temp); //* popped is a pair<Node*, unordered_set<Node*>>
   //         this->poppedNodes.push(popped);
   //       }
   //     }
   //     deg--;
   //   }
   // }
+  void ColorGraph::emptyGraph() {
+    int deg = 14;
+    while (deg >= 0) {
+      auto curr_nodes = this->g->degree_dict[deg];
+      for (auto it = curr_nodes.begin(); it != curr_nodes.end(); ++it) {
+        auto temp = *it;
+        if (!temp->isRegister && !temp->didPop) {
+          auto popped = this->g->popNode(temp);
+          this->poppedNodes.push(popped.first);
+          this->Node_neighbors.push(popped.second);
+          // auto popped = this->g->popNode(temp); //* popped is a pair<Node*, unordered_set<Node*>>
+        }
+      }
+      deg--;
+    }
+    deg = this->g->degree_dict.size() - 1;
+    while (deg >= 0) {
+      auto curr_nodes = this->g->degree_dict[deg];
+      for (auto it = curr_nodes.begin(); it != curr_nodes.end(); ++it) {
+        auto temp = *it;
+        if (!temp->isRegister && !temp->didPop) {
+          auto popped = this->g->popNode(temp);
+          this->poppedNodes.push(popped.first);
+          this->Node_neighbors.push(popped.second);
+        //   auto popped = this->g->popNode(temp); //* popped is a pair<Node*, unordered_set<Node*>>
+        //   this->poppedNodes.push(popped);
+        }
+      }
+      deg--;
+    }
+  }
 
   //* STEP 2) Select a color on each node as it comes back into the graph, making sure no adjacent nodes have the same color
   void ColorGraph::assignColors() {
     while (!this->poppedNodes.empty()) {
-      Node* popped = this->g->lookupNode(this->poppedNodes.top());
+      // Node* popped = this->g->lookupNode(this->poppedNodes.top());
+      Node* popped = this->poppedNodes.top();
+      std::set<Node*> n = this->Node_neighbors.top();
       popped->color = this->colorSelector(this->g->g[popped]);
+      popped->didPop = false;
       // std::cout << popped->name << " " << popped->color << ": ";
       for (auto it = this->g->g[popped].begin(); it != this->g->g[popped].end(); ++it) {
         auto temp = *it;
@@ -107,9 +121,9 @@ namespace L2 {
         pop_ref->color = popped->color;
       }
       // std::cout << std::endl;
-      std::cout << popped->name << " is " << popped->color << std::endl;
-      if (popped->color != "none") this->coloredAny = true;
-      else failedToColor.push_back(popped);
+      // std::cout << popped->name << " is " << popped->color << std::endl;
+      if (popped->color == "none") this->failedToColor.push_back(popped);
+      else this->coloredAny = true;
       this->poppedNodes.pop();
     }
   }
@@ -117,9 +131,27 @@ namespace L2 {
   //* ACTUAL FUNCTION THAT CALLS THE OTHER HELPERS
   ColorGraph* registerAllocate(Graph* interference_graph) {
     ColorGraph* cgraph = new ColorGraph(interference_graph);
-    // cgraph->g->printDegrees();
     cgraph->emptyGraph();
     cgraph->assignColors();
+    // for (auto it = cgraph->g->g.begin(); it != cgraph->g->g.end(); ++it) {
+    //   auto temp = *it;
+    //   std::cout << temp.first->name << "=" << temp.first->color << " ";
+    //   for (auto item : temp.second) {
+    //     if (!item->isRegister) std::cout << item->name << "=" << item->color << " ";
+    //   }
+    //   std::cout << std::endl;
+    // }
+    // for (auto node : cgraph->failedToColor) {
+    //   std::cout << node->name << " ";
+    // }
+    // std::cout << std::endl;
+    std::cout << "variables to be spilled: ";
+    for (auto node : cgraph->failedToColor) {
+      std::cout << node->name << " ";
+      Variable* temp_var = new Variable(node->name);
+      cgraph->tobeSpilled.push_back(temp_var);
+    }
+    std::cout << std::endl;
     return cgraph;
   }
 

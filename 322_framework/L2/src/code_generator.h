@@ -1,5 +1,6 @@
 #pragma once
 
+#include <graph_coloring.h>
 #include <L2.h>
 
 namespace L2{
@@ -7,7 +8,7 @@ namespace L2{
 
   class Gen_Code_Visitors : public Visitor {
     public:
-      Gen_Code_Visitors(std::ofstream &outF);
+      Gen_Code_Visitors(std::ofstream &outF, Function* f, ColorGraph* color_graph);
       void VisitInstruction (Instruction_ret *element) override;
       void VisitInstruction (Instruction_assignment *element) override;
       void VisitInstruction (Instruction_arithmetic *element) override;
@@ -23,5 +24,7 @@ namespace L2{
       void VisitInstruction (Instruction_stackarg *element) override;
     private:
       std::ofstream &outputFile;
+      Function* f;
+      ColorGraph* color_graph;
   };
 }

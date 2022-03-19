@@ -16,8 +16,10 @@ namespace L2 {
       std::string colorSelector(std::set<Node*> edges);
       void emptyGraph();
       void assignColors();
-      std::stack<std::string> poppedNodes;
+      std::stack<Node*> poppedNodes;
+      std::stack<std::set<Node*>> Node_neighbors;
       std::vector<Node*> failedToColor;
+      std::vector<Variable*> tobeSpilled;
       Graph* g;
   };
 

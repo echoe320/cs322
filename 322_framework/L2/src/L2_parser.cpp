@@ -588,7 +588,8 @@ namespace L2 {
   template<> struct action < spill_var > {
     template< typename Input >
 	static void apply( const Input & in, Program & p){
-      p.toSpill = in.string();
+      Variable* v = new Variable(in.string());
+      p.toSpill.push_back(v);
     }
   };
 

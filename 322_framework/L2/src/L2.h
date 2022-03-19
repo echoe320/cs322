@@ -5,6 +5,7 @@
 #include <algorithm>
 
 #include <unordered_map>
+#include <map>
 #include <unordered_set>
 #include <set>
 
@@ -23,8 +24,9 @@ namespace L2 {
 
   static const char* rt_enum_str[] = {"print", "input", "allocate", "tensor-error"};
 
-  static const char* all_color_list[] = {"red", "orange", "yellow", "green", "blue", "indigo", "purple", "pink", "brown", "black", "white", "gray", "maroon", "navy", "periwinkle"};
+  // enum all_color_list{red, orange, yellow, green, blue, indigo, purple, pink, brown, black, white, gray, maroon, navy, periwinkle};
 
+  static const char* all_color_list[] = {"red", "orange", "yellow", "green", "blue", "indigo", "purple", "pink", "brown", "black", "white", "gray", "maroon", "navy", "periwinkle"};
 
   //Item Class + subclasses
   class Item {
@@ -300,7 +302,7 @@ namespace L2 {
     public:
       std::string entryPointLabel;
       std::vector<Function *> functions;
-      std::string toSpill;
+      std::vector<Variable*> toSpill;
       std::string prefix;
   };
 
@@ -309,4 +311,6 @@ namespace L2 {
   std::string get_op_string (int enum_value);
 
   std::string get_rt_string (int enum_value);
+
+  Program create_program_with_colors(Program p);
 }

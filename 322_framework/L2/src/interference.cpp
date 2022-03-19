@@ -26,7 +26,8 @@ namespace L2 {
     this->g = empty;
   }
   
-  std::string Graph::popNode(Node* node) {
+  // std::string Graph::popNode(Node* node) {
+  std::pair<Node*, std::set<Node*>> Graph::popNode(Node* node) {
     Node* found = this->lookupNode(node->name);
     std::set<Node*> node_edges = this->g[found]; 
     for (auto it = node_edges.begin(); it != node_edges.end(); ++it) {
@@ -38,9 +39,12 @@ namespace L2 {
     }
     // this->g.erase(found); // erases the node key from unordered map
     // this->name_dict.erase(found->name);
+    found->didPop = true;
     this->degree_dict[found->degree].erase(found);
-    // std::pair<Node*, std::set<Node*>> popped{found, node_edges};
-    return found->name;
+    std::pair<Node*, std::set<Node*>> popped{found, node_edges};
+    // std::set<Node*> popped{node_edges};
+    return popped;
+    // return found->name;
   }
 
   bool Graph::nodeExists(std::string node_name) {
@@ -173,13 +177,13 @@ namespace L2 {
     }
     // graph->printDegrees();
     // for (auto it = graph->g.begin(); it != graph->g.end(); ++it) {
-    //     auto temp = *it;
-    //     std::cout << temp.first->name << " ";
-    //     for (auto item : temp.second) {
-    //       std::cout << item->name << " ";
-    //     }
-    //     std::cout << std::endl;
+    //   auto temp = *it;
+    //   std::cout << temp.first->name << " ";
+    //   for (auto item : temp.second) {
+    //     std::cout << item->name << " ";
     //   }
+    //   std::cout << std::endl;
+    // }
     return graph;
   }
 }

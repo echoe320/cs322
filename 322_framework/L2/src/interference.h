@@ -18,12 +18,14 @@ namespace L2 {
       std::string color = "none";
       std::string toString() override;
       bool isRegister = false;
+      bool didPop = false;
   };
 
   class Graph {
     public:
       Graph();
-      std::string popNode(Node*);
+      // std::string popNode(Node*);
+      std::pair<Node*, std::set<Node*>> popNode(Node*);
       bool nodeExists(std::string node_name);
       bool edgeExists(std::string src, std::string dst);
       Node* lookupNode(std::string node_name);
