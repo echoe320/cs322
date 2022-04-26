@@ -1,0 +1,86 @@
+define void :main(){
+  :entry
+  int64 %arg1
+  int64 %arg2
+  int64 %arg3
+  int64 %arg4
+  int64 %arg5
+  int64 %arg6
+  %arg1 <- 1
+  %arg2 <- 2
+  %arg3 <- 3
+  %arg4 <- 4
+  %arg5 <- 5
+  %arg6 <- 6
+
+  int64 %test
+  %test <- %arg1 * 2
+  %test <- %test << 1
+  %test <- %test + 1
+  call print(%test)
+
+  int64 %fthres
+  %fthres <- call :firsttest_helper(%arg1,%arg2,%arg3,%arg4,%arg5,%arg6)
+
+  int64 %result
+  %result <- %fthres << 1
+  %result <- %result + 1
+  call print(%result)
+
+  int64 %result2
+  %result2 <- %arg1 << 1
+  %result2 <- %result2 + 1
+  call print(%result2)
+
+  int64 %arr_len
+  int64 %arr_init
+  int64[] %arr
+
+  %arr_len <- 6 << 1
+  %arr_len <- %arr_len + 1
+  %arr_init <- 1
+  %arr <- new Array(%arr_len)
+  %arr[0] <- 3
+  %arr[1] <- 5
+  %arr[2] <- 7
+  %arr[3] <- 9
+  %arr[4] <- 11
+  %arr[5] <- 13
+
+  int64 %iter
+  int64 %sum
+  int64 %load
+  int64 %cmp
+  %iter <- 1
+  %sum <- 1
+  br :loop
+
+  :loop
+  %load <- %arr[%iter]
+  %sum <- %sum + %load
+  %iter <- %iter + 1
+  %cmp <- %iter <= 48
+  br %cmp :loop :exit
+
+  :exit
+  %sum <- %sum << 1
+  %sum <- %sum + 1
+  call print(%sum)
+  return
+}
+define int64 :firsttest_helper(int64 %a1,int64 %a2,int64 %a3,int64 %a4,int64 %a5,int64 %a6){
+  :entry
+  int64 %a23
+  int64 %a45
+  %a1 <- %a1 + 1
+  %a23 <- %a2 + %a3
+  %a45 <- %a4 + %a5
+
+  int64 %temp
+  %temp <- %a23 + %a45
+  %temp <- %temp + %a6
+
+  int64 %result
+  %result <- %a1 + %temp
+  return %result
+}

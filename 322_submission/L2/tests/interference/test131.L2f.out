@@ -1,0 +1,2 @@
+ERROR: the last instruction of ":go" is neighter an unconditional branch nor a return instruction.
+L2: src/compiler.cpp:126: int main(int, char**): Assertion `L2::VERIFIER_verify(p)' failed.
