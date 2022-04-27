@@ -713,38 +713,38 @@ namespace L3 {
   template< typename Rule >
   struct action : pegtl::nothing< Rule > {};
 
-  template<> struct action < function_type > {
-    template< typename Input >
-	static void apply( const Input & in, Program & p){
-      if (shouldPrint) cout << "function_type (no end)\n";
-      auto newF = new Function();
-      if (in.string() == "int64") 
-      {
-        newF->type = func_type::int64_f;
-      } else if (std::regex_match (in.string(), std::regex("(int64[])(.*)")))
-      {
-        newF->type = func_type::int64_arr_f;
-      } else if (in.string() == "tuple")
-      {
-        newF->type = func_type::tup_f;
-      } else if (in.string() == "code")
-      {
-        newF->type = func_type::code_f;
-      } else if (in.string() == "void")
-      {
-        newF->type = func_type::v_f;
-      }
+  // template<> struct action < function_type > {
+  //   template< typename Input >
+	// static void apply( const Input & in, Program & p){
+  //     if (shouldPrint) cout << "function_type (no end)\n";
+  //     auto newF = new Function();
+  //     if (in.string() == "int64") 
+  //     {
+  //       newF->type = func_type::int64_f;
+  //     } else if (std::regex_match (in.string(), std::regex("(int64[])(.*)")))
+  //     {
+  //       newF->type = func_type::int64_arr_f;
+  //     } else if (in.string() == "tuple")
+  //     {
+  //       newF->type = func_type::tup_f;
+  //     } else if (in.string() == "code")
+  //     {
+  //       newF->type = func_type::code_f;
+  //     } else if (in.string() == "void")
+  //     {
+  //       newF->type = func_type::v_f;
+  //     }
       
-      p.functions.push_back(newF);
-    }
-  };
+  //     p.functions.push_back(newF);
+  //   }
+  // };
 
   template<> struct action < function_name > {
     template< typename Input >
 	static void apply( const Input & in, Program & p){
       if (shouldPrint) cout << "function_name action started\n";
       auto currentF = p.functions.back();
-      if (in.string() == ":main") currentF->isMain = true;
+      // if (in.string() == ":main") currentF->isMain = true;
       currentF->name = in.string();
     }
   };
@@ -772,26 +772,26 @@ namespace L3 {
     }
   };
 
-  template<> struct action < type_rule > { // need to edit this to scan for two parts
-    template< typename Input >
-    static void apply( const Input & in, Program & p){
-      if (shouldPrint) cout << "type_rule started\n";
-      if (in.string() == "int64") 
-      {
-        vType_curr.push_back(var_type::int64);
-      } else if (std::regex_match (in.string(), std::regex("(int64[])(.*)")))
-      {
-        vType_curr.push_back(var_type::int64_arr);
-      } else if (in.string() == "tuple")
-      {
-        vType_curr.push_back(var_type::tup);
-      } else if (in.string() == "code")
-      {
-        vType_curr.push_back(var_type::code);
-      }
-      if (shouldPrint) cout << "type_rule ended\n";
-    }
-  };
+  // template<> struct action < type_rule > { // need to edit this to scan for two parts
+  //   template< typename Input >
+  //   static void apply( const Input & in, Program & p){
+  //     if (shouldPrint) cout << "type_rule started\n";
+  //     if (in.string() == "int64") 
+  //     {
+  //       vType_curr.push_back(var_type::int64);
+  //     } else if (std::regex_match (in.string(), std::regex("(int64[])(.*)")))
+  //     {
+  //       vType_curr.push_back(var_type::int64_arr);
+  //     } else if (in.string() == "tuple")
+  //     {
+  //       vType_curr.push_back(var_type::tup);
+  //     } else if (in.string() == "code")
+  //     {
+  //       vType_curr.push_back(var_type::code);
+  //     }
+  //     if (shouldPrint) cout << "type_rule ended\n";
+  //   }
+  // };
 
   template<> struct action < var_rule > { // need to edit this to scan for two parts
     template< typename Input >

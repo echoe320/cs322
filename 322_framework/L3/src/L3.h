@@ -269,6 +269,7 @@ namespace L3 {
       Label* name;
       // bool isMain;
       std::vector<Variable *> arguments;
+      std::vector<Instruction *> instructions;
       // std::map<std::string, Variable *> existing_vars;
   };
 
