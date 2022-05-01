@@ -346,6 +346,7 @@ namespace L2 {
     }
 
   void spill_one_var(Function* f, std::string toSpill, std::string prefix) {
+    // instead of returning a new function for each spilled variable, we can just edit the instructions for the input function directly
     auto spill_visitor = new Spill_Visitors(toSpill, prefix);
     for (auto inst : f->instructions) {
         inst->Accept(spill_visitor);
@@ -363,4 +364,8 @@ namespace L2 {
 
     std::cout << ")" << std::endl;
   }
+
+  // Function* smill_mult_var(Function*f, std::vector<Variable*> toSpill, std::string prefix) {
+  //   something idk
+  // }
 }
