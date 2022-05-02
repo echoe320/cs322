@@ -154,6 +154,8 @@ int main(
    * Interference graph test.
    */
   if (interference_only){
+    L2::create_liveness_list(p);
+    L2::create_interference_graph(p);
     // for (auto f : p.functions) {
     //   L2::create_liveness_list(f);
     //   auto graph = L2::create_interference_graph(f);
