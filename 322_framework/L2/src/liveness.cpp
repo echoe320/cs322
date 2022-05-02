@@ -16,7 +16,7 @@ int caller_reg_list[] = {L2::reg::r10, L2::reg::r11, L2::reg::r8, L2::reg::r9, L
 int callee_reg_list[] = {L2::reg::r12, L2::reg::r13, L2::reg::r14, L2::reg::r15, L2::reg::rbp, L2::reg::rbx};
 int arg_reg_list[] = {L2::reg::rdi, L2::reg::rsi, L2::reg::rdx, L2::reg::rcx, L2::reg::r8, L2::reg::r9};
 
-bool shouldPrint = false;
+bool shouldPrint = true;
 
 namespace L2 {
 
@@ -219,14 +219,14 @@ namespace L2 {
 
   void create_liveness_list(Function* f) {
     //Gen and kill 
-    std::cout << "Started Liveness" << std::endl;
+    // std::cout << "Started Liveness" << std::endl;
     auto gen_kill_visitor = new Gen_Kill_Visitors();
     for (auto i : f->instructions) {
       i->Accept(gen_kill_visitor);
       f->GEN.push_back(i->reads);
       f->KILL.push_back(i->writes);
     }
-    std::cout << "finished gen and kill" << std::endl;
+    // std::cout << "finished gen and kill" << std::endl;
 
     int count = 0;
     //Print gen & kill methods
@@ -265,7 +265,7 @@ namespace L2 {
       }
     }
 
-    std::cout << "started sucessors/predecessors" << std::endl;
+    // std::cout << "started sucessors/predecessors" << std::endl;
 
     // Successor and predecessor
     f->findSuccessorsPredecessors();
@@ -278,10 +278,10 @@ namespace L2 {
         }
     }
 
-    std::cout << "ended sucessors/predecessors" << std::endl;
+    // std::cout << "ended sucessors/predecessors" << std::endl;
     
 
-    std::cout << "started in/out" << std::endl;
+    // std::cout << "started in/out" << std::endl;
     // Compute IN and OUT sets
     bool didChange;
     do {
@@ -348,7 +348,7 @@ namespace L2 {
       }
     } while (didChange);
 
-    std::cout << "ended in/out" << std::endl;
+    // std::cout << "ended in/out" << std::endl;
 
     for (auto i : f->instructions) {
       f->IN.push_back(i->IN);

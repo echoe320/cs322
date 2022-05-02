@@ -714,7 +714,7 @@ namespace L2 {
     }
   };
 
-  //Mem action
+  // action
   template<> struct action < mem_rule > {
     template< typename Input >
     static void apply( const Input & in, Program & p){
