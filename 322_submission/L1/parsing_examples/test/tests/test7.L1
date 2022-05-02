@@ -1,0 +1,20 @@
+(:go
+  (:go
+    0 0
+
+    // This is my comment
+    //rdi <- 5
+    //rsi <- 4
+
+    //srdi += rsi
+
+    rax <- rdi
+
+    return 
+  )
+
+  (:testFunction
+    1 2
+    return 
+  )
+)

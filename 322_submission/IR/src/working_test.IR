@@ -1,0 +1,20 @@
+define void :main (){
+  :entry
+  int64 %cmp
+  int64 %var
+  %var <- 5
+  %cmp <- 1
+  %cmp <- %cmp + 1
+  %cmp <- %cmp - 1
+  %cmp <- %cmp * 1
+  %cmp <- %cmp & 1
+  %cmp <- %var >= 3
+  return
+}
+
+define int64 :myf (){
+  :entry
+  int64 %var
+  %var <- 5
+  return %var
+}

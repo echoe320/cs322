@@ -1,0 +1,22 @@
+(:go
+  (:go
+    0 0
+
+    // This is my comment
+    rdi <- 5
+    rsi <- 4
+
+    rdi += rsi
+
+    rax <- rdi
+
+    mem rdi 8 <- rax
+
+    return 
+  )
+
+  (:testFunction
+    1 2
+    return 
+  )
+)

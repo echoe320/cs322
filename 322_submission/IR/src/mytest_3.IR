@@ -1,0 +1,88 @@
+define void :main() {
+  :entry
+  int64 %player1_kills
+  int64 %player1_errors
+  int64 %player1_attempts
+  %player1_kills <- 21
+  %player1_errors <- 45
+  %player1_attempts <- %player1_kills + %player1_errors
+
+  int64 %player2_kills
+  int64 %player2_errors
+  int64 %player2_attempts
+  %player2_kills <- 4
+  %player2_errors <- 8
+  %player2_attempts <- %player2_kills + %player2_errors
+
+  int64 %player3_kills
+  int64 %player3_errors
+  int64 %player3_attempts
+  %player3_kills <- 17
+  %player3_errors <- 0
+  %player3_attempts <- %player3_kills + %player3_errors
+
+  int64 %player1
+  %player1 <- call :isGood(%player1_kills, %player1_errors, %player1_attempts)
+  %player1 <- call :encode(%player1)
+  call print(%player1)
+
+  int64 %player2
+  %player2 <- call :isGood(%player2_kills, %player2_errors, %player2_attempts)
+  %player2 <- call :encode(%player2)
+  call print(%player2)
+  
+  int64 %player3
+  %player3 <- call :isGood(%player3_kills, %player3_errors, %player3_attempts)
+  %player3 <- call :encode(%player3)
+  call print(%player3)
+  
+  return
+}
+
+define int64 :isGood(int64 %kills, int64 %errors, int64 %numAttempts) {
+  :entry
+  int64 %temp
+  int64 %res
+  int64 %cond
+  %temp <- %kills - %errors
+  %res <- call :multiply(%temp, %numAttempts)
+  %cond <- %res < 0
+  br %cond :negative :positive
+
+  :positive
+  return 1
+
+  :negative
+  return 0
+
+}
+
+define int64 :multiply(int64 %x, int64 %y) {
+  :entry
+  int64 %res
+  int64 %count
+  int64 %cond
+  %res <- 0
+  %count <- 0
+  %cond <- %count = %y
+  br %cond :zero :loop
+
+  :loop
+  %res <- %res + %x
+  %count <- %count + 1
+  %cond <- %count = %y
+  br %cond :end :loop
+
+  :end
+  return %res
+
+  :zero
+  return 0
+}
+
+define int64 :encode(%x) {
+  :entry
+  %x <- %x << 1
+  %x <- %x + 1
+  return %x
+}

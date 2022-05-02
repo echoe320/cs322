@@ -1,0 +1,81 @@
+LLLLLLLLLLLLLLLLLLLLLLLL
+
+TODO:
+1) push instruction's IN and OUT sets to function's IN and OUT vectors
+2) why are tests 203 and 206 not running????????????
+
+#################### CHANGELOG ASYNCRONOUS ##################### (new entries go to top of stack)
+03/12/2022 Jacob:
+- implementing unordered_map for findSuccessorsPredecessors() to speed up
+
+03/11/2022 Jacob:
+- started testing and fixing edge cases
+
+03/10/2022 Jacob:
+- fixed rsp being added to GEN sets
+- fixed successors for Instruction_goto
+
+03/08/2022 Jacob:
+- fixed successors for "call u N"
+- need to figure out how to filter rsp from getting added to GEN sets
+
+03/04/2022 Jacob:
+- populated OUT sets based off of IN sets of successor(s)
+- implemented OUTKILL checking
+- implemented didChange checking
+- added printing statements for IN and OUT sets
+
+
+02/25/2022 Eugene:
+- debugged issue with pointers segment faulting. Changed filling Item * vector with Item* objects to Register * regi = new Register(rdi); and directly pushing (regi) into the stack(see rdi register parser for an example). 
+- Gen and kill now prints lists -> need to check for correctness and for outlier cases.
+- Next steps: check if findSuccessorsPredecessors works properly, implement the liveness algorithm.
+
+
+02/08/2022 Both:
+- implement typeAsString() methods for instructions (for debugging)
+
+
+02/01/2022 Eugene:
+- Change from program to function for parse_function_file
+- Test gen/kill sets
+
+
+02/01/2022 Jacob:
+- implemented ACTUAL toString() methods for Register, Number, Label, Variable
+  -> don't see any need for the other Item subclasses yet
+- added a findSuccessorsPredecessors() method to function class
+  -> only implemented successors, not predecessors
+    -> successors are represented as integers, since we only need the indices (i.e. we can access successors with f.instructions[successor_idx])
+    -> changed Instruction fields successor_idx and predecessor_idx to reflect this semantic
+    -> code is not the prettiest, but it should work, DID NOT TEST yet (im not sure how to test it lmao)
+- added a section in liveness.cpp::create_liveness_list() for computing IN and OUT sets
+- updated our TODO list
+
+01/30/2022 Eugene:
+- debugging
+  -> fixed the toString method for all item classes
+  -> added constructor for Instruction_ret -> seems to error without
+  -> fixed getting the reg from Mem r field
+  -> fixed getting the number from N field for Instruction_calls and Instruction_runtime
+
+01/29/2022 (Jacob):
+- change VisitInstruction() methods to use get() instead of directly accessing fields
+- remove 'using namespace std;' from liveness.cpp
+  -> to avoid confusion between std::get<idx>(myTuple) and myClass.get()
+- add toString method to parent Item class to allow dynamic_cast
+  -> if there is no virtual function to override, you can't use dynamic_cast because the class isn't polymorphic 
+  -> add toString override methods to Item's children
+    -> none of the toString methods actually work lmao they just return empty string (i just needed it so the classes are recognized as polymorphic)
+- updated our TODO list
+
+Update Eugene Jan 29, 2022:
+- added reg_list for callee, caller, arg 
+  -> used reg::rdi to get the int value for reg enum values
+- fixed loops creating callee, caller, arg 
+  -> used static_cast<reg>(count) instead of reg(count)
+  -> arg_reg_list for arg registers
+- started creating get() for each instruction class
+  -> changed L2.h to include get functions in the each instruction class
+  -> finished implementing get() functions for Instruction_assignment, Instruction_arithmetic, Instruction_crement, Instruction_shift, Instruction_cmp, Instruction_lea, Instruction_calls, Instruction_runtime, Instruction_label, Instruction_goto, Instruction_stackarg -> all Instruction classes have get()
+  -> used i.e. std::tuple<Item*, Item*, Item*> get() -> access the fields using indexing?
