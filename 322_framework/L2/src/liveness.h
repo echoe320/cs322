@@ -3,7 +3,7 @@
 #include <L2.h>
 
 namespace L2{
-  void create_liveness_list(Function* f);
+  void create_liveness_list(Program p);
 
   class Gen_Kill_Visitors : public Visitor {
     void VisitInstruction (Instruction_ret *element) override;

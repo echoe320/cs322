@@ -16,7 +16,7 @@ int caller_reg_list[] = {L2::reg::r10, L2::reg::r11, L2::reg::r8, L2::reg::r9, L
 int callee_reg_list[] = {L2::reg::r12, L2::reg::r13, L2::reg::r14, L2::reg::r15, L2::reg::rbp, L2::reg::rbx};
 int arg_reg_list[] = {L2::reg::rdi, L2::reg::rsi, L2::reg::rdx, L2::reg::rcx, L2::reg::r8, L2::reg::r9};
 
-bool shouldPrint = true;
+bool shouldPrint = false;
 
 namespace L2 {
 
@@ -217,142 +217,137 @@ namespace L2 {
     element->writes.insert(dst);
   }
 
-  void create_liveness_list(Function* f) {
+  void create_liveness_list(Program p) {
     //Gen and kill 
-    // std::cout << "Started Liveness" << std::endl;
     auto gen_kill_visitor = new Gen_Kill_Visitors();
-    for (auto i : f->instructions) {
-      i->Accept(gen_kill_visitor);
-      f->GEN.push_back(i->reads);
-      f->KILL.push_back(i->writes);
-    }
-    // std::cout << "finished gen and kill" << std::endl;
-
-    int count = 0;
-    //Print gen & kill methods
-    if (shouldPrint) {
-      std::cout << "Gen:" << std::endl;
-      for (auto i: f->GEN) {
-        std::cout << std::to_string(count) << ": ";
-        for(auto item: i) {
-          if (dynamic_cast<Variable *>(item) != nullptr){
-            Variable* var_temp = (Variable*)item;
-            std::cout << var_temp->toString() << " ";
-          } else if (dynamic_cast<Register *>(item) != nullptr) {
-            Register* reg_temp = (Register*)item;
-            std::cout << reg_temp->toString() << " ";
-          }
-        } 
-        count++;
-        std::cout << std::endl;
+    for (auto f : p.functions) {
+      for (auto i : f->instructions) {
+        i->Accept(gen_kill_visitor);
+        f->GEN.push_back(i->reads);
+        f->KILL.push_back(i->writes);
       }
 
-      std::cout << "Kill: " << std::endl;
-      count = 0;
-      for (auto i: f->KILL) {
-        std::cout << std::to_string(count) << ": ";
-        for(auto item: i){
-          if (dynamic_cast<Variable *>(item) != nullptr){
-            Variable* var_temp = (Variable*)item;
-            std::cout << var_temp->toString() << " ";
-          } else if (dynamic_cast<Register *>(item) != nullptr) {
-            Register* reg_temp = (Register*)item;
-            std::cout << reg_temp->toString() << " ";
+      int count = 0;
+      //Print gen & kill methods
+      if (shouldPrint) {
+        std::cout << "Gen:" << std::endl;
+        for (auto i: f->GEN) {
+          std::cout << std::to_string(count) << ": ";
+          for(auto item: i) {
+            if (dynamic_cast<Variable *>(item) != nullptr){
+              Variable* var_temp = (Variable*)item;
+              std::cout << var_temp->toString() << " ";
+            } else if (dynamic_cast<Register *>(item) != nullptr) {
+              Register* reg_temp = (Register*)item;
+              std::cout << reg_temp->toString() << " ";
+            }
+          } 
+          count++;
+          std::cout << std::endl;
+        }
+
+        std::cout << "Kill: " << std::endl;
+        count = 0;
+        for (auto i: f->KILL) {
+          std::cout << std::to_string(count) << ": ";
+          for(auto item: i){
+            if (dynamic_cast<Variable *>(item) != nullptr){
+              Variable* var_temp = (Variable*)item;
+              std::cout << var_temp->toString() << " ";
+            } else if (dynamic_cast<Register *>(item) != nullptr) {
+              Register* reg_temp = (Register*)item;
+              std::cout << reg_temp->toString() << " ";
+            }
+          }
+          count++;
+          std::cout << std::endl;
+        }
+      }
+
+      // Successor and predecessor
+      f->findSuccessorsPredecessors();
+      if (shouldPrint) {
+        for (auto f : p.functions) {
+          for (int ii = 0; ii < f->instructions.size(); ii++) {
+            std::cout << "instruction " << std::to_string(ii) << " succeeded by: ";
+            for (auto it = f->instructions[ii]->successor_idx.begin(); it != f->instructions[ii]->successor_idx.end(); ++it)
+              std::cout << ' ' << *it;
+            std::cout << '\n';
           }
         }
-        count++;
-        std::cout << std::endl;
       }
-    }
 
-    // std::cout << "started sucessors/predecessors" << std::endl;
 
-    // Successor and predecessor
-    f->findSuccessorsPredecessors();
-    if (shouldPrint) {
-        for (int ii = 0; ii < f->instructions.size(); ii++) {
-          std::cout << "instruction " << std::to_string(ii) << " succeeded by: ";
-          for (auto it = f->instructions[ii]->successor_idx.begin(); it != f->instructions[ii]->successor_idx.end(); ++it)
-            std::cout << ' ' << *it;
-          std::cout << '\n';
-        }
-    }
+      // Compute IN and OUT sets
+      bool didChange;
+      do {
+        didChange = false;
+        for (int ii = f->instructions.size() - 1; ii >= 0; ii--) {
+          std::unordered_set<Item *> temp_IN = f->instructions[ii]->IN; //set equal to instruction's IN set (this will be the previous iteration's) and compare at end
+          std::unordered_set<Item *> temp_OUT = f->instructions[ii]->OUT;
+          f->instructions[ii]->IN.clear();
+          f->instructions[ii]->OUT.clear();
 
-    // std::cout << "ended sucessors/predecessors" << std::endl;
-    
+          //* populate OUT sets
+          if (shouldPrint) std::cout << "populating instruction's OUT set" << std::endl;
+          bool dupie;
+          // find the successor(s) of the current instruction
+          for (auto it1 = f->instructions[ii]->successor_idx.begin(); it1 != f->instructions[ii]->successor_idx.end(); ++it1) {
+            // iterate through the successors' IN sets
+            for (auto it2 = f->instructions[*it1]->IN.begin(); it2 != f->instructions[*it1]->IN.end(); ++it2) {
+              auto temp2 = *it2;
+              dupie = false;
+              // add each item in the successors' IN sets to the current instruction's OUT set
+              for (auto it3 = f->instructions[ii]->OUT.begin(); it3 != f->instructions[ii]->OUT.end(); ++it3) {
+                auto temp3 = *it3;
+                if (temp2->toString() == temp3->toString()) {
+                  dupie = true;
+                  break;
+                }
+              }
+              if (!dupie) f->instructions[ii]->OUT.insert(temp2);
+            }
+          }
 
-    // std::cout << "started in/out" << std::endl;
-    // Compute IN and OUT sets
-    bool didChange;
-    do {
-      didChange = false;
-      for (int ii = f->instructions.size() - 1; ii >= 0; ii--) {
-        std::unordered_set<Item *> temp_IN = f->instructions[ii]->IN; //set equal to instruction's IN set (this will be the previous iteration's) and compare at end
-        std::unordered_set<Item *> temp_OUT = f->instructions[ii]->OUT;
-        f->instructions[ii]->IN.clear();
-        f->instructions[ii]->OUT.clear();
+          //! START
+          //* GEN[ii]
+          if (shouldPrint) std::cout << "adding GEN to IN" << std::endl;
+          f->instructions[ii]->IN = f->GEN[ii];
+          if (shouldPrint) std::cout << "done adding GEN to IN" << std::endl;
 
-        //* populate OUT sets
-        if (shouldPrint) std::cout << "populating instruction's OUT set" << std::endl;
-        bool dupie;
-        // find the successor(s) of the current instruction
-        for (auto it1 = f->instructions[ii]->successor_idx.begin(); it1 != f->instructions[ii]->successor_idx.end(); ++it1) {
-          // iterate through the successors' IN sets
-          for (auto it2 = f->instructions[*it1]->IN.begin(); it2 != f->instructions[*it1]->IN.end(); ++it2) {
-            auto temp2 = *it2;
-            dupie = false;
-            // add each item in the successors' IN sets to the current instruction's OUT set
-            for (auto it3 = f->instructions[ii]->OUT.begin(); it3 != f->instructions[ii]->OUT.end(); ++it3) {
-              auto temp3 = *it3;
-              if (temp2->toString() == temp3->toString()) {
-                dupie = true;
+          //* OUT[ii] - KILL[ii]
+          bool OUTKILLFLAG;
+          for (auto it1 = f->instructions[ii]->OUT.begin(); it1 != f->instructions[ii]->OUT.end(); ++it1) {
+            OUTKILLFLAG = false;
+            auto temp1 = *it1;
+            for (auto it2 = f->KILL[ii].begin(); it2 != f->KILL[ii].end(); ++it2) {
+              auto temp2 = *it2;
+              if (temp1->toString() == temp2->toString()) {
+                OUTKILLFLAG = true;
                 break;
               }
             }
-            if (!dupie) f->instructions[ii]->OUT.insert(temp2);
-          }
-        }
-
-        //! START
-        //* GEN[ii]
-        if (shouldPrint) std::cout << "adding GEN to IN" << std::endl;
-        f->instructions[ii]->IN = f->GEN[ii];
-        if (shouldPrint) std::cout << "done adding GEN to IN" << std::endl;
-
-        //* OUT[ii] - KILL[ii]
-        bool OUTKILLFLAG;
-        for (auto it1 = f->instructions[ii]->OUT.begin(); it1 != f->instructions[ii]->OUT.end(); ++it1) {
-          OUTKILLFLAG = false;
-          auto temp1 = *it1;
-          for (auto it2 = f->KILL[ii].begin(); it2 != f->KILL[ii].end(); ++it2) {
-            auto temp2 = *it2;
-            if (temp1->toString() == temp2->toString()) {
-              OUTKILLFLAG = true;
-              break;
+            for (auto it = f->GEN[ii].begin(); it != f->GEN[ii].end(); ++it) {
+              auto temp = *it;
+              if (temp->toString() == temp1->toString()) {
+                OUTKILLFLAG = true;
+                break;
+              }
             }
+            if (!OUTKILLFLAG) f->instructions[ii]->IN.insert(*it1);
           }
-          for (auto it = f->GEN[ii].begin(); it != f->GEN[ii].end(); ++it) {
-            auto temp = *it;
-            if (temp->toString() == temp1->toString()) {
-              OUTKILLFLAG = true;
-              break;
-            }
+          //! END
+          
+          if (temp_OUT != f->instructions[ii]->OUT || temp_IN != f->instructions[ii]->IN) {
+            didChange = true;
           }
-          if (!OUTKILLFLAG) f->instructions[ii]->IN.insert(*it1);
         }
-        //! END
-        
-        if (temp_OUT != f->instructions[ii]->OUT || temp_IN != f->instructions[ii]->IN) {
-          didChange = true;
-        }
+      } while (didChange);
+
+      for (auto i : f->instructions) {
+        f->IN.push_back(i->IN);
+        f->OUT.push_back(i->OUT);
       }
-    } while (didChange);
-
-    // std::cout << "ended in/out" << std::endl;
-
-    for (auto i : f->instructions) {
-      f->IN.push_back(i->IN);
-      f->OUT.push_back(i->OUT);
     }
   }
 }
