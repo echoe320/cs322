@@ -155,21 +155,18 @@ int main(
    */
   if (interference_only){
     L2::create_liveness_list(p);
-    L2::create_interference_graph(p);
-    // for (auto f : p.functions) {
-    //   L2::create_liveness_list(f);
-    //   auto graph = L2::create_interference_graph(f);
-    //   for (auto it = graph->g.begin(); it != graph->g.end(); ++it) {
-    //     auto temp = *it;
-    //     std::cout << temp.first->name << " ";
-    //     for (auto item : temp.second) {
-    //       std::cout << item->name << " ";
-    //     }
-    //     std::cout << std::endl;
-    //   }
-    //   auto colorGraph = L2::registerAllocate(graph);
-    // }
-    // for (auto f : p.functions) f->printInterferenceGraph();
+    for (auto f : p.functions) {
+      auto graph = L2::create_interference_graph(f);
+      for (auto it = graph->g.begin(); it != graph->g.end(); ++it) {
+        auto temp = *it;
+        std::cout << temp.first->name << " ";
+        for (auto item : temp.second) {
+          std::cout << item->name << " ";
+        }
+        std::cout << std::endl;
+      }
+      // auto colorGraph = L2::registerAllocate(graph);
+    }
     return 0;
   }
 
