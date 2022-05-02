@@ -40,9 +40,9 @@ namespace L2 {
     return res; // res.first
   }
   std::string Memory::toString(void) {
-    auto reg_temp = dynamic_cast<Register *>(this->rv);
+    // auto reg_temp = dynamic_cast<Register *>(this->rv);
     auto num_temp = dynamic_cast<Number *>(this->offset);
-    return "mem " + reg_temp->toString() + " " + num_temp->toString();
+    return "mem " + this->rv->toString() + " " + num_temp->toString();
   }
 
   //Number

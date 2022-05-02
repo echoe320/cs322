@@ -122,6 +122,7 @@ int main(
    */
   if (spill_only){
     auto func = L2::spill_mult_var(p.functions[0], p.toSpill, p.prefix);
+
     // have to print func separately
     std::cout << "(" << func->name << "\n\t";
     std::cout << std::to_string(func->arguments) << " " << std::to_string(func->num_locals) << "\n";

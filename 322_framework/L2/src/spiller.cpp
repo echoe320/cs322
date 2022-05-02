@@ -13,11 +13,11 @@
 
 
 namespace L2 {
-    Spill_Visitors::Spill_Visitors(std::string toSpill, std::string prefix, int num_vars_spilled, int spill_count) {
+    Spill_Visitors::Spill_Visitors(std::string toSpill, std::string prefix, int num_vars_spilled) {
         this->var = toSpill;
         this->prefix = prefix;
         this->num_vars_spilled = num_vars_spilled;
-        this->count = spill_count;
+        // this->count = spill_count;
     }
 
     int Spill_Visitors::getCount() {
@@ -35,7 +35,7 @@ namespace L2 {
       Memory* mem = new Memory(reg, offset);
 
       std::string var_name = this->prefix + std::to_string(this->count);
-      std::cout << "load " << var_name << std::endl;
+      // std::cout << "load " << var_name << std::endl;
       Variable* var = new Variable(var_name);
       var->isSpill = true;
 
@@ -50,7 +50,7 @@ namespace L2 {
       Memory* mem = new Memory(reg, offset);
 
       std::string var_name = this->prefix + std::to_string(this->count);
-      std::cout << "store" << var_name << std::endl;
+      // std::cout << "store" << var_name << std::endl;
       Variable* var = new Variable(var_name);
       var->isSpill = true;
 
@@ -71,47 +71,75 @@ namespace L2 {
       bool didWrite = false;
       std::string var_name = this->prefix + std::to_string(this->count);
 
-      if (dynamic_cast<Memory*>(src) != nullptr) {
-        auto mem_temp = dynamic_cast<Memory*>(src);
-        auto mem_fields = mem_temp->get();
-        auto rv_temp = std::get<0>(mem_fields);
-        rv_temp = dynamic_cast<Register*>(rv_temp);
-        auto offset_temp = std::get<1>(mem_fields);
-        if (rv_temp->toString() == this->var) {
-          didRead = true;
-          Variable* var = new Variable(var_name);
-          var->isSpill = true;
-          src = new Memory(var, offset_temp);
-        }
-      }
-      if (dynamic_cast<Memory*>(dst) != nullptr) {
-        auto mem_temp = dynamic_cast<Memory*>(dst);
-        auto mem_fields = mem_temp->get();
-        auto rv_temp = std::get<0>(mem_fields);
-        rv_temp = dynamic_cast<Register*>(rv_temp);
-        auto offset_temp = std::get<1>(mem_fields);
-        if (rv_temp->toString() == this->var) {
-          didRead = true;
-          Variable* var = new Variable(var_name);
-          var->isSpill = true;
-          dst = new Memory(var, offset_temp);
-        }
-      }
+      // if (dynamic_cast<Memory*>(src) != nullptr) {
+      //   auto mem_temp = dynamic_cast<Memory*>(src);
+      //   auto mem_fields = mem_temp->get();
+      //   auto rv_temp = std::get<0>(mem_fields);
+      //   rv_temp = dynamic_cast<Variable*>(rv_temp);
+      //   if (rv_temp != nullptr) {
+      //     auto offset_temp = std::get<1>(mem_fields);
+      //     if (rv_temp->toString() == this->var) {
+      //       didRead = true;
+      //       Variable* var = new Variable(var_name);
+      //       var->isSpill = true;
+      //       src = new Memory(var, offset_temp);
+      //     }
+      //   }
+      // }
+      // if (dynamic_cast<Memory*>(dst) != nullptr) {
+      //   auto mem_temp = dynamic_cast<Memory*>(dst);
+      //   auto mem_fields = mem_temp->get();
+      //   auto rv_temp = std::get<0>(mem_fields);
+      //   rv_temp = dynamic_cast<Variable*>(rv_temp);
+      //   if (rv_temp != nullptr) {
+      //     auto offset_temp = std::get<1>(mem_fields);
+      //     if (rv_temp->toString() == this->var) {
+      //       didRead = true;
+      //       Variable* var = new Variable(var_name);
+      //       var->isSpill = true;
+      //       dst = new Memory(var, offset_temp);
+      //     }
+      //   }
+      // }
       if (dynamic_cast<Variable*>(src) != nullptr) {
-        auto src_temp = dynamic_cast<Variable*>(src);
-        if (src_temp->toString() == this->var) {
+        // auto src_temp = dynamic_cast<Variable*>(src);
+        if (src->toString() == this->var) {
           didRead = true;
           src = new Variable(var_name);
           src->isSpill = true;
         }
       }
+      else if (dynamic_cast<Memory*>(src) != nullptr) {
+        auto mem_temp = dynamic_cast<Memory*>(src);
+        auto mem_fields = mem_temp->get();
+        auto rv_temp = std::get<0>(mem_fields);
+        auto offset_temp = std::get<1>(mem_fields);
+        if (rv_temp->toString() == this->var) {
+          didRead = true;
+          Variable* var = new Variable(var_name);
+          src = new Memory(var, offset_temp);
+          src->isSpill = true;
+        }
+      }
       if (dynamic_cast<Variable*>(dst) != nullptr) {
-        auto dst_temp = dynamic_cast<Variable*>(dst);
-        if (dst_temp->toString() == this->var) {
+        // auto dst_temp = dynamic_cast<Variable*>(dst);
+        if (dst->toString() == this->var) {
         didWrite = true;
         dst = new Variable(var_name);
         dst->isSpill = true;
+        }
       }
+      else if (dynamic_cast<Memory*>(dst) != nullptr) {
+        auto mem_temp = dynamic_cast<Memory*>(dst);
+        auto mem_fields = mem_temp->get();
+        auto rv_temp = std::get<0>(mem_fields);
+        auto offset_temp = std::get<1>(mem_fields);
+        if (rv_temp->toString() == this->var) {
+          didRead = true;
+          Variable* var = new Variable(var_name);
+          dst = new Memory(var, offset_temp);
+          dst->isSpill = true;
+        }
       }
 
       if (this->count != 0 && didRead) this->new_inst.push_back(this->loadvar());
@@ -131,47 +159,74 @@ namespace L2 {
       bool didWrite = false;
       std::string var_name = this->prefix + std::to_string(this->count);
 
-      if (dynamic_cast<Memory*>(src) != nullptr) {
-        auto mem_temp = dynamic_cast<Memory*>(src);
-        auto mem_fields = mem_temp->get();
-        auto rv_temp = std::get<0>(mem_fields);
-        rv_temp = dynamic_cast<Register*>(rv_temp);
-        auto offset_temp = std::get<1>(mem_fields);
-        if (rv_temp->toString() == this->var) {
-          didRead = true;
-          Variable* var = new Variable(var_name);
-          var->isSpill = true;
-          src = new Memory(var, offset_temp);
-        }
-      }
-      if (dynamic_cast<Memory*>(dst) != nullptr) {
-        auto mem_temp = dynamic_cast<Memory*>(dst);
-        auto mem_fields = mem_temp->get();
-        auto rv_temp = std::get<0>(mem_fields);
-        rv_temp = dynamic_cast<Register*>(rv_temp);
-        auto offset_temp = std::get<1>(mem_fields);
-        if (rv_temp->toString() == this->var) {
-          didRead = true;
-          Variable* var = new Variable(var_name);
-          var->isSpill = true;
-          dst = new Memory(var, offset_temp);
-        }
-      }
+      // if (dynamic_cast<Memory*>(src) != nullptr) {
+      //   auto mem_temp = dynamic_cast<Memory*>(src);
+      //   auto mem_fields = mem_temp->get();
+      //   auto rv_temp = std::get<0>(mem_fields);
+      //   // rv_temp = dynamic_cast<Variable*>(rv_temp);
+      //   if (dynamic_cast<Variable*>(rv_temp) != nullptr) {
+      //     auto offset_temp = std::get<1>(mem_fields);
+      //     if (rv_temp->toString() == this->var) {
+      //       didRead = true;
+      //       Variable* var = new Variable(var_name);
+      //       var->isSpill = true;
+      //       src = new Memory(var, offset_temp);
+      //     }
+      //   }
+      // }
+      // if (dynamic_cast<Memory*>(dst) != nullptr) {
+      //   auto mem_temp = dynamic_cast<Memory*>(dst);
+      //   auto mem_fields = mem_temp->get();
+      //   auto rv_temp = std::get<0>(mem_fields);
+      //   // rv_temp = dynamic_cast<Variable*>(rv_temp);
+      //   if (dynamic_cast<Variable*>(rv_temp) != nullptr) {
+      //     auto offset_temp = std::get<1>(mem_fields);
+      //     if (rv_temp->toString() == this->var) {
+      //       didRead = true;
+      //       Variable* var = new Variable(var_name);
+      //       var->isSpill = true;
+      //       dst = new Memory(var, offset_temp);
+      //     }
+      //   }
+      // }
       if (dynamic_cast<Variable*>(src) != nullptr) {
-        auto src_temp = dynamic_cast<Variable*>(src);
-        if (src_temp->toString() == this->var) {
+        // auto src_temp = dynamic_cast<Variable*>(src);
+        if (src->toString() == this->var) {
           didRead = true;
           src = new Variable(var_name);
           src->isSpill = true;
         }
       }
+      else if (dynamic_cast<Memory*>(src) != nullptr) {
+        auto mem_temp = dynamic_cast<Memory*>(src);
+        auto mem_fields = mem_temp->get();
+        auto rv_temp = std::get<0>(mem_fields);
+        auto offset_temp = std::get<1>(mem_fields);
+        if (rv_temp->toString() == this->var) {
+          didRead = true;
+          Variable* var = new Variable(var_name);
+          src = new Memory(var, offset_temp);
+        }
+      }
       if (dynamic_cast<Variable*>(dst) != nullptr) {
-        auto dst_temp = dynamic_cast<Variable*>(dst);
-        if (dst_temp->toString() == this->var) {
+        // auto dst_temp = dynamic_cast<Variable*>(dst);
+        if (dst->toString() == this->var) {
           didRead = true;
           didWrite = true;
           dst = new Variable(var_name);
           dst->isSpill = true;
+        }
+      }
+      else if (dynamic_cast<Memory*>(dst) != nullptr) {
+        auto mem_temp = dynamic_cast<Memory*>(dst);
+        auto mem_fields = mem_temp->get();
+        auto rv_temp = std::get<0>(mem_fields);
+        auto offset_temp = std::get<1>(mem_fields);
+        if (rv_temp->toString() == this->var) {
+          didRead = true;
+          // didWrite = true;
+          Variable* var = new Variable(var_name);
+          dst = new Memory(var, offset_temp);
         }
       }
       
@@ -192,9 +247,10 @@ namespace L2 {
       std::string var_name = this->prefix + std::to_string(this->count);
 
       if (dynamic_cast<Variable*>(dst) != nullptr) {
-        auto dst_temp = dynamic_cast<Variable*>(dst);
-        if (dst_temp->toString() == this->var) {
+        // auto dst_temp = dynamic_cast<Variable*>(dst);
+        if (dst->toString() == this->var) {
           didRead = true;
+          didWrite = true;
           dst = new Variable(var_name);
           dst->isSpill = true;
         }
@@ -218,17 +274,17 @@ namespace L2 {
       std::string var_name = this->prefix + std::to_string(this->count);
 
       if (dynamic_cast<Variable*>(src) != nullptr) {
-        auto src_temp = dynamic_cast<Variable*>(src);
-        if (src_temp->toString() == this->var) {
+        // auto src_temp = dynamic_cast<Variable*>(src);
+        if (src->toString() == this->var) {
           didRead = true;
           src = new Variable(var_name);
           src->isSpill = true;
         }
       }
       if (dynamic_cast<Variable*>(dst) != nullptr) {
-        auto dst_temp = dynamic_cast<Variable*>(dst);
-        if (dst_temp->toString() == this->var) {
-          didRead = true;
+        // auto dst_temp = dynamic_cast<Variable*>(dst);
+        if (dst->toString() == this->var) {
+          didWrite = true;
           dst = new Variable(var_name);
           dst->isSpill = true;
         }
@@ -271,7 +327,7 @@ namespace L2 {
       if (dynamic_cast<Variable*>(dst) != nullptr) {
         auto dst_temp = dynamic_cast<Variable*>(dst);
         if (dst_temp->toString() == this->var) {
-          didRead = true;
+          didWrite = true;
           dst = new Variable(var_name);
           dst->isSpill = true;
         }
@@ -292,7 +348,7 @@ namespace L2 {
       auto op = std::get<3>(fields);
 
       bool didRead = false;
-      bool didWrite = false;
+      // bool didWrite = false;
       std::string var_name = this->prefix + std::to_string(this->count);
 
       if (dynamic_cast<Variable*>(arg1) != nullptr) {
@@ -315,8 +371,8 @@ namespace L2 {
       if (this->count != 0 && didRead) this->new_inst.push_back(this->loadvar());
       auto inst = new Instruction_cjump(arg1, arg2, label, op);
       this->new_inst.push_back(inst);
-      if (didWrite) this->new_inst.push_back(this->storevar());
-      if (didRead || didWrite) this->count++;
+      // if (didWrite) this->new_inst.push_back(this->storevar());
+      if (didRead) this->count++;
     }
 
     void Spill_Visitors::VisitInstruction(Instruction_lea *element){
@@ -349,7 +405,7 @@ namespace L2 {
       if (dynamic_cast<Variable*>(dst) != nullptr) {
         auto dst_temp = dynamic_cast<Variable*>(dst);
         if (dst_temp->toString() == this->var) {
-          didRead = true;
+          didWrite = true;
           dst = new Variable(var_name);
           dst->isSpill = true;
         }
@@ -424,9 +480,9 @@ namespace L2 {
       if (didRead || didWrite) this->count++;
     }
 
-  Function* spill_one_var(Function* f, std::string toSpill, std::string prefix, int num_vars_spilled, int spill_count) {
+  std::vector<Instruction*> spill_one_var(Function* f, std::string toSpill, std::string prefix, int num_vars_spilled) {
     // std::cout << "we made it to spill_one_var()" << std::endl;
-    auto spill_visitor = new Spill_Visitors(toSpill, prefix, num_vars_spilled, spill_count);
+    auto spill_visitor = new Spill_Visitors(toSpill, prefix, num_vars_spilled);
     spill_visitor->func_vars = f->func_vars;
     // std::cout << "visiting instructions" << std::endl;
     for (auto inst : f->instructions) {
@@ -438,41 +494,55 @@ namespace L2 {
       spill_visitor->num_vars_spilled++;
     }
 
-    //* NEW STUFF
-    Function* spilled_func = new Function();
-    spilled_func->name = f->name;
-    spilled_func->arguments = f->arguments;
-    spilled_func->num_locals = spill_visitor->num_vars_spilled;
-    spilled_func->instructions = spill_visitor->getInstructions();
-    spilled_func->spill_count = spill_visitor->count;
+    return spill_visitor->getInstructions();
 
-    return spilled_func;
-  }
+    // start printing to cout
+    // std::cout << "(" << f->name << "\n\t";
+    // std::cout << std::to_string(f->arguments) << " " << std::to_string(spill_visitor->num_vars_spilled) << "\n";
+    
+    // for (auto i : spill_visitor->getInstructions()) {
+    //   std::cout << "\t" << i->toString() << "\n";
+    // }
+
+    // std::cout << ")" << std::endl;
+
+    // //* NEW STUFF
+    // Function* spilled_func = new Function();
+    // spilled_func->name = f->name;
+    // spilled_func->arguments = f->arguments;
+    // spilled_func->num_locals = spill_visitor->num_vars_spilled;
+    // spilled_func->instructions = spill_visitor->getInstructions();
+    // spilled_func->spill_count = spill_visitor->count;
+
+    // return spilled_func;
+  } 
 
   Function* spill_mult_var(Function* f, std::vector<Variable*> toSpill, std::string prefix) {
     // std::cout << "start spilling" << std::endl;
-    Function* temp_func = f;
-    int spill_count = 0;
+    // Function* temp_func = new Function();
+    // temp_func->instructions = f->instructions;
+    // int spill_count = 0;
     int num_vars_spilled = 0;
     // std::cout << "start spilling one" << std::endl;
     for (auto var : toSpill) {
-      // auto var_temp = dynamic_cast<Variable*>(var);
-      if (!var->isSpill) {
-        temp_func = spill_one_var(temp_func, var->toString(), prefix, num_vars_spilled, spill_count);
-        num_vars_spilled += temp_func->num_locals;
-        spill_count = temp_func->spill_count;
-      }
+      int inst_count = f->instructions.size();
+      f->instructions = spill_one_var(f, var->toString(), prefix, num_vars_spilled);
+      if (f->instructions.size() > inst_count) num_vars_spilled += 1;
+        // spill_count = temp_func->spill_count;
+      // }
     }
+
+    f->num_locals += num_vars_spilled;
     // std::cout << "finished spilling one" << std::endl;
 
-    Function* spilled_func = new Function();
-    spilled_func->name = temp_func->name;
-    spilled_func->arguments = temp_func->arguments;
-    spilled_func->num_locals = num_vars_spilled;
-    spilled_func->instructions = temp_func->instructions;
-    spilled_func->spill_count = temp_func->spill_count;
+    // Function* spilled_func = new Function();
+    // temp_func->name = f->name;
+    // temp_func->arguments = f->arguments;
+    // temp_func->num_locals = num_vars_spilled;
+    // temp_func->instructions = f->instructions;
+    // spilled_func->spill_count = temp_func->spill_count;
     // std::cout << "done spilling" << std::endl;
 
-    return spilled_func;
+    return f;
   }
 }
