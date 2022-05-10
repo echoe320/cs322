@@ -318,5 +318,5 @@ namespace L2 {
 
   std::string get_rt_string (int enum_value);
 
-  Program create_program_with_colors(Program p);
+  std::string get_color (int idx);
 }

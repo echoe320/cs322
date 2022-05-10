@@ -20,8 +20,9 @@ namespace L2 {
     for (auto i : all_color_list) {
       bool color_present = false;
       for (auto it = edges.begin(); it != edges.end(); ++it) {
-        auto temp = *it;
-        Node* adj_node = this->g->lookupNode(temp->name);
+        //// auto temp = *it;
+        //// Node* adj_node = this->g->lookupNode(temp->name);
+        Node* adj_node = *it;
         if (adj_node->color == i) { 
           color_present = true;
           break;
@@ -30,7 +31,7 @@ namespace L2 {
       }
       if (color_present == false) return i;
     }
-    return "none";
+    return "spill";
   }
 
   //* STEP 1) Repeatedly select a node and remove it from the graph, putting it on top of the stack
@@ -77,7 +78,8 @@ namespace L2 {
     while (deg >= 0) {
       auto curr_nodes = this->g->degree_dict[deg];
       for (auto it = curr_nodes.begin(); it != curr_nodes.end(); ++it) {
-        auto temp = *it;
+        auto query = *it;
+        auto temp = this->g->lookupNode(query->name);
         if (!temp->isRegister && !temp->didPop) {
           auto popped = this->g->popNode(temp);
           this->poppedNodes.push(popped.first);
@@ -91,7 +93,8 @@ namespace L2 {
     while (deg >= 0) {
       auto curr_nodes = this->g->degree_dict[deg];
       for (auto it = curr_nodes.begin(); it != curr_nodes.end(); ++it) {
-        auto temp = *it;
+        auto query = *it;
+        auto temp = this->g->lookupNode(query->name);
         if (!temp->isRegister && !temp->didPop) {
           auto popped = this->g->popNode(temp);
           this->poppedNodes.push(popped.first);
@@ -110,12 +113,13 @@ namespace L2 {
       // Node* popped = this->g->lookupNode(this->poppedNodes.top());
       Node* popped = this->poppedNodes.top();
       // std::set<Node*> n = this->Node_neighbors.top();
-      popped = this->g->lookupNode(popped->name);
-      std::set<Node*> popped_neighbors = this->g->g[popped];
+      //// popped = this->g->lookupNode(popped->name);
+      // std::set<Node*> popped_neighbors = this->g->g[popped];
+      std::set<Node*> popped_neighbors = Node_neighbors.top();
       popped->color = this->colorSelector(popped_neighbors);
       popped->didPop = false;
       // std::cout << popped->name << " " << popped->color << ": ";
-      for (auto it = this->g->g[popped].begin(); it != this->g->g[popped].end(); ++it) {
+      for (auto it = popped_neighbors.begin(); it != popped_neighbors.end(); ++it) {
         auto temp = *it;
         auto adj_node = this->g->lookupNode(temp->name);
         auto got = this->g->g[adj_node].find(popped);
@@ -124,12 +128,13 @@ namespace L2 {
       }
       // std::cout << std::endl;
       // std::cout << popped->name << " is " << popped->color << std::endl;
-      if (popped->color == "none") {
+      if (popped->color == "spill") {
         this->failedToColor.push_back(popped);
         // popped->isSpill = true;
       }
       else this->coloredAny = true;
       this->poppedNodes.pop();
+      this->Node_neighbors.pop();
     }
   }
 
@@ -142,12 +147,10 @@ namespace L2 {
     // std::cout << "variables to be spilled: ";
     for (auto node : cgraph->failedToColor) {
       // std::cout << node->name << " ";
-      if (!node->isSpill) {
-        Variable* temp_var = new Variable(node->name);
-        cgraph->tobeSpilled.push_back(temp_var);
-      }
+      Variable* temp_var = new Variable(node->name);
+      cgraph->tobeSpilled.push_back(temp_var);
     }
-    std::cout << std::endl;
+    // std::cout << std::endl;
     return cgraph;
   }
 

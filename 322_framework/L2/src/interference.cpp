@@ -29,7 +29,7 @@ namespace L2 {
   // std::string Graph::popNode(Node* node) {
   std::pair<Node*, std::set<Node*>> Graph::popNode(Node* node) {
     Node* found = this->lookupNode(node->name);
-    std::set<Node*> node_edges = this->g[found]; 
+    std::set<Node*> node_edges = this->g[found];
     for (auto it = node_edges.begin(); it != node_edges.end(); ++it) {
       Node* query = *it;
       Node* temp = this->lookupNode(query->name);
@@ -76,6 +76,7 @@ namespace L2 {
       this->degree_dict[0].insert(new_node);
       this->name_dict[node_name] = new_node;
       this->g[new_node] = empty_set;
+      this->nodes.push_back(new_node);
       return new_node;
     }
   }

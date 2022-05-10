@@ -356,6 +356,10 @@ namespace L2 {
     return (rt_enum_str[enum_value]);
   }
 
+  std::string get_color (int idx) {
+    return all_color_list[idx];
+  }
+
 
   //* FUNCTION - setting successors and predecessors
   void Function::findSuccessorsPredecessors() {

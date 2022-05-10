@@ -545,4 +545,17 @@ namespace L2 {
 
     return f;
   }
+
+  Function* spill_all(Function* f, std::string prefix) {
+    int num_vars_spilled = 0;
+
+    for (auto var : f->func_vars) {
+      int inst_count = f->instructions.size();
+      f->instructions = spill_one_var(f, var->toString(), prefix, num_vars_spilled);
+      if (f->instructions.size() > inst_count) num_vars_spilled += 1;
+    }
+
+    f->num_locals += num_vars_spilled;
+    return f;
+  }
 }

@@ -522,39 +522,40 @@ namespace L2 {
       /* Register Allocation Loop */
       if (shouldPrint) std::cout << "start register allocation" << std::endl;
       bool mustSpill;
-      Function* func_copy = f;
+      Function* func_copy;
+      func_copy = f;
       Graph* interference_graph;
       ColorGraph* color_graph; // set visitor's color_graph field here
       std::vector<Variable*> spill_list;
       std::string prefix = "%JACOBEUGENEAREAWESOME";
-      // int count = 0;
-      // do {
-      //   //! make sure to check the edge case of can't color and can't spill
-      //   std::cout << "iterate analysis" << std::endl;
-      //   mustSpill = false;
-      //   spill_list.clear();
-      //   create_liveness_list(func_copy);
-      //   std::cout << "created liveness list" << std::endl;
-      //   interference_graph = create_interference_graph(func_copy);
-      //   std::cout << "created interference graph" << std::endl;
-      //   color_graph = registerAllocate(interference_graph);
-      //   std::cout << "created color graph" << std::endl;
-      //   std::cout << "variables to be spilled: ";
-      //   for (auto var : color_graph->tobeSpilled) {
-      //     std::string var_name = var->toString();
-      //     if (var_name.compare(0, 22, prefix) != 0) {
-      //       spill_list.push_back(var);
-      //       std::cout << var_name << " ";
-      //     }
-      //   }
-      //   std::cout << std::endl;
-      //   if (!spill_list.empty()) {
-      //     mustSpill = true;
-      //     std::cout << "spilling" << std::endl;
-      //     func_copy = spill_mult_var(func_copy, color_graph->tobeSpilled, prefix)
-      //     std::cout << "done spilling" << std::endl;
-      //   }
-      // } while (mustSpill);
+      int count = 0;
+      do {
+        //! make sure to check the edge case of can't color and can't spill
+        std::cout << "iterate analysis" << std::endl;
+        mustSpill = false;
+        spill_list.clear();
+        create_liveness_list(func_copy);
+        std::cout << "created liveness list" << std::endl;
+        interference_graph = create_interference_graph(func_copy);
+        std::cout << "created interference graph" << std::endl;
+        color_graph = registerAllocate(interference_graph);
+        std::cout << "created color graph" << std::endl;
+        std::cout << "variables to be spilled: ";
+        for (auto var : color_graph->tobeSpilled) {
+          std::string var_name = var->toString();
+          if (var_name.compare(0, 22, prefix) != 0) {
+            spill_list.push_back(var);
+            // std::cout << var_name << " ";
+          }
+        }
+        std::cout << std::endl;
+        if (!spill_list.empty()) {
+          mustSpill = true;
+          std::cout << "spilling" << std::endl;
+          func_copy = spill_mult_var(func_copy, color_graph->tobeSpilled, prefix);
+          std::cout << "done spilling" << std::endl;
+        }
+      } while (mustSpill);
       
       /* Create function header */
       outputFile << "\t" << "(" << func_copy->name << std::endl;

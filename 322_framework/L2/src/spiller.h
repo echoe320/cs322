@@ -5,6 +5,7 @@
 namespace L2{
   std::vector<Instruction*> spill_one_var(Function* f, std::string toSpill, std::string prefix, int num_vars_spilled);
   Function* spill_mult_var(Function* f, std::vector<Variable*> toSpill, std::string prefix);
+  Function* spill_all(Function* f, std::string prefix);
 
   class Spill_Visitors : public Visitor {
     public:
