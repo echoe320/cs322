@@ -62,8 +62,7 @@ namespace L3 {
         }
         // two successors
         Instruction_br_t *b = dynamic_cast<Instruction_br_t *>(i);
-        if (b != nullptr)
-        {
+        if (b != nullptr) {
             vector<int> successors;
             Item *label = b->label;
             successors.push_back(idx + 1);
@@ -81,16 +80,16 @@ namespace L3 {
             return successors;
         }
         // no successor
-        Instruction_ret *c = dynamic_cast<Instruction_ret *>(i);
-        if (c != nullptr)
-        {
-            return {};
+        Instruction_return *r = dynamic_cast<Instruction_return *>(i);
+        Instruction_return_t *rt = dynamic_cast<Instruction_return_t *>(i);
+        if (r != nullptr || rt != nullptr ||) {
+          return {};
         }
-        Instruction_call *d = dynamic_cast<Instruction_call *>(i);
-        if (d != nullptr)
-        {
-            if (String *str = dynamic_cast<String *>(d->callee)) {
 
+        Instruction_call *c = dynamic_cast<Instruction_call *>(i);
+        Instruction_call_assign *ca = dynamic_cast<Instruction_call_assign *>(i);
+        if (c != nullptr || ca != nullptr) {
+            if (String *str = dynamic_cast<String *>(d->callee)) {
                 if (str->toString() == "tensor-error") {
                     return {};
                 }
@@ -180,29 +179,29 @@ namespace L3 {
         return res; 
     }
 
-    void GenKill::visit(Instruction_ret_not *i) {
+    void GenKill::VisitInstruction(Instruction_return *i) {
         i->uses = {};
         i->define = {};
     }
 
-    void GenKill::visit(Instruction_ret_t *i) {
+    void GenKill::VisitInstruction(Instruction_return_t *i) {
         if(dynamic_cast<Variable*>(i->arg) != nullptr){
             i->uses.push_back(i->arg);
         }
         i->define = {};
     }
 
-    void GenKill::visit(Instruction_assignment *i) {
+    void GenKill::VisitInstruction(Instruction_assignment *i) {
         if(dynamic_cast<Variable*>(i->src)) i->uses.push_back(i->src);
         i->define.push_back(i->dst);
     }
 
-    void GenKill::visit(Instruction_load *i) {
+    void GenKill::VisitInstruction(Instruction_load *i) {
         i->uses.push_back(i->src);
         i->define.push_back(i->dst);
     }
 
-    void GenKill::visit(Instruction_math *i) {
+    void GenKill::VisitInstruction(Instruction_op *i) {
         if(dynamic_cast<Variable*>(i->oprand1) != nullptr) {
             i->uses.push_back(i->oprand1);
         }
@@ -212,32 +211,22 @@ namespace L3 {
         i->define.push_back(i->dst);
     }
 
-    void GenKill::visit(Instruction_store *i) {
+    void GenKill::VisitInstruction(Instruction_store *i) {
         if(dynamic_cast<Variable*>(i->src)) i->uses.push_back(i->src);
         i->define.push_back(i->dst);
 
     }
-    void GenKill::visit(Instruction_compare *i) {
-        if(dynamic_cast<Variable*>(i->oprand1) != nullptr) {
-            i->uses.push_back(i->oprand1);
-        }
-        if(dynamic_cast<Variable*>(i->oprand2) != nullptr) {
-            i->uses.push_back(i->oprand2);
-        }
-        i->define.push_back(i->dst);
-    }
-
-    void GenKill::visit(Instruction_br_label *i) {
+    void GenKill::VisitInstruction(Instruction_br_label *i) {
         i->uses = {};
         i->define = {};
     }
 
-    void GenKill::visit(Instruction_br_t *i) {
+    void GenKill::VisitInstruction(Instruction_br_t *i) {
         if(dynamic_cast<Variable*>(i->condition))i->uses.push_back(i->condition);
         i->define = {};
     }
 
-    void GenKill::visit(Instruction_call_noassign *i) {
+    void GenKill::VisitInstruction(Instruction_call *i) {
         for(Item* item : i->args) {
             Variable* v = dynamic_cast<Variable *>(item); 
             if(v != nullptr) i->uses.push_back(v);
@@ -246,7 +235,7 @@ namespace L3 {
         if(v_callee != nullptr) i->uses.push_back(v_callee);
     }
 
-    void GenKill::visit(Instruction_call_assignment *i) {
+    void GenKill::VisitInstruction(Instruction_call_assign *i) {
         for(Item* item : i->args) {
             Variable* v = dynamic_cast<Variable *>(item); 
             if(v != nullptr) i->uses.push_back(v);
@@ -256,7 +245,7 @@ namespace L3 {
         i->define.push_back(i->dst);
     }
 
-    void GenKill::visit(Instruction_label *i) {
+    void GenKill::VisitInstruction(Instruction_label *i) {
         i->define = {};
         i->uses = {};
     }
