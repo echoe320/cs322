@@ -11,6 +11,7 @@
 #include <interference.h>
 #include <graph_coloring.h>
 #include <spiller.h>
+#include <color_visitor.h>
 
 // included libraries
 #include <unordered_set>
@@ -540,6 +541,8 @@ namespace L2 {
         std::cout << "created interference graph" << std::endl;
         color_graph = registerAllocate(interference_graph);
         std::cout << "created color graph" << std::endl;
+        func_copy = color2reg(func_copy, color_graph);
+        std::cout << "switched vars to registers from colors" << std::endl;
         std::cout << "variables to be spilled: ";
         for (auto var : color_graph->tobeSpilled) {
           std::string var_name = var->toString();

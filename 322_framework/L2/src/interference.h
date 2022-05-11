@@ -35,7 +35,7 @@ namespace L2 {
       std::unordered_map<Node*, std::set<Node*>> g;
       std::unordered_map<std::string, Node*> name_dict;
       std::map<int, std::unordered_set<Node*>> degree_dict;
-      std::vector nodes;
+      std::vector<Node*> nodes;
   };
 
   Graph* create_interference_graph(Function* f);

@@ -28,6 +28,8 @@ namespace L2 {
 
   static const char* all_color_list[] = {"red", "orange", "yellow", "green", "blue", "indigo", "purple", "pink", "brown", "black", "white", "gray", "maroon", "navy", "periwinkle"};
 
+  static const std::map<std::string, reg> color_dict = {{"red", rdi}, {"orange", rsi}, {"yellow", rdx}, {"green", rcx}, {"blue", r8}, {"indigo", r9}, {"purple", rax}, {"pink", rbx}, {"brown", rbp}, {"black", r10}, {"white", r11}, {"gray", r12}, {"maroon", r13}, {"navy", r14}, {"periwinkle", r15}};
+
   //Item Class + subclasses
   class Item {
     public:

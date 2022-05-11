@@ -8,7 +8,8 @@ namespace L2{
 
   class Color_Visitors : public Visitor {
     public:
-      Color_Visitors(std::string toSpill, std::string prefix, int num_vars_spilled);
+      Color_Visitors(ColorGraph* cgraph);
+      ColorGraph* cgraph;
       std::vector<Instruction*> new_inst;
       void VisitInstruction (Instruction_ret *element) override;
       void VisitInstruction (Instruction_assignment *element) override;
@@ -23,13 +24,5 @@ namespace L2{
       void VisitInstruction (Instruction_label *element) override;
       void VisitInstruction (Instruction_goto *element) override;
       void VisitInstruction (Instruction_stackarg *element) override;
-
-    // private:
-    //   std::string var;
-    //   std::string prefix;
-    //   std::vector<std::pair<bool, bool>> RWflags;
-    //   std::vector<Instruction*> new_inst;
-    //   Instruction* loadvar();
-    //   Instruction* storevar();
   };
 }
