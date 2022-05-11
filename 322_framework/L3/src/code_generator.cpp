@@ -12,6 +12,8 @@
 bool shouldPrint;
 
 namespace L3 {
+  int arg_reg_list[] = {L3::reg::rdi, L3::reg::rsi, L3::reg::rdx, L3::reg::rcx, L3::reg::r8, L3::reg::r9};
+
   bool comp_label(Label *l1, Label *l2) {
     return l1->get().length() > l2->get().length();
   }
@@ -176,10 +178,27 @@ namespace L3 {
     for (auto f : p.functions) {
       auto l3_visitors = new L3_Visitors(f, outputFile);
       /* function head */
-      outputFile << "\t(" << f->name;
-
-      /* args */
+      outputFile << "\t(" << f->name << std::endl;
+      outputFile << "\t\t" << f->arguments.size() << std::endl;
       
+      /* args */
+      if (f->arguments.size()) {
+        // auto arg_regs = L2::Architecture::get_argument_regs();
+        int idx = 0;
+        for (auto arg : f->arguments) {
+          std::string line;
+          int size = f->arguments.size();
+          int64_t stack_pos = (size - idx - 1) * 8;
+          if (idx >= 6) {
+            line = "\t" + arg->toString() + "<-" + "stack-arg " + std::to_string(stack_pos) + "\n";
+          } else {
+            line = "\t" + arg->toString() + " <- " + get_reg_string(arg_reg_list[idx]) + "\n";
+          }
+          // all_instructions.push_back(line);
+          outputFile << "\t" << line;
+          idx++;
+        }
+      }
 
       /* Instruction select */
       // want to give list of tiled functions to transform

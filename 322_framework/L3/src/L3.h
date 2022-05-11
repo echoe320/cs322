@@ -22,7 +22,12 @@ namespace L3 {
 
   enum calleeCode {cc_print, cc_allocate, cc_input, cc_tensor_error};
 
+  enum reg {rdi, rsi, rdx, rcx, r8, r9, rax, rbx, rbp, r10, r11, r12, r13, r14, r15, rsp};
+
+  static const char* reg_enum_str[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9", "rax", "rbx", "rbp", "r10", "r11", "r12", "r13", "r14", "r15", "rsp"};
+
   std::string get_enum_string (int enum_value);
+  std::string get_reg_string (int enum_value);
   
   class Item {
     public:
@@ -49,11 +54,10 @@ namespace L3 {
 
   class Variable : public Item {
     public:
-      Variable(var_type tp, std::string vn);
-      std::pair<var_type, std::string> get(void);
+      Variable(std::string vn);
+      std::string get(void);
       std::string toString(void) override;
     private:
-      var_type varType;
       std::string varName;
   };
 
@@ -73,6 +77,13 @@ namespace L3 {
       std::string toString(void) override;
     private:
       calleeCode ce;
+  };
+
+  class Empty : public Item {
+    public:
+      Empty(); 
+      std::string toString() override {return "";};
+      // ItemType getType(void) override { return item_empty; }
   };
 
   // Declare Visitor first

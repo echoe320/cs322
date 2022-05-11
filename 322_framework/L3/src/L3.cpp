@@ -43,13 +43,11 @@ namespace L3 {
   }
 
   //Variable
-  Variable::Variable(var_type tp, std::string vn){
-    this->varType = tp;
+  Variable::Variable(std::string vn){
     this->varName = vn;
   }
-  std::pair<var_type, std::string> Variable::get(void){
-    std::pair<var_type, std::string> var{this->varType, this->varName};
-    return var;
+  std::string Variable::get(void){
+    return this->varName;
   }
   std::string Variable::toString(void) {
     return this->varName;
@@ -255,6 +253,10 @@ namespace L3 {
 
   std::string get_enum_string (int enum_value) {
     return (op_enum_str[enum_value]);
+  }
+
+  std::string get_reg_string (int enum_value) {
+    return (reg_enum_str[enum_value]);
   }
 
 }

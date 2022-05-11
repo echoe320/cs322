@@ -150,31 +150,6 @@ namespace L3 {
       label_rule
     > {};
 
-  // // type/T rules
-  // struct str_int64 : TAOCPP_PEGTL_STRING( "int64" ) {};
-  // struct str_brackets : TAOCPP_PEGTL_STRING( "[]" ) {};
-  // struct str_tuple : TAOCPP_PEGTL_STRING( "tuple" ) {};
-  // struct str_code : TAOCPP_PEGTL_STRING( "code" ) {};
-  // struct str_void : TAOCPP_PEGTL_STRING( "void" ) {};
-
-  // struct type_rule :
-  //   pegtl::sor<
-  //     pegtl::seq<
-  //       str_int64, 
-  //       pegtl::star<
-  //         str_brackets
-  //       >
-  //     >,
-  //     str_tuple, 
-  //     str_code
-  //   > {};
-  
-  // struct T_rule :
-  //   pegtl::sor<
-  //     type_rule,
-  //     str_void
-  //   > {};
-
   /*
    * Instruction Rules
    */
@@ -223,7 +198,7 @@ namespace L3 {
   struct lessEq_rule : str_lessEqual {};
   struct greatEq_rule : str_lessEqual {};
   struct less_rule : str_less {};
-  struct great_rule : str_less {};
+  struct great_rule : str_great {};
   struct equal_rule : str_equal {};
 
   struct op_rule :
@@ -372,58 +347,6 @@ namespace L3 {
       seps
     > {};
 
-  // Instruction_new_array_rule
-
-  // struct str_new : TAOCPP_PEGTL_STRING( "new" ) {};
-  // struct str_array : TAOCPP_PEGTL_STRING( "Array" ) {};
-
-  // struct new_rule : str_new {};
-  // struct array_rule : str_array {};
-
-  // struct Instruction_new_array_rule :
-  //   pegtl::seq<
-  //     seps,
-  //     var_rule,
-  //     seps,
-  //     str_arrow,
-  //     seps,
-  //     new_rule,
-  //     seps,
-  //     array_rule,
-  //     seps,
-  //     pegtl::one< '(' >,
-  //     seps,
-  //     arguments_rule,
-  //     seps,
-  //     pegtl::one< ')' >,
-  //     seps
-  //   > {};
-
-  // // Instruction_new_tuple_rule
-
-  // // struct str_tuple : TAOCPP_PEGTL_STRING( "Tuple" ) {};
-
-  // struct tuple_rule : str_tuple {};
-
-  // struct Instruction_new_tuple_rule :
-  //   pegtl::seq<
-  //     seps,
-  //     var_rule,
-  //     seps,
-  //     str_arrow,
-  //     seps,
-  //     new_rule,
-  //     seps,
-  //     tuple_rule,
-  //     seps,
-  //     pegtl::one< '(' >,
-  //     seps,
-  //     t_rule,
-  //     seps,
-  //     pegtl::one< ')' >,
-  //     seps
-  //   > {};
-
   /*
    * Instruction br rules
    */
@@ -485,9 +408,9 @@ namespace L3 {
       pegtl::seq< pegtl::at<Instruction_op_rule>          , Instruction_op_rule           >,
       pegtl::seq< pegtl::at<Instruction_load_rule>        , Instruction_load_rule         >,
       pegtl::seq< pegtl::at<Instruction_store_rule>       , Instruction_store_rule        >,
-      // pegtl::seq< pegtl::at<Instruction_length_rule>      , Instruction_length_rule       >,
-      pegtl::seq< pegtl::at<Instruction_call_rule>        , Instruction_call_rule         >,
+      pegtl::seq< pegtl::at<Instruction_label_rule>      , Instruction_label_rule       >,
       pegtl::seq< pegtl::at<Instruction_call_assign_rule> , Instruction_call_assign_rule  >,
+      pegtl::seq< pegtl::at<Instruction_call_rule>        , Instruction_call_rule         >,
       // pegtl::seq< pegtl::at<Instruction_new_array_rule>   , Instruction_new_array_rule    >,
       // pegtl::seq< pegtl::at<Instruction_new_tuple_rule>   , Instruction_new_tuple_rule    >,
       pegtl::seq< pegtl::at<Instruction_assignment_rule>  , Instruction_assignment_rule   >,
@@ -520,25 +443,6 @@ namespace L3 {
   
   struct function_name :
     label_rule {};
-
-  // struct function_arguments_rule :
-  //   pegtl::sor<
-  //     pegtl::seq<
-  //       type_rule,
-  //       seps,
-  //       var_rule,
-  //       pegtl::star<
-  //         pegtl::seq<
-  //           pegtl::one< ',' >,
-  //           seps,
-  //           type_rule,
-  //           seps,
-  //           var_rule
-  //         >
-  //       >
-  //     >,
-  //     seps
-  //   > {};
 
   // Function Rule
 
@@ -619,21 +523,29 @@ namespace L3 {
           std::string substr;
           std::getline(ss, substr, ',');
           v.push_back(substr);
+          if (shouldPrint) cout << substr << "\n";
       }
-      std::vector<Item *> parsed_args;
+      std::vector<Item *> parsed_args = {};
       if (shouldPrint) cout << "vars_rule vars: " << s << " , size: " << s.size() << std::endl;
-      if (s.size() == 0) return;
+      if (s.size() == 0) {
+        vec_of_args.push_back(parsed_args);
+        if (shouldPrint) cout << "vars_rule ended\n";
+        return;
+      } 
       for (auto i : v) {
         if (std::regex_match(i, std::regex("(%)(.*)"))) {
-          Variable * v_temp = currentF->existing_vars[i];
-          parsed_args.push_back(v_temp);
+          Variable * v_temp = new Variable(i);
+          currentF->existing_vars[i] = v_temp;
+          currentF->arguments.push_back(v_temp);
+          if (shouldPrint) cout << v_temp->toString() << "\n";
         } else {
           Number* n_temp = new Number(std::stol(i));
-          parsed_args.push_back(n_temp);
+          currentF->arguments.push_back(n_temp);
+          if (shouldPrint) cout << n_temp->toString() << "\n";
         }
       }
 
-      vec_of_args.push_back(parsed_args);
+      // vec_of_args.push_back(parsed_args);
 
       if (shouldPrint) cout << "vars_rule ended\n";
     }
@@ -648,10 +560,10 @@ namespace L3 {
        * Fetch the current function.
        */ 
       auto currentF = p.functions.back();
-      // auto b = currentF->basicblocks.back();
 
       std::vector<std::string> v;
       std::string s = in.string();
+      if (shouldPrint) cout << s << "\n";
       int l = s.length();
       int c = count(s.begin(), s.end(), ' ');
       remove(s.begin(), s.end(), ' ');
@@ -665,14 +577,21 @@ namespace L3 {
           v.push_back(substr);
       }
 
-      std::vector<Item *> parsed_args;
-
+      std::vector<Item *> parsed_args = {};
+      if (s.size() == 0) {
+        vec_of_args.push_back(parsed_args);
+        if (shouldPrint) cout << "arguments_rule ended\n";
+        return;
+      }
       for (auto i : v) {
         if (std::regex_match(i, std::regex("(%)(.*)"))) {
-          Variable * v_temp = currentF->existing_vars[i];
+          Variable * v_temp = new Variable(i);
+          currentF->existing_vars[i] = v_temp;
           parsed_args.push_back(v_temp);
+          if (shouldPrint) cout << v_temp->toString() << "\n";
         } else {
           Number* n_temp = new Number(std::stol(i));
+          if (shouldPrint) cout << n_temp->toString() << "\n";
           parsed_args.push_back(n_temp);
         }
       }
@@ -702,6 +621,7 @@ namespace L3 {
       if (shouldPrint) cout << "label_rule started\n";
       Label* l = new Label(in.string());
       parsed_items.push_back(l);
+      if (shouldPrint) cout << in.string() << "\n";
       if (shouldPrint) cout << "label_rule ended\n";
     }
   };
@@ -710,9 +630,7 @@ namespace L3 {
     template< typename Input >
     static void apply( const Input & in, Program & p){
       if (shouldPrint) cout << "var started\n";
-      var_type vtype_temp = vType_curr.back();
-      vType_curr.pop_back();
-      Variable* v = new Variable(vtype_temp, in.string());
+      Variable* v = new Variable(in.string());
       parsed_items.push_back(v);
 
       auto currentF = p.functions.back();
@@ -835,31 +753,6 @@ namespace L3 {
   };
 
   /* Instruction rule actions */
-
-  // template<> struct action < Instruction_define_rule > {
-  //   template< typename Input >
-	// static void apply( const Input & in, Program & p){
-  //     if (shouldPrint) cout << "Instruction_define_rule started\n";
-
-  //     /* 
-  //      * Fetch the current function.
-  //      */ 
-  //     auto currentF = p.functions.back();
-  //     auto b = currentF->basicblocks.back();
-
-  //     /* 
-  //      * Create the instruction.
-  //      */ 
-  //     auto var = parsed_items.back();
-  //     parsed_items.pop_back();
-  //     auto i = new Instruction_def(var);
-
-  //     /* 
-  //      * Add the just-created instruction to the current function.
-  //      */ 
-  //     if (shouldPrint) cout << "Instruction_define_rule ended\n";
-  //   }
-  // };
 
   template<> struct action < Instruction_assignment_rule > {
     template< typename Input >
@@ -1026,11 +919,18 @@ namespace L3 {
       /* 
        * Create the instruction.
        */ 
+      std::vector<Item*> args;
       auto vec_arg = vec_of_args.back();
       vec_of_args.pop_back();
+      reverse(vec_arg.begin(), vec_arg.end());
+      while(!vec_arg.empty()) {
+          args.push_back(vec_arg.back());
+          vec_arg.pop_back();
+          parsed_items.pop_back();
+      }
       auto call = parsed_items.back();
       parsed_items.pop_back();
-      auto i = new Instruction_call(call, vec_arg);
+      auto i = new Instruction_call(call, args);
       currentF->instructions.push_back(i);
 
       /* 
@@ -1053,13 +953,20 @@ namespace L3 {
       /* 
        * Create the instruction.
        */ 
+      std::vector<Item*> args;
       auto vec_arg = vec_of_args.back();
       vec_of_args.pop_back();
+      reverse(vec_arg.begin(), vec_arg.end());
+      while(!vec_arg.empty()) {
+          args.push_back(vec_arg.back());
+          vec_arg.pop_back();
+          parsed_items.pop_back();
+      }
       auto call = parsed_items.back();
       parsed_items.pop_back();
       auto dst = parsed_items.back();
       parsed_items.pop_back();
-      auto i = new Instruction_call_assign(dst, call, vec_arg);
+      auto i = new Instruction_call_assign(dst, call, args);
       currentF->instructions.push_back(i);
 
       /* 
@@ -1122,16 +1029,13 @@ namespace L3 {
   template<> struct action < Instruction_label_rule > { 
     template< typename Input >
     static void apply( const Input & in, Program & p){
-      if (shouldPrint) cout << "var started\n";
+      if (shouldPrint) cout << "Instruction_label_rule started\n";
       auto currentF = p.functions.back();
-      // Basic_Block* b = new Basic_Block();
       auto lab = parsed_items.back();
       parsed_items.pop_back();
       auto i = new Instruction_label(lab);
-      // auto lab_temp = dynamic_cast<Label *>(lab);
-      // b->label = lab_temp;
       currentF->instructions.push_back(i);
-      if (shouldPrint) cout << "var ended\n";
+      if (shouldPrint) cout << "Instruction_label_rule ended\n";
     }
   };
 

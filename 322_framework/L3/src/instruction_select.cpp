@@ -5,6 +5,7 @@
 #include "instruction_select.h"
 #include "L3.h"
 #include "code_generator.h"
+#include "liveness.h"
 
 namespace L3 {
   /* Context class functions */
@@ -43,16 +44,36 @@ namespace L3 {
         C->start = idx + 1;
       }
     }
-
     return contexts;
   }
 
+  /* Node class functions */
+  Node::Node(Item* i) {
+    this->item = i;
+  }
+
+  /* Tree class functions */
+  // Tree::Tree(Instruction* i) {
+  //   this->instruction = i;
+  // }
+
 
   std::vector<std::string> inst_select(Program p, Function* f){
-    std::vector<std::string> ret_instructions;
+    std::vector<std::string> tiled_instructions;
+
+    /* Liveness */
+    GenKill genkill; 
+    for(auto i : f->instructions) {
+      i->Accept(&genkill);
+    }
+    AnalysisResult* res = computeLiveness(f);
+
+    /* Tiling */
+
+    /* Context */
 
     std::vector<Context*> gen_context = identifyContext(f);
 
-    return ret_instructions;
+    return tiled_instructions;
   }
 }
