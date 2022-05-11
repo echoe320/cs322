@@ -8,7 +8,8 @@ namespace L2{
 
   class Color_Visitors : public Visitor {
     public:
-      Color_Visitors();
+      Color_Visitors(ColorGraph* cgraph);
+      ColorGraph* cgraph;
       std::vector<Instruction*> new_inst;
       void VisitInstruction (Instruction_ret *element) override;
       void VisitInstruction (Instruction_assignment *element) override;

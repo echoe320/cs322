@@ -11,6 +11,7 @@
 #include <interference.h>
 #include <graph_coloring.h>
 #include <spiller.h>
+#include <color_visitor.h>
 
 // included libraries
 #include <unordered_set>

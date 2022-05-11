@@ -2,6 +2,7 @@
 
 #include <graph_coloring.h>
 #include <L2.h>
+#include <interference.h>
 
 namespace L2{
   void generate_L1_file(Program p);

@@ -5,6 +5,7 @@
 #include <algorithm>
 
 #include <color_visitor.h>
+#include <interference.h>
 // #include <L2_parser.h>
 
 // included libraries
@@ -13,11 +14,8 @@
 
 
 namespace L2 {
-  Color_Visitors::Color_Visitors() {
-      // this->var = toSpill;
-      // this->prefix = prefix;
-      // this->num_vars_spilled = num_vars_spilled;
-      // this->count = spill_count;
+  Color_Visitors::Color_Visitors(ColorGraph* cgraph) {
+      this->cgraph = cgraph;
   }
   
   void Color_Visitors::VisitInstruction(Instruction_ret *element){
@@ -30,9 +28,9 @@ namespace L2 {
     auto dst = std::get<1>(fields);
 
     if (dynamic_cast<Variable*>(src) != nullptr) {
-      auto src_node = lookupNode(src->toString());
+      auto src_node = this->cgraph->g->lookupNode(src->toString());
       if (src_node->color != "spill") {
-        src = new Register(color_dict[src_node->color]);
+        src = new Register(color_dict.at(src_node->color));
       }
     }
     else if (dynamic_cast<Memory*>(src) != nullptr) {
@@ -41,17 +39,17 @@ namespace L2 {
       auto rv_temp = std::get<0>(mem_fields);
       auto offset_temp = std::get<1>(mem_fields);
       if (dynamic_cast<Variable*>(rv_temp) != nullptr) {
-        auto src_node = lookupNode(rv_temp->toString());
+        auto src_node = this->cgraph->g->lookupNode(rv_temp->toString());
         if (src_node->color != "spill") {
-          Register* regi = new Register(color_dict[src_node->color]);
+          Register* regi = new Register(color_dict.at(src_node->color));
           src = new Memory(regi, offset_temp);
         }
       }
     }
     if (dynamic_cast<Variable*>(dst) != nullptr) {
-      auto dst_node = lookupNode(dst->toString());
+      auto dst_node = this->cgraph->g->lookupNode(dst->toString());
       if (dst_node->color != "spill") {
-        dst = new Register(color_dict[dst_node->color]);
+        dst = new Register(color_dict.at(dst_node->color));
       }
     }
     else if (dynamic_cast<Memory*>(dst) != nullptr) {
@@ -60,9 +58,9 @@ namespace L2 {
       auto rv_temp = std::get<0>(mem_fields);
       auto offset_temp = std::get<1>(mem_fields);
       if (dynamic_cast<Variable*>(rv_temp) != nullptr) {
-        auto dst_node = lookupNode(rv_temp->toString());
+        auto dst_node = this->cgraph->g->lookupNode(rv_temp->toString());
         if (dst_node->color != "spill") {
-          Register* regi = new Register(color_dict[dst_node->color]);
+          Register* regi = new Register(color_dict.at(dst_node->color));
           dst = new Memory(regi, offset_temp);
         }
       }
@@ -79,9 +77,9 @@ namespace L2 {
     auto op = std::get<2>(fields);
 
     if (dynamic_cast<Variable*>(src) != nullptr) {
-      auto src_node = lookupNode(src->toString());
+      auto src_node = this->cgraph->g->lookupNode(src->toString());
       if (src_node->color != "spill") {
-        src = new Register(color_dict[src_node->color]);
+        src = new Register(color_dict.at(src_node->color));
       }
     }
     else if (dynamic_cast<Memory*>(src) != nullptr) {
@@ -90,17 +88,17 @@ namespace L2 {
       auto rv_temp = std::get<0>(mem_fields);
       auto offset_temp = std::get<1>(mem_fields);
       if (dynamic_cast<Variable*>(rv_temp) != nullptr) {
-        auto src_node = lookupNode(rv_temp->toString());
+        auto src_node = this->cgraph->g->lookupNode(rv_temp->toString());
         if (src_node->color != "spill") {
-          Register* regi = new Register(color_dict[src_node->color]);
+          Register* regi = new Register(color_dict.at(src_node->color));
           src = new Memory(regi, offset_temp);
         }
       }
     }
     if (dynamic_cast<Variable*>(dst) != nullptr) {
-      auto dst_node = lookupNode(dst->toString());
+      auto dst_node = this->cgraph->g->lookupNode(dst->toString());
       if (dst_node->color != "spill") {
-        dst = new Register(color_dict[dst_node->color]);
+        dst = new Register(color_dict.at(dst_node->color));
       }
     }
     else if (dynamic_cast<Memory*>(dst) != nullptr) {
@@ -109,9 +107,9 @@ namespace L2 {
       auto rv_temp = std::get<0>(mem_fields);
       auto offset_temp = std::get<1>(mem_fields);
       if (dynamic_cast<Variable*>(rv_temp) != nullptr) {
-        auto dst_node = lookupNode(rv_temp->toString());
+        auto dst_node = this->cgraph->g->lookupNode(rv_temp->toString());
         if (dst_node->color != "spill") {
-          Register* regi = new Register(color_dict[dst_node->color]);
+          Register* regi = new Register(color_dict.at(dst_node->color));
           dst = new Memory(regi, offset_temp);
         }
       }
@@ -127,9 +125,9 @@ namespace L2 {
     auto op = std::get<1>(fields);
 
     if (dynamic_cast<Variable*>(dst) != nullptr) {
-      auto dst_node = lookupNode(dst->toString());
+      auto dst_node = this->cgraph->g->lookupNode(dst->toString());
       if (dst_node->color != "spill") {
-        dst = new Register(color_dict[dst_node->color]);
+        dst = new Register(color_dict.at(dst_node->color));
       }
     }
     
@@ -144,15 +142,15 @@ namespace L2 {
     auto op = std::get<2>(fields);
 
     if (dynamic_cast<Variable*>(src) != nullptr) {
-      auto src_node = lookupNode(src->toString());
+      auto src_node = this->cgraph->g->lookupNode(src->toString());
       if (src_node->color != "spill") {
-        src = new Register(color_dict[src_node->color]);
+        src = new Register(color_dict.at(src_node->color));
       }
     }
     if (dynamic_cast<Variable*>(dst) != nullptr) {
-      auto dst_node = lookupNode(dst->toString());
+      auto dst_node = this->cgraph->g->lookupNode(dst->toString());
       if (dst_node->color != "spill") {
-        dst = new Register(color_dict[dst_node->color]);
+        dst = new Register(color_dict.at(dst_node->color));
       }
     }
 
@@ -168,21 +166,21 @@ namespace L2 {
     auto op = std::get<3>(fields);
 
     if (dynamic_cast<Variable*>(arg1) != nullptr) {
-      auto arg1_node = lookupNode(arg1->toString());
+      auto arg1_node = this->cgraph->g->lookupNode(arg1->toString());
       if (arg1_node->color != "spill") {
-        arg1 = new Register(color_dict[arg1_node->color]);
+        arg1 = new Register(color_dict.at(arg1_node->color));
       }
     }
     if (dynamic_cast<Variable*>(arg2) != nullptr) {
-      auto arg2_node = lookupNode(arg2->toString());
+      auto arg2_node = this->cgraph->g->lookupNode(arg2->toString());
       if (arg2_node->color != "spill") {
-        arg2 = new Register(color_dict[arg2_node->color]);
+        arg2 = new Register(color_dict.at(arg2_node->color));
       }
     }
     if (dynamic_cast<Variable*>(dst) != nullptr) {
-      auto dst_node = lookupNode(dst->toString());
+      auto dst_node = this->cgraph->g->lookupNode(dst->toString());
       if (dst_node->color != "spill") {
-        dst = new Register(color_dict[dst_node->color]);
+        dst = new Register(color_dict.at(dst_node->color));
       }
     }
 
@@ -198,15 +196,15 @@ namespace L2 {
     auto op = std::get<3>(fields);
 
     if (dynamic_cast<Variable*>(arg1) != nullptr) {
-      auto arg1_node = lookupNode(arg1->toString());
+      auto arg1_node = this->cgraph->g->lookupNode(arg1->toString());
       if (arg1_node->color != "spill") {
-        arg1 = new Register(color_dict[arg1_node->color]);
+        arg1 = new Register(color_dict.at(arg1_node->color));
       }
     }
     if (dynamic_cast<Variable*>(arg2) != nullptr) {
-      auto arg2_node = lookupNode(arg2->toString());
+      auto arg2_node = this->cgraph->g->lookupNode(arg2->toString());
       if (arg2_node->color != "spill") {
-        arg2 = new Register(color_dict[arg2_node->color]);
+        arg2 = new Register(color_dict.at(arg2_node->color));
       }
     }
 
@@ -222,21 +220,21 @@ namespace L2 {
     auto mult = std::get<3>(fields);
     
     if (dynamic_cast<Variable*>(arg1) != nullptr) {
-      auto arg1_node = lookupNode(arg1->toString());
+      auto arg1_node = this->cgraph->g->lookupNode(arg1->toString());
       if (arg1_node->color != "spill") {
-        arg1 = new Register(color_dict[arg1_node->color]);
+        arg1 = new Register(color_dict.at(arg1_node->color));
       }
     }
     if (dynamic_cast<Variable*>(arg2) != nullptr) {
-      auto arg2_node = lookupNode(arg2->toString());
+      auto arg2_node = this->cgraph->g->lookupNode(arg2->toString());
       if (arg2_node->color != "spill") {
-        arg2 = new Register(color_dict[arg2_node->color]);
+        arg2 = new Register(color_dict.at(arg2_node->color));
       }
     }
     if (dynamic_cast<Variable*>(dst) != nullptr) {
-      auto dst_node = lookupNode(dst->toString());
+      auto dst_node = this->cgraph->g->lookupNode(dst->toString());
       if (dst_node->color != "spill") {
-        dst = new Register(color_dict[dst_node->color]);
+        dst = new Register(color_dict.at(dst_node->color));
       }
     }
 
@@ -250,9 +248,9 @@ namespace L2 {
     auto N = std::get<1>(fields);
 
     if (dynamic_cast<Variable*>(u) != nullptr) {
-      auto u_node = lookupNode(dst->toString());
+      auto u_node = this->cgraph->g->lookupNode(u->toString());
       if (u_node->color != "spill") {
-        u = new Register(color_dict[u_node->color]);
+        u = new Register(color_dict.at(u_node->color));
       }
     }
 
@@ -278,9 +276,9 @@ namespace L2 {
     auto M = std::get<1>(fields);
 
     if (dynamic_cast<Variable*>(dst) != nullptr) {
-      auto dst_node = lookupNode(dst->toString());
+      auto dst_node = this->cgraph->g->lookupNode(dst->toString());
       if (dst_node->color != "spill") {
-        dst = new Register(color_dict[dst_node->color]);
+        dst = new Register(color_dict.at(dst_node->color));
       }
     }
 
@@ -288,30 +286,13 @@ namespace L2 {
     this->new_inst.push_back(inst);
   }
 
-  Function* color2reg(Function* f) {
-    auto color_visitor = new Color_Visitors();
+  Function* color2reg(Function* f, ColorGraph* cgraph) {
+    auto color_visitor = new Color_Visitors(cgraph);
     for (auto inst : f->instructions) {
       inst->Accept(color_visitor);
     }
 
     f->instructions = color_visitor->new_inst;
     return f;
-  }
-
-  std::vector<Instruction*> spill_one_var(Function* f, std::string toSpill, std::string prefix, int num_vars_spilled) {
-    // std::cout << "we made it to spill_one_var()" << std::endl;
-    auto spill_visitor = new Spill_Visitors(toSpill, prefix, num_vars_spilled);
-    spill_visitor->func_vars = f->func_vars;
-    // std::cout << "visiting instructions" << std::endl;
-    for (auto inst : f->instructions) {
-      // std::cout << "visiting instructions" << std::endl;
-      inst->Accept(spill_visitor);
-    }
-
-    if (spill_visitor->didSpill) {
-      spill_visitor->num_vars_spilled++;
-    }
-
-    return spill_visitor->getInstructions();
   }
 }
