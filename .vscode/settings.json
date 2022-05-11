@@ -84,7 +84,8 @@
       "typeindex": "cpp",
       "valarray": "cpp",
       "regex": "cpp",
-      "__bits": "cpp"
+      "__bits": "cpp",
+      "queue": "cpp"
     },
     "editor.tabSize": 2,
     "editor.detectIndentation": false
