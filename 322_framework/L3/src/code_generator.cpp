@@ -1,208 +1,199 @@
-#include <L3.h>
 #include <string>
 #include <iostream>
 #include <fstream>
-#include <unordered_map>
-#include <globalize.h>
-#include <instructionSelect.h>
-#include <architecture.h>
+#include <algorithm>
 
+#include <L3.h>
 #include <code_generator.h>
-using namespace std;
+#include "instruction_select.h"
 
-extern bool is_debug; 
-namespace L3{
+// using namespace std;
 
-    string temp_var(string varname) {
-        return "%tmp_" + varname.substr(1);
-    }
+bool shouldPrint;
 
-    CodeGen::CodeGen(/*Function *f*/) {}
+namespace L3 {
+  bool comp_label(Label *l1, Label *l2) {
+    return l1->get().length() > l2->get().length();
+  }
 
-    void CodeGen::visit(Tile_return* t){
-        TreeNode *tree = t->getTree();
-        L2_instructions.push_back("\treturn\n");
-    }
-    void CodeGen::visit(Tile_return_t* t){
-        TreeNode *tree = t->getTree();
-        Variable* arg = dynamic_cast<Variable*>(tree->val); 
-        string line;
-        if(arg){
-            line = "\t" + t->root->oprand1->matched_node->val->toString() + " <- rdi\n";
-            L2_instructions.push_back(line);
+  void label_global(Program *p) { 
+    //find longest label for whole L3 program
+    std::vector<Label *> labels;
+    for (auto f : p->functions) {
+      for (auto i : f->instructions) {
+        Instruction_label *l = dynamic_cast<Instruction_label *>(i);
+        if (l) {
+          labels.push_back(dynamic_cast<Label *>(l->label));
         }
-        line = "\trax <- " + t->root->oprand1->matched_node->val->toString() + "\n";
-        L2_instructions.push_back(line);
-        L2_instructions.push_back("\treturn\n");
+      }
     }
-    void CodeGen::visit(Tile_assign* t){
-        TreeNode *tree = t->getTree();
-        string dst = tree->val->toString();
-        string oprand = t->root->oprand1->matched_node->val->toString();
-        string line = "\t" + dst + " <- " + oprand + '\n';
-        L2_instructions.push_back(line);
-    }
+    p->LL = "";
+    if (labels.size() == 0) return;
+    sort(labels.begin(), labels.end(), comp_label);
+    // Label *l_temp = dynamic_cast<Label *>(labels[0]);
+    std::string llg = dynamic_cast<Label *>(labels[0])->get().substr(1);
+    p->LL = llg;
+    llg = llg + "_global_";
 
-    void CodeGen::visit(Tile_math* t) {
-        TreeNode *tree = t->getTree();
-        if (!tree) cout << "bug " << endl;
-        string dst = tree->val->toString();
-        string oprand1 = t->root->oprand1->matched_node->val->toString();
-        string op = tree->op->toString(); 
-        string oprand2 = t->root->oprand2->matched_node->val->toString();
-        if (op == "*" || op == "+" || op == "&") {
-            string line = '\t' + dst + " <- " + oprand1 + '\n'; 
-            L2_instructions.push_back(line);
-            line = '\t' + dst + " " + op + "= " + oprand2 + '\n';
-            L2_instructions.push_back(line);
-        } else if (op == "-" || op == "<<" || op == ">>") {
-            string tmp = temp_var("%tmp");
-            string line = '\t' + tmp + " <- " + oprand1 + '\n'; 
-            L2_instructions.push_back(line);
-            line = '\t' + tmp + " " + op + "= " + oprand2 + '\n'; 
-            L2_instructions.push_back(line);
-            line = '\t' + dst + " <- " + tmp + '\n'; 
-            L2_instructions.push_back(line);
+    //change label to LLG
+    for (auto f : p->functions) {
+      std::string fname = f->name.substr(1);
+      for (auto i : f->instructions) {
+        Instruction_label *l = dynamic_cast<Instruction_label *>(i);
+        if (l) {
+          std::string old_lab = dynamic_cast<Label *>(l->label)->get();
+          l->label = new Label(":" + llg + fname + "_" + old_lab.substr(1));
+          if(shouldPrint) std::cout << "label: " << old_lab << std::endl;
         }
-
-    }
-
-    void CodeGen::visit(Tile_math_specialized* t) {
-        string dst = t->root->matched_node->val->toString();
-
-        string other = t->root->oprand2->matched_node->val->toString();
-        string op = t->root->op->get();
-
-        string line = '\t' + dst + " " + op + "= " + other + '\n';   
-        L2_instructions.push_back(line);
-    }
-
-
-    void CodeGen::visit(Tile_compare *t){
-        TreeNode *tree = t->getTree();
-        string dst = tree->val->toString(); 
-        string oprand1 = t->root->oprand1->matched_node->val->toString();
-        string op = tree->op->toString(); 
-        string oprand2 = t->root->oprand2->matched_node->val->toString();
-        string line;
-        // string line = '\t' + dst + " <- " + oprand1 + '\n'; 
-        // L2_instructions.push_back(line);
-        // line = '\t' + dst + " " + op + "= " + oprand2 + '\n';
-        // L2_instructions.push_back(line);
-        if(op == ">="){
-            line = '\t' + dst + " <- " + oprand2 + " <= " + oprand1 +  '\n'; 
+        Instruction_br_label *bl = dynamic_cast<Instruction_br_label *>(i);
+        if(bl) {
+          std::string old_lab = dynamic_cast<Label *>(bl->label)->get();
+          bl->label = new Label(":" + llg + fname + "_" + old_lab.substr(1));
+          if(shouldPrint) std::cout << "br label: " << old_lab << std::endl;                    
         }
-        else if(op == ">"){
-            line = '\t' + dst + " <- " + oprand2 + " < " + oprand1 +  '\n'; 
+        Instruction_br_t *brt = dynamic_cast<Instruction_br_t *>(i);
+        if(brt) {
+          std::string old_lab = dynamic_cast<Label *>(brt->label)->get().substr(1);
+          brt->label = new Label(":" + llg + fname + "_" + old_lab.substr(1));
+          if(shouldPrint) std::cout << "brt label: " << old_lab << std::endl;                    
         }
-        else {
-            line = '\t' + dst + " <- " + oprand1 + " " + op + " " + oprand2 +  '\n'; 
+        Instruction_assignment *a = dynamic_cast<Instruction_assignment *>(i);
+        if(a) {
+          Label* label = dynamic_cast<Label*>(a->src);
+          if(label) {
+            std::string old_lab = label->get();
+            label = new Label(":" + llg + fname + "_" + old_lab.substr(1));
+            if(shouldPrint) std::cout << "assign label: " << old_lab << std::endl; 
+          }                   
         }
-        L2_instructions.push_back(line);
+      }
+    }
+  }
+
+  /* Visitor Constructor */
+
+  L3_Visitors::L3_Visitors(Function *f, std::ofstream &ofs) : f(f), outputFile(ofs) {}
+
+  /* Visitor Functions */
+
+  void L3_Visitors::VisitInstruction(Instruction_assignment *element) {
+    auto fields = element->get();
+    auto dst = std::get<0>(fields);
+    auto src = std::get<1>(fields);
+
+    auto dst_temp = dynamic_cast<Variable *>(dst);
+
+    // auto src_temp;
+    
+    if (dynamic_cast<Variable *>(src) != nullptr) {
+      src = dynamic_cast<Variable *>(src);
+    } else if (dynamic_cast<Label *>(src) != nullptr)
+    {
+      src = dynamic_cast<Label *>(src);
+    } else if (dynamic_cast<Number *>(src) != nullptr)
+    {
+      src = dynamic_cast<Number *>(src);
+    }
+    
+    outputFile << "\t" << dst_temp->toString() << " <- " << src->toString() << std::endl;
+  }
+  void L3_Visitors::VisitInstruction(Instruction_op *element) {
+    auto fields = element->get();
+    auto dst = std::get<0>(fields);
+    auto arg1 = std::get<1>(fields);
+    auto op = std::get<2>(fields);
+    auto arg2 = std::get<3>(fields);
+
+    auto dst_temp = dynamic_cast<Variable *>(dst);
+
+    auto op_temp = dynamic_cast<Operation *>(op);
+    auto op_val = op_temp->get();
+    
+    if (dynamic_cast<Variable *>(arg1) != nullptr) {
+      arg1 = dynamic_cast<Variable *>(arg1);
+    } else if (dynamic_cast<Number *>(arg1) != nullptr)
+    {
+      arg1 = dynamic_cast<Number *>(arg1);
     }
 
-    void CodeGen::visit(Tile_load *t){
-        TreeNode *tree = t->getTree();
-        string dst = tree->val->toString(); 
-        string oprand1 = t->root->oprand1->matched_node->val->toString();
-        //need to know current number of item on stack 
-        // string M = to_string(this->f->sizeOfStack * 8);
-        // string line = '\t' + dst + " <- mem " + oprand1 + " " + M + '\n'; 
-        string line = '\t' + dst + " <- mem " + oprand1 + " 0\n"; 
-        L2_instructions.push_back(line);
+    if (dynamic_cast<Variable *>(arg2) != nullptr) {
+      arg2 = dynamic_cast<Variable *>(arg2);
+    } else if (dynamic_cast<Number *>(arg2) != nullptr)
+    {
+      arg2 = dynamic_cast<Number *>(arg2);
     }
-    void CodeGen::visit(Tile_store *t){
-        TreeNode *tree = t->getTree();
-        string dst = tree->val->toString(); 
-        string oprand1 = t->root->oprand1->matched_node->val->toString();
-        //need to know current number of item on stack 
-        string line = "\tmem" + dst + " 0 <- " + oprand1 + '\n'; 
-        L2_instructions.push_back(line);
-    }
-    void CodeGen::visit(Tile_br* t){
-        TreeNode *tree = t->getTree();
-        string label = t->root->oprand1->matched_node->val->toString();
-        string line = "\tgoto " + label + '\n'; 
-        L2_instructions.push_back(line);
-    }
-    //TODO might need fix
-    void CodeGen::visit(Tile_br_t* t){
-        TreeNode *tree = t->getTree();
-        while (!(tree->oprand1 && tree->oprand2)) {
-            if (tree->oprand1) tree = tree->oprand1;
-            if (tree->oprand2) tree = tree->oprand2;
-        }
-        string label = tree->oprand2->val->toString(); 
-        Item* condition = tree->oprand1->val;
-        Number* n = dynamic_cast<Number*>(condition); 
-        string line; 
-        if(n != nullptr){
-            if(n->get() == 0) line = "\tcjump 0 = 1 " + label + '\n'; 
-            else line = "\tcjump 1 = 1 " + label + '\n'; 
-        }
-        else {
-            //condition is a variable, find the two nodes in the tree that define this variable
-            line = "\tcjump " + condition->toString() + " = 1 " + label + "\n";   
-        }
-        L2_instructions.push_back(line);
+    
+    outputFile << "\t" << dst_temp->toString() << " <- " << arg1->toString() << get_enum_string(op_val) << arg2->toString() << std::endl;
+  }
+  void L3_Visitors::VisitInstruction(Instruction_load *element) {
+    return;
+  }
+  void L3_Visitors::VisitInstruction(Instruction_store *element) {
+    return;
+  }
+  void L3_Visitors::VisitInstruction(Instruction_call *element) {
+    return;
+  }
+  void L3_Visitors::VisitInstruction(Instruction_call_assign *element) {
+    return;
+  }
+  void L3_Visitors::VisitInstruction(Instruction_label *element) {
+    return;
+  }
+  void L3_Visitors::VisitInstruction(Instruction_br_label *element) {
+    outputFile << "\t" << "return" << std::endl;
+  }
+  void L3_Visitors::VisitInstruction(Instruction_br_t *element) {
+    outputFile << "\t" << "return" << std::endl;
+  }
+  void L3_Visitors::VisitInstruction(Instruction_return *element) {
+    outputFile << "\t" << "return" << std::endl;
+  }
+  void L3_Visitors::VisitInstruction(Instruction_return_t *element) {
+    auto fields = element->get();
+    auto arg = std::get<0>(fields);
+    
+    if (dynamic_cast<Variable *>(arg) != nullptr) {
+      arg = dynamic_cast<Variable *>(arg);
+    } else if (dynamic_cast<Number *>(arg) != nullptr)
+    {
+      arg = dynamic_cast<Number *>(arg);
     }
 
-    void CodeGen::visit(Tile_increment* t){
-        TreeNode *tree = t->getTree();
-        string dst = tree->val->toString(); 
-        string line; 
-        if(tree->op->toString() == "+"){
-            line = "\t" + dst + "++\n";
-        }
-        else {
-            line = "\t" + dst + "--\n";
-        }
-        L2_instructions.push_back(line);
-    }
+    outputFile << "\t" << "return " << arg->toString() << std::endl;
+  }
 
-    void CodeGen::visit(Tile_at* t){
-        TreeNode *tree = t->getTree();
-        string dst = tree->val->toString(); 
-        string src_add = t->root->oprand2->matched_node->val->toString(); 
-        string src_mult = t->root->oprand1->oprand1->matched_node->val->toString(); 
-        string src_const = t->root->oprand1->oprand2->matched_node->val->toString(); 
-        string line = "\t" + dst + " @ " + src_add + " " + src_mult + " " + src_const + "\n";
-        L2_instructions.push_back(line);       
-    }
+  void generate_code(Program p) {
+    /* global labels */    
+    label_global(&p);
 
-    void generate_code(Program p){
-        /* 
-        * Open the output file.
-        */ 
-       //globalize labels
-        L3::labelGlobalize(&p);
-        std::ofstream outputFile;
-        outputFile.open("prog.L2");
-        outputFile << "(:main" << endl;  
-        vector<L2::Architecture::RegisterID> args = L2::Architecture::get_argument_regs();
-        for(Function* f : p.functions){
-            //step 1: instruction selection
-            vector<string> L2_instructions = L3::instructionSelection(p, f);
-            //initialize function setup 
-            outputFile << "\t(" << f->name << endl; 
-            outputFile << "\t\t" << f->arguments.size() << endl;
-            //output arguments
-            // for(int i = 0; i < min((int)f->arguments.size(), 6); i++){
-            //     outputFile << "\t\t" << f->arguments[i]->toString() << " <- " << L2::Architecture::fromRegisterToString(args[i]) << "\n";
-            // }
-            // int count = 1; 
-            // for(int i = 6; i < f->arguments.size(); i++){
-            //     outputFile << "\t\tmem rsp -" << to_string(count * 8) << " <- " << f->arguments[i] << "\n";
-            //     count++;
-            // }
-            //step 2: output L2 instructions
-            for(string s : L2_instructions){
-                outputFile << "\t" << s; 
-            }
-            outputFile << "\t)\n"; 
+    /* Open and initialize the output file */
+    std::ofstream outputFile;
+    outputFile.open("prog.L2");
+    outputFile << "(:main" << std::endl; 
 
-        }
-        outputFile << ")\n" << endl;
-        return;
+    /* iterate through functions */
+    for (auto f : p.functions) {
+      auto l3_visitors = new L3_Visitors(f, outputFile);
+      /* function head */
+      outputFile << "\t(" << f->name;
+
+      /* args */
+      
+
+      /* Instruction select */
+      // want to give list of tiled functions to transform
+      
+      // for (auto i : f->instructions) {
+      //   i->Accept(l3_visitors);
+      // }
+      std::vector<std::string> L2_inst = inst_select(p, f);
+
+      /* end of function */
+      outputFile << "\t)\n\n";
     }
+    outputFile << ")\n\n";
+    
+  }
+
 }
