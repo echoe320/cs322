@@ -22,353 +22,457 @@
 namespace pegtl = tao::TAO_PEGTL_NAMESPACE;
 
 using namespace pegtl;
-using namespace std;
+// using namespace std;
 
+bool shouldPrint = false;
 extern bool is_debug;
-namespace L3
-{
+namespace L3 {
   /*
    * Data required to parse
    */
+  
   std::vector<Item *> parsed_items = {};
   std::vector<Item *> list_of_args = {}; 
   std::vector<Item *> parameter_list = {}; 
 
   /*
-   *map from string to registerid
-   */
-
-  /*
-   * Grammar rules from now on.
-   */
-  struct name : pegtl::seq<
-                    pegtl::plus<
-                        pegtl::sor<
-                            pegtl::alpha,
-                            pegtl::one<'_'>>>,
-                    pegtl::star<
-                        pegtl::sor<
-                            pegtl::alpha,
-                            pegtl::one<'_'>,
-                            pegtl::digit>>>
-  {
-  };
-
-  /*
    * Keywords.
    */
   struct str_return : TAOCPP_PEGTL_STRING("return") {};
-  struct str_load : TAOCPP_PEGTL_STRING("load") {};
-  struct str_store : TAOCPP_PEGTL_STRING("store") {};
-  struct str_call : TAOCPP_PEGTL_STRING("call") {};
-  struct str_br : TAOCPP_PEGTL_STRING("br") {};
   struct str_arrow : TAOCPP_PEGTL_STRING("<-") {};
 
-  struct comment : pegtl::disable<
-                       TAOCPP_PEGTL_STRING("//"),
-                       pegtl::until<pegtl::eolf>> {};
+  /*
+   * Basics
+   */
 
-  struct label : pegtl::seq<
-                     pegtl::one<':'>,
-                     name> {};
-  struct seps : pegtl::star<
-                    pegtl::sor<
-                        pegtl::ascii::space,
-                        comment>> {};
-  struct number : pegtl::seq<
-                      pegtl::opt<
-                          pegtl::sor<
-                              pegtl::one<'-'>,
-                              pegtl::one<'+'>>>,
-                      pegtl::plus<
-                          pegtl::digit>> {};
-  struct variable : pegtl::seq<
-                             pegtl::one<'%'>,
-                             name> {};
-  struct function_name : label {};
-
-  struct number_rule : number {};
-
-  struct variable_rule : variable {};
-  // struct parameter_rule :variable {};
-  struct variables_rule :   pegtl::sor<
-                                pegtl::seq<
-                                    variable,
-                                    pegtl::star<
-                                        pegtl::seq<
-                                            seps,
-                                            pegtl::one<','>,
-                                            seps,
-                                            variable,
-                                            seps
-                                                >
-                                            >
-                                        >,
-                                variable,
-                                seps
-                                > {};
-  struct args_rule :   pegtl::sor<
-                                pegtl::seq<
-                                    pegtl::sor<variable_rule, number_rule>,
-                                    pegtl::star<
-                                        pegtl::seq<
-                                            pegtl::one<','>,
-                                            pegtl::sor<seps, pegtl::eol>,
-                                            pegtl::sor<variable_rule, number_rule>
-                                                >
-                                            >
-                                        >,
-                                seps
-                                    > {};
-
-  struct Label_rule : label {};
+  struct comment : 
+    pegtl::disable< 
+      TAOCPP_PEGTL_STRING( "//" ), 
+      pegtl::until< pegtl::eolf > 
+    > {};
   
-  struct op_rule : pegtl::sor<TAOCPP_PEGTL_STRING("<<"), 
-                            TAOCPP_PEGTL_STRING(">>"),
-                            pegtl::one<'+'>, 
-                            pegtl::one<'-'>, 
-                            pegtl::one<'*'>,
-                            pegtl::one<'&'>
-                            >
-  {
-  };
+  struct seps : 
+    pegtl::star< 
+      pegtl::sor< 
+        pegtl::ascii::space, 
+        comment 
+      > 
+    > {};
+  
+  struct name:
+    pegtl::seq<
+      pegtl::plus< 
+        pegtl::sor<
+          pegtl::alpha,
+          pegtl::one< '_' >
+        >
+      >,
+      pegtl::star<
+        pegtl::sor<
+          pegtl::alpha,
+          pegtl::one< '_' >,
+          pegtl::digit
+        >
+      >
+    > {};
+  
+  struct label :
+    pegtl::seq<
+      pegtl::one<':'>,
+      name
+    > {};
+  
+  struct label_rule:
+    label {};
+  
+  struct number:
+    pegtl::seq<
+      pegtl::opt<
+        pegtl::sor<
+          pegtl::one< '-' >,
+          pegtl::one< '+' >
+        >
+      >,
+      pegtl::plus< 
+        pegtl::digit
+      >
+    >{};
+  
+  struct number_rule :
+    number {};
+  
+  struct var :
+    pegtl::seq<
+      pegtl::one<'%'>,
+      name
+    > {};
+  
+  struct var_rule:
+    var {};
 
-  struct Instruction_return_rule : pegtl::seq<
-                                       str_return> {};
-  struct Instruction_return_t_rule : pegtl::seq<
-                                       str_return,
-                                       seps,
-                                       pegtl::sor<variable_rule, 
-                                                  number_rule>> {};
+  struct str_load : TAOCPP_PEGTL_STRING("load") {};
+  struct str_store : TAOCPP_PEGTL_STRING("store") {};
+  struct str_br : TAOCPP_PEGTL_STRING("br") {};
 
-  struct Instruction_assignment_rule : pegtl::seq<
-                                           variable_rule,
-                                           seps,
-                                           str_arrow,
-                                           seps,
-                                           pegtl::sor<
-                                               number_rule,
-                                               Label_rule,
-                                               variable_rule>>
-  {
-  };
+  struct vars_rule :
+    pegtl::sor<
+      pegtl::seq<
+        pegtl::sor<
+          var
+        >,
+        pegtl::star<
+          pegtl::seq<
+            seps,
+            pegtl::one<','>,
+            seps,
+            pegtl::sor<
+              var
+            >
+          >
+        >
+      >,
+      seps
+    > {};
+  
+  struct t_rule :
+    pegtl::sor<
+      var_rule,
+      number_rule
+    > {};
 
-  struct Instruction_math_rule : pegtl::seq<
-                                      variable_rule,
-                                      seps,
-                                      str_arrow,
-                                      seps, 
-                                      pegtl::sor<variable_rule, number_rule>,
-                                      seps,
-                                      op_rule,
-                                      seps,
-                                      pegtl::sor<number_rule, variable_rule>>
-  {
-  };
+  struct s_rule :
+    pegtl::sor<
+      t_rule,
+      label_rule
+    > {};
+  
+  struct u_rule :
+    pegtl::sor<
+      var_rule,
+      label_rule
+    > {};
+
+  /* Instruction_assignment_rule */
+  struct Instruction_assignment_rule :
+    pegtl::seq<
+      seps,
+      var_rule,
+      seps,
+      str_arrow,
+      seps,
+      s_rule,
+      seps
+    > {};
+
+  struct args_rule :
+    pegtl::sor<
+      pegtl::seq<
+        pegtl::sor<
+          t_rule
+        >,
+        pegtl::star<
+          pegtl::seq<
+            pegtl::one<','>,
+            seps,
+            pegtl::sor<
+              t_rule
+            >
+          >
+        >
+      >,
+      seps
+    > {};
+  
+  // Instruction_op_rule
+  struct str_plus : TAOCPP_PEGTL_STRING( "+" ) {};
+  struct str_minus : TAOCPP_PEGTL_STRING( "-" ) {};
+  struct str_mult : TAOCPP_PEGTL_STRING( "*" ) {};
+  struct str_bitAND : TAOCPP_PEGTL_STRING( "&" ) {};
+  struct str_leftShift : TAOCPP_PEGTL_STRING( "<<" ) {};
+  struct str_rightShift : TAOCPP_PEGTL_STRING( ">>" ) {};
+  struct str_lessEqual : TAOCPP_PEGTL_STRING( "<=" ) {};
+  struct str_greatEqual : TAOCPP_PEGTL_STRING( ">=" ) {};
+  struct str_less : TAOCPP_PEGTL_STRING( "<" ) {};
+  struct str_great : TAOCPP_PEGTL_STRING( ">" ) {};
+  struct str_equal : TAOCPP_PEGTL_STRING( "=" ) {};
+
+  struct plus_rule : str_plus {};
+  struct minus_rule : str_minus {};
+  struct mult_rule : str_mult {};
+  struct bitAND_rule : str_bitAND {};
+  struct Lshift_rule : str_leftShift {};
+  struct Rshift_rule : str_rightShift {};
+  struct lessEq_rule : str_lessEqual {};
+  struct greatEq_rule : str_lessEqual {};
+  struct less_rule : str_less {};
+  struct great_rule : str_less {};
+  struct equal_rule : str_equal {};
+
+  struct op_rule :
+    pegtl::sor<
+      plus_rule,
+      minus_rule,
+      mult_rule,
+      bitAND_rule,
+      Lshift_rule,
+      Rshift_rule,
+      lessEq_rule,
+      greatEq_rule,
+      less_rule,
+      great_rule,
+      equal_rule
+    > {};
+
+  struct Instruction_op_rule :
+    pegtl::seq<
+      seps,
+      var_rule,
+      seps,
+      str_arrow,
+      seps,
+      t_rule,
+      seps,
+      op_rule,
+      seps,
+      t_rule,
+      seps
+    > {};
 
   struct Instruction_load_rule : pegtl::seq<
-                                     variable_rule,
+                                     var_rule,
                                      seps,
                                      str_arrow,
                                      seps,
                                      str_load,
                                      seps,
-                                     variable_rule>
+                                     var_rule>
   {
   };
 
   struct Instruction_store_rule : pegtl::seq<
                                       str_store,
                                       seps,
-                                      variable_rule,
+                                      var_rule,
                                       seps,
                                       str_arrow,
                                       seps,
                                       pegtl::sor<
                                           number_rule,
-                                          Label_rule,
-                                          variable_rule>>
+                                          label_rule,
+                                          var_rule>>
   {
   };
 
-  struct compare_op_rule : pegtl::sor<
-                               TAOCPP_PEGTL_STRING(">="),
-                               TAOCPP_PEGTL_STRING("<="),
-                               TAOCPP_PEGTL_STRING("<"),
-                               TAOCPP_PEGTL_STRING(">"),
-                               TAOCPP_PEGTL_STRING("=")>
-  {
-  };
+  // Instruction_call_rule
 
-  struct Instruction_compare_rule : pegtl::seq<
-                                        variable_rule,
-                                        seps,
-                                        str_arrow,
-                                        seps,
-                                        pegtl::sor<number_rule, variable_rule>,
-                                        seps,
-                                        compare_op_rule,
-                                        seps,
-                                        pegtl::sor<number_rule, variable_rule>>
-  {
-  };
-  /*
-  call
-  */
-  struct call_string_rule : pegtl::sor<
-                                TAOCPP_PEGTL_STRING("print"), 
-                                TAOCPP_PEGTL_STRING("allocate"), 
-                                TAOCPP_PEGTL_STRING("input"), 
-                                TAOCPP_PEGTL_STRING("tensor-error")> {};
-  struct Instruction_call_rule : pegtl::seq<
-                                     str_call,
-                                     seps,
-                                     pegtl::sor<
-                                         Label_rule,
-                                         variable_rule,
-                                         call_string_rule>,
-                                     seps,
-                                     TAOCPP_PEGTL_STRING("("),
-                                     pegtl::sor<seps, pegtl::eol>,
-                                     args_rule,
-                                     pegtl::sor<seps, pegtl::eol>,
-                                     TAOCPP_PEGTL_STRING(")")>
-  {
-  };
-  struct Instruction_call_assignment_rule : pegtl::seq<
-                                    variable_rule, 
-                                    seps, 
-                                    str_arrow, 
-                                    seps, 
-                                    str_call,
-                                    seps,
-                                     pegtl::sor<
-                                         Label_rule,
-                                         variable_rule,
-                                         call_string_rule>,
-                                    seps,
-                                     TAOCPP_PEGTL_STRING("("),
-                                     pegtl::sor<seps, pegtl::eol>,
-                                     args_rule,
-                                     pegtl::sor<seps, pegtl::eol>,
-                                     TAOCPP_PEGTL_STRING(")")>
-  {
-  };
+  struct str_call : TAOCPP_PEGTL_STRING( "call" ) {};
+  struct str_print : TAOCPP_PEGTL_STRING( "print" ) {};
+  struct str_allocate : TAOCPP_PEGTL_STRING( "allocate" ) {};
+  struct str_input : TAOCPP_PEGTL_STRING( "input" ) {};
+  struct str_tensor_error : TAOCPP_PEGTL_STRING( "tensor-error" ) {};
+
+  struct call_rule : str_call {};
+  struct print_rule : str_print {};
+  struct allocate_rule : str_allocate {};
+  struct input_rule : str_input {};
+  struct tensor_error_rule : str_tensor_error {};
+
+  struct callee :
+    pegtl::sor<
+      u_rule,
+      print_rule,
+      allocate_rule,
+      input_rule,
+      tensor_error_rule
+    > {};
+
+  struct callee_rule : callee {};
+
+  struct arguments_rule :
+    pegtl::sor<
+      pegtl::seq<
+        pegtl::sor<
+          t_rule
+        >,
+        pegtl::star<
+          pegtl::seq<
+            pegtl::one<','>,
+            seps,
+            pegtl::sor<
+              t_rule
+            >
+          >
+        >
+      >,
+      seps
+    > {};
+
+  struct Instruction_call_rule :
+    pegtl::seq<
+      seps,
+      call_rule,
+      seps,
+      callee_rule,
+      seps,
+      pegtl::one< '(' >,
+      seps,
+      arguments_rule,
+      seps,
+      pegtl::one< ')' >,
+      seps
+    > {};
+
+  // Instruction_call_assign_rule
+
+  struct Instruction_call_assign_rule :
+    pegtl::seq<
+      seps,
+      var_rule,
+      seps,
+      str_arrow,
+      seps,
+      call_rule,
+      seps,
+      callee_rule,
+      seps,
+      pegtl::one< '(' >,
+      seps,
+      arguments_rule,
+      seps,
+      pegtl::one< ')' >,
+      seps
+    > {};
+
+  struct Instruction_label_rule :
+    pegtl::seq<
+      seps,
+      label,
+      seps
+    > {};
 
   struct Instruction_br_label_rule : pegtl::seq<
                                      str_br,
                                      seps,
-                                     Label_rule>
+                                     label_rule>
   {
   };
   struct Instruction_br_t_rule : pegtl::seq<
                                      str_br,
                                      seps,
-                                     pegtl::sor<variable_rule, number_rule>,
+                                     pegtl::sor<var_rule, number_rule>,
                                      seps, 
-                                     Label_rule>
-  {
-  };
-  struct Instruction_label_rule : label
-  {
-  };
-  struct Instruction_rule : pegtl::sor<
-                                pegtl::seq<pegtl::at<Instruction_label_rule>, Instruction_label_rule>,
-                                pegtl::seq<pegtl::at<Instruction_br_label_rule>, Instruction_br_label_rule>,
-                                pegtl::seq<pegtl::at<Instruction_br_t_rule>, Instruction_br_t_rule>,
-                                pegtl::seq<pegtl::at<Instruction_return_t_rule>, Instruction_return_t_rule>,
-                                pegtl::seq<pegtl::at<Instruction_return_rule>, Instruction_return_rule>,
-                                pegtl::seq<pegtl::at<Instruction_compare_rule>, Instruction_compare_rule>,
-                                pegtl::seq<pegtl::at<Instruction_math_rule>, Instruction_math_rule>,
-                                pegtl::seq<pegtl::at<Instruction_load_rule>, Instruction_load_rule>,
-                                pegtl::seq<pegtl::at<Instruction_store_rule>, Instruction_store_rule>,
-                                pegtl::seq<pegtl::at<Instruction_call_rule>, Instruction_call_rule>,
-                                pegtl::seq<pegtl::at<Instruction_call_assignment_rule>, Instruction_call_assignment_rule>,
-                                pegtl::seq<pegtl::at<Instruction_assignment_rule>, Instruction_assignment_rule>>
+                                     label_rule>
   {
   };
 
-  struct Instructions_rule : pegtl::plus<
-                                 pegtl::seq<
-                                     seps,
-                                     Instruction_rule,
-                                     seps>>
-  {
-  };
+  // Instruction_return_rule
 
-  struct Function_rule : pegtl::seq<
-                             TAOCPP_PEGTL_STRING("define"),
-                             seps,
-                             function_name,
-                             seps,
-                             TAOCPP_PEGTL_STRING("("),
-                             seps,
-                             variables_rule,
-                             seps,
-                             TAOCPP_PEGTL_STRING(")"),
-                             seps,
-                             TAOCPP_PEGTL_STRING("{"),
-                             seps,
-                             Instructions_rule,
-                             seps,
-                            TAOCPP_PEGTL_STRING("}")>
-  {
-  };
+  struct Instruction_return_rule :
+    pegtl::seq<
+      seps,
+      str_return,
+      seps
+    > {};
 
-  struct Functions_rule : pegtl::plus<
-                              seps,
-                              Function_rule,
-                              seps>
-  {
-  };
+  // Instruction_return_t_rule
 
-  struct grammar : pegtl::must<
-                       Functions_rule>
-  {
-  };
-  /*
+  struct Instruction_return_t_rule :
+    pegtl::seq<
+      seps,
+      str_return,
+      seps,
+      t_rule,
+      seps
+    > {};
+  
+  struct Instruction_rule:
+    pegtl::sor<
+      pegtl::seq< pegtl::at<Instruction_op_rule>          , Instruction_op_rule           >,
+      pegtl::seq< pegtl::at<Instruction_load_rule>        , Instruction_load_rule         >,
+      pegtl::seq< pegtl::at<Instruction_store_rule>       , Instruction_store_rule        >,
+      pegtl::seq< pegtl::at<Instruction_call_rule>        , Instruction_call_rule         >,
+      pegtl::seq< pegtl::at<Instruction_call_assign_rule> , Instruction_call_assign_rule  >,
+      pegtl::seq< pegtl::at<Instruction_assignment_rule>  , Instruction_assignment_rule   >,
+      pegtl::seq< pegtl::at<Instruction_br_label_rule>             , Instruction_br_label_rule              >,
+      pegtl::seq< pegtl::at<Instruction_br_t_rule>                 , Instruction_br_t_rule                  >,
+      pegtl::seq< pegtl::at<Instruction_return_t_rule>             , Instruction_return_t_rule              >,
+      pegtl::seq< pegtl::at<Instruction_return_rule>               , Instruction_return_rule                >
+
+    > {};
+
+  struct Instructions_rule:
+    pegtl::plus<
+      pegtl::seq<
+        seps,
+        Instruction_rule,
+        seps
+      >
+    > {};
+
+  /* 
+   * Function Rule 
+   */
+  
+  // Function Components 
+
+  struct str_define : TAOCPP_PEGTL_STRING( "define" ) {};
+  
+  struct function_name :
+    label_rule {};
+
+  struct Function_rule:
+    pegtl::seq<
+      seps,
+      str_define,
+      seps,
+      function_name,
+      seps,
+      pegtl::one< '(' >,
+      seps,
+      vars_rule,
+      seps,
+      pegtl::one< ')' >,
+      seps,
+      pegtl::one< '{' >,
+      seps,
+      Instructions_rule,
+      seps,
+      pegtl::one< '}' >,
+      seps
+    > {};
+
+  struct Functions_rule: // covers multiple functions
+    pegtl::plus<
+      pegtl::seq<
+        seps,
+        Function_rule,
+        seps
+      >
+    > {};
+
+  struct grammar : 
+    pegtl::must<
+      Functions_rule
+    > {};
+
+//================================= ACTIONS =================================
+  /* 
    * Actions attached to grammar rules.
    */
-  template <typename Rule>
-  struct action : pegtl::nothing<Rule>
-  {
-  };
 
-  template <>
-  struct action<Function_rule>
-  {
-    template <typename Input>
-    static void apply(const Input &in, Program &p)
-    {
-      if (is_debug) cout << "firing Function_rule" << endl;
-    }
-  };
+  template< typename Rule >
+  struct action : pegtl::nothing< Rule > {};
 
-  // template <>
-  // struct action<parameter_rule>
-  // {
-  //   template <typename Input>
-  //   static void apply(const Input &in, Program &p)
-  //   {
-  //     auto currentF = p.functions.back();
-  //     //parameter_list.push_back(in.string());
-  //     Variable *v = currentF->newVariable(in.string());
-  //     currentF->arguments.push_back(v);
-  //   }
-  // };
-
-  template <>
-  struct action<function_name>
-  {
-    template <typename Input>
-    static void apply(const Input &in, Program &p)
-    {
-      if (is_debug) cout << "new function: " << in.string() << endl;
+  template<> struct action < function_name > {
+    template< typename Input >
+	static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "function_name action started\n";
       auto newF = new Function();
+      // auto newF = p.functions.back();
+      // if (in.string() == ":main") currentF->isMain = true;
       newF->name = in.string();
-      newF->isMain = in.string() == ":main";
-      parameter_list = {};
       p.functions.push_back(newF);
+      if (shouldPrint) cout << "function_name action ended\n";
     }
   };
 
@@ -407,7 +511,7 @@ namespace L3
     }
   };
   template <>
-  struct action<Label_rule>
+  struct action<label_rule>
   {
     template <typename Input>
     static void apply(const Input &in, Program &p)
@@ -418,13 +522,13 @@ namespace L3
   };
 
   template <>
-  struct action<variable_rule>
+  struct action<var_rule>
   {
     template <typename Input>
     static void apply(const Input &in, Program &p)
     {
       // if (is_debug)
-      //   cout << "firing variable_rule: " << in.string() << endl;
+      //   cout << "firing var_rule: " << in.string() << endl;
       auto currentF = p.functions.back();
       std::string var_name = in.string(); 
       Variable *i = currentF->newVariable(var_name);
@@ -433,13 +537,13 @@ namespace L3
   };    
 
 template <>
-  struct action<variables_rule>
+  struct action<vars_rule>
   {
     template <typename Input>
     static void apply(const Input &in, Program &p)
     {
       if (is_debug)
-        cout << "firing variables_rule: " << in.string() << endl;
+        cout << "firing vars_rule: " << in.string() << endl;
       auto currentF = p.functions.back();
       std::string vars = in.string(); 
       while(vars.find(',') != vars.npos){
@@ -622,13 +726,13 @@ template <>
   };
   // action for var <- t op t
   template <>
-  struct action<Instruction_math_rule>
+  struct action<Instruction_op_rule>
   {
     template <typename Input>
     static void apply(const Input &in, Program &p)
     {
       if (is_debug)
-        cout << "firing Instruction_math_rule: " << in.string() << endl;
+        cout << "firing Instruction_op_rule: " << in.string() << endl;
       auto currentF = p.functions.back();
       auto i = new Instruction_math();
       i->oprand2 = parsed_items.back();
@@ -672,13 +776,13 @@ template <>
   };
 
   template <>
-  struct action<Instruction_call_assignment_rule>
+  struct action<Instruction_call_assign_rule>
   {
     template <typename Input>
     static void apply(const Input &in, Program &p)
     {
       if (is_debug)
-        cout << "firing Instruction_call_assignment_rule: " << in.string() << endl;
+        cout << "firing Instruction_call_assign_rule: " << in.string() << endl;
       auto currentF = p.functions.back();
       auto i = new Instruction_call_assignment();
       for(Item* item : list_of_args) {
@@ -803,46 +907,8 @@ template <>
     }
   };
 
-  template <>
-  struct action<compare_op_rule>
-  {
-    template <typename Input>
-    static void apply(const Input &in, Program &p)
-    {
-      // if (is_debug)
-      //   cout << "firing compare_op_rule: " << in.string() << endl;
-      Operation *i = new Operation(in.string());
-      parsed_items.push_back(i);
-    }
-  };
 
-  template <>
-  struct action<Instruction_compare_rule>
-  {
-    template <typename Input>
-    static void apply(const Input &in, Program &p)
-    {
-      if (is_debug)
-        cout << "firing Instruction_compare_rule: " << in.string() << endl;
-      auto currentF = p.functions.back();
-
-      auto i = new Instruction_compare();
-      i->oprand2 = parsed_items.back();
-      parsed_items.pop_back();
-      i->op = parsed_items.back();
-      parsed_items.pop_back();
-      i->oprand1 = parsed_items.back();
-      parsed_items.pop_back();
-      i->dst = dynamic_cast<Variable*>(parsed_items.back());
-      parsed_items.pop_back();
-      if(is_debug) cout << i->toString() << endl;
-      currentF->instructions.push_back(i);
-    }
-  };
-
-  Program parse_file(char *fileName)
-  {
-
+  Program parse_file(char *fileName) {
     /*
      * Check the grammar for some possible issues.
      */
@@ -851,11 +917,10 @@ template <>
     /*
      * Parse.
      */
-    file_input<> fileInput(fileName);
+    file_input< > fileInput(fileName);
     Program p;
     parse<grammar, action>(fileInput, p);
 
     return p;
   }
-
 }
