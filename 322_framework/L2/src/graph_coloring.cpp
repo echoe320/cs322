@@ -16,22 +16,30 @@ namespace L2 {
   }
 
   std::string ColorGraph::colorSelector(std::set<Node*> edges) {
-    // for (int idx = 0; idx < 15; idx++) {
-    for (auto i : all_color_list) {
-      bool color_present = false;
-      for (auto it = edges.begin(); it != edges.end(); ++it) {
-        //// auto temp = *it;
-        //// Node* adj_node = this->g->lookupNode(temp->name);
-        Node* adj_node = *it;
-        if (adj_node->color == i) { 
-          color_present = true;
-          break;
-        }
-        // if (color == adj_node->color) break;
-      }
-      if (color_present == false) return i;
+    std::set<std::string> usedColors;
+    for (auto it = edges.begin(); it != edges.end(); ++it) {
+      Node* adj_node = *it;
+      usedColors.insert(adj_node->color);
+    }
+    for (auto c : all_color_list) {
+      if (usedColors.find(c) == usedColors.end()) return c;
     }
     return "spill";
+    // for (auto i : all_color_list) {
+    //   bool color_present = false;
+    //   for (auto it = edges.begin(); it != edges.end(); ++it) {
+    //     //// auto temp = *it;
+    //     //// Node* adj_node = this->g->lookupNode(temp->name);
+    //     Node* adj_node = *it;
+    //     if (adj_node->color == i) { 
+    //       color_present = true;
+    //       break;
+    //     }
+    //     // if (color == adj_node->color) break;
+    //   }
+    //   if (color_present == false) return i;
+    // }
+    // return "spill";
   }
 
   //* STEP 1) Repeatedly select a node and remove it from the graph, putting it on top of the stack
@@ -114,8 +122,8 @@ namespace L2 {
       Node* popped = this->poppedNodes.top();
       // std::set<Node*> n = this->Node_neighbors.top();
       //// popped = this->g->lookupNode(popped->name);
-      // std::set<Node*> popped_neighbors = this->g->g[popped];
-      std::set<Node*> popped_neighbors = Node_neighbors.top();
+      std::set<Node*> popped_neighbors = this->g->g[popped];
+      // std::set<Node*> popped_neighbors = Node_neighbors.top();
       popped->color = this->colorSelector(popped_neighbors);
       popped->didPop = false;
       // std::cout << popped->name << " " << popped->color << ": ";

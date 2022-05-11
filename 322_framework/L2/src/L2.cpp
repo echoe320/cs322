@@ -376,6 +376,8 @@ namespace L2 {
     }
 
     for (int ii = 0; ii < instructions_len; ii++) {
+      this->instructions[ii]->successor_idx.clear();
+      // this->instructions[ii]->prede_idx.clear();
       // return instruction has no successors
       if (dynamic_cast<Instruction_ret *>(this->instructions[ii]) != nullptr) {
         if (doiprint) std::cout << "return succ" << std::endl;

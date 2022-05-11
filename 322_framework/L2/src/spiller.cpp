@@ -17,7 +17,7 @@ namespace L2 {
         this->var = toSpill;
         this->prefix = prefix;
         this->num_vars_spilled = num_vars_spilled;
-        // this->count = spill_count;
+        // this->count = num_vars_spilled;
     }
 
     int Spill_Visitors::getCount() {

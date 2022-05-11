@@ -1,8 +1,27 @@
-(:go
-	(:go
+(:stub
+	(:stub
 		0 0
-		mem rsp -8 <- :ret
-		call :myF 0
-		:ret
 		return
 	)
+	(:leftShiftStuff_1
+		3 1
+		rcx <- rdi
+		r10 <- rsi
+		mem rsp 0 <- r10
+		r10 <- rdx
+		cjump rcx = 0 :WORK
+		return
+		:WORK
+		rcx <- rcx
+		r11 <<= rcx
+		mem rsp 0 <- r11
+		%JACOBEUGENEAREAWESOME2 <- mem rsp 0
+		rcx <- %JACOBEUGENEAREAWESOME2
+		r10 <<= rcx
+		rax <- r10
+		rax += rcx
+		r10 <- mem rsp 0
+		rax += r10
+		return
+	)
+)

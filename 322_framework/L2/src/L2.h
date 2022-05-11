@@ -28,7 +28,7 @@ namespace L2 {
 
   static const char* all_color_list[] = {"red", "orange", "yellow", "green", "blue", "indigo", "purple", "pink", "brown", "black", "white", "gray", "maroon", "navy", "periwinkle"};
 
-  static const std::map<std::string, reg> color_dict = {{"red", rdi}, {"orange", rsi}, {"yellow", rdx}, {"green", rcx}, {"blue", r8}, {"indigo", r9}, {"purple", rax}, {"pink", rbx}, {"brown", rbp}, {"black", r10}, {"white", r11}, {"gray", r12}, {"maroon", r13}, {"navy", r14}, {"periwinkle", r15}};
+  static const std::map<std::string, reg> color_dict = {{"red", r10}, {"orange", r11}, {"yellow", r8}, {"green", r9}, {"blue", rax}, {"indigo", rcx}, {"purple", rdi}, {"pink", rdx}, {"brown", rsi}, {"black", r12}, {"white", r13}, {"gray", r14}, {"maroon", r15}, {"navy", rbp}, {"periwinkle", rbx}};
 
   //Item Class + subclasses
   class Item {
@@ -113,7 +113,7 @@ namespace L2 {
       virtual std::string typeAsString(void) = 0;
       virtual std::string toString(void) = 0;
 
-      std::set<int> predecessor_idx;
+      // std::set<int> predecessor_idx;
       std::set<int> successor_idx;
       std::unordered_set<Item *> reads; // Gen
       std::unordered_set<Item *> writes; // Kill

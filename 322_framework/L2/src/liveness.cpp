@@ -218,9 +218,13 @@ namespace L2 {
   }
 
   void create_liveness_list(Function* f) {
-    //Gen and kill 
+    //Gen and kill
+    f->GEN.clear();
+    f->KILL.clear();
     auto gen_kill_visitor = new Gen_Kill_Visitors();
     for (auto i : f->instructions) {
+      i->reads.clear();
+      i->writes.clear();
       i->Accept(gen_kill_visitor);
       f->GEN.push_back(i->reads);
       f->KILL.push_back(i->writes);
@@ -280,8 +284,10 @@ namespace L2 {
     do {
       didChange = false;
       for (int ii = f->instructions.size() - 1; ii >= 0; ii--) {
-        std::unordered_set<Item *> temp_IN = f->instructions[ii]->IN; //set equal to instruction's IN set (this will be the previous iteration's) and compare at end
-        std::unordered_set<Item *> temp_OUT = f->instructions[ii]->OUT;
+        std::unordered_set<Item *> temp_IN;
+        std::unordered_set<Item *> temp_OUT;
+        temp_IN = f->instructions[ii]->IN; //set equal to instruction's IN set (this will be the previous iteration's) and compare at end
+        temp_OUT = f->instructions[ii]->OUT;
         f->instructions[ii]->IN.clear();
         f->instructions[ii]->OUT.clear();
 
@@ -341,6 +347,8 @@ namespace L2 {
       }
     } while (didChange);
 
+    f->IN.clear();
+    f->OUT.clear();
     for (auto i : f->instructions) {
       f->IN.push_back(i->IN);
       f->OUT.push_back(i->OUT);

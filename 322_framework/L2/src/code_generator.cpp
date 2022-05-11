@@ -30,74 +30,76 @@ namespace L2 {
     auto fields = element->get();
     auto src = std::get<0>(fields);
     auto dst = std::get<1>(fields);
-    std::string dst_str, src_str;
+    // std::string dst_str, src_str;
+    std::string dst_str = dst->toString();
+    std::string src_str = src->toString();
 
-    // dst - w
-    if (dynamic_cast<Variable*>(dst) != nullptr) {
-      auto temp_var = dynamic_cast<Variable*>(dst);
-      auto var_name = temp_var->toString();
-      std::string col = this->color_graph->g->lookupNode(var_name)->color;
-      int regi = color_to_reg[col];
-      dst_str = get_enum_string(regi);
-    }
-    else if (dynamic_cast<Register *>(dst) != nullptr) {
-      auto dst_temp = dynamic_cast<Register *>(dst);
-      dst_str = dst_temp->toString();
-    } else if (dynamic_cast<Memory *>(dst) != nullptr) {
-      auto mem_temp = dynamic_cast<Memory *>(dst);
-      auto mem_fields = mem_temp->get();
-      auto rv_temp = std::get<0>(mem_fields);
-      if (dynamic_cast<Variable*>(rv_temp) != nullptr){
-        auto temp_var = dynamic_cast<Variable*>(rv_temp);
-        auto var_name = temp_var->toString();
-        std::string col = this->color_graph->g->lookupNode(var_name)->color;
-        int regi = color_to_reg[col];
-        auto num_temp = std::get<1>(mem_fields);
-        std::cout << "Before seg" << std::endl;
-        num_temp = dynamic_cast<Number *>(num_temp);
-        dst_str = "mem " + get_enum_string(regi) + " " + num_temp->toString();
-        std::cout << "after seg" << std::endl;
-      } else {
-        // auto mem_temp = dynamic_cast<Memory *>(dst);
-        dst_str = mem_temp->toString(); 
-      }
-    }
+    // // dst - w
+    // // if (dynamic_cast<Variable*>(dst) != nullptr) {
+    // //   auto temp_var = dynamic_cast<Variable*>(dst);
+    // //   auto var_name = temp_var->toString();
+    // //   std::string col = this->color_graph->g->lookupNode(var_name)->color;
+    // //   int regi = color_to_reg[col];
+    // //   dst_str = get_enum_string(regi);
+    // // }
+    // if (dynamic_cast<Register *>(dst) != nullptr) {
+    //   auto dst_temp = dynamic_cast<Register *>(dst);
+    //   dst_str = dst_temp->toString();
+    // } else if (dynamic_cast<Memory *>(dst) != nullptr) {
+    //   auto mem_temp = dynamic_cast<Memory *>(dst);
+    //   auto mem_fields = mem_temp->get();
+    //   auto rv_temp = std::get<0>(mem_fields);
+    //   // if (dynamic_cast<Variable*>(rv_temp) != nullptr){
+    //   //   auto temp_var = dynamic_cast<Variable*>(rv_temp);
+    //   //   auto var_name = temp_var->toString();
+    //   //   std::string col = this->color_graph->g->lookupNode(var_name)->color;
+    //   //   int regi = color_to_reg[col];
+    //   //   auto num_temp = std::get<1>(mem_fields);
+    //   //   std::cout << "Before seg" << std::endl;
+    //   //   num_temp = dynamic_cast<Number *>(num_temp);
+    //   //   dst_str = "mem " + get_enum_string(regi) + " " + num_temp->toString();
+    //   //   std::cout << "after seg" << std::endl;
+    //   // } else {
+    //     // auto mem_temp = dynamic_cast<Memory *>(dst);
+    //   dst_str = mem_temp->toString(); 
+    //   // }
+    // }
 
-    // src - s
-    if (dynamic_cast<Variable*>(src) != nullptr) {
-      auto temp_var = dynamic_cast<Variable*>(src);
-      auto var_name = temp_var->toString();
-      std::string col = this->color_graph->g->lookupNode(var_name)->color;
-      int regi = color_to_reg[col];
-      src_str = get_enum_string(regi);
-    } else if (dynamic_cast<Label *>(src) != nullptr) {
-      auto src_temp = dynamic_cast<Label *>(src);
-      src_str = src_temp->toString();
-    } else if (dynamic_cast<Register *>(src) != nullptr) {
-      auto src_temp = dynamic_cast<Register *>(src);
-      src_str = src_temp->toString();
-    } else if (dynamic_cast<Number *>(src) != nullptr) {
-      auto src_temp = dynamic_cast<Number *>(src);
-      src_str = src_temp->toString();
-    } else if (dynamic_cast<Memory *>(src) != nullptr) {
-      auto mem_temp = dynamic_cast<Memory *>(src);
-      auto mem_fields = mem_temp->get();
-      auto rv_temp = std::get<0>(mem_fields);
-      if (dynamic_cast<Variable*>(rv_temp) != nullptr){
-        auto temp_var = dynamic_cast<Variable*>(rv_temp);
-        auto var_name = temp_var->toString();
-        std::string col = this->color_graph->g->lookupNode(var_name)->color;
-        int regi = color_to_reg[col];
-        auto num_temp = std::get<1>(mem_fields);
-        std::cout << "Before seg" << std::endl;
-        num_temp = dynamic_cast<Number *>(num_temp);
-        src_str = "mem " + get_enum_string(regi) + " " + num_temp->toString();
-        std::cout << "after seg" << std::endl;
-      } else {
-        // auto mem_temp = dynamic_cast<Memory *>(src);
-        src_str = mem_temp->toString(); 
-      }
-    }
+    // // src - s
+    // // if (dynamic_cast<Variable*>(src) != nullptr) {
+    // //   auto temp_var = dynamic_cast<Variable*>(src);
+    // //   auto var_name = temp_var->toString();
+    // //   std::string col = this->color_graph->g->lookupNode(var_name)->color;
+    // //   int regi = color_to_reg[col];
+    // //   src_str = get_enum_string(regi);
+    // if (dynamic_cast<Label *>(src) != nullptr) {
+    //   auto src_temp = dynamic_cast<Label *>(src);
+    //   src_str = src_temp->toString();
+    // } else if (dynamic_cast<Register *>(src) != nullptr) {
+    //   auto src_temp = dynamic_cast<Register *>(src);
+    //   src_str = src_temp->toString();
+    // } else if (dynamic_cast<Number *>(src) != nullptr) {
+    //   auto src_temp = dynamic_cast<Number *>(src);
+    //   src_str = src_temp->toString();
+    // } else if (dynamic_cast<Memory *>(src) != nullptr) {
+    //   auto mem_temp = dynamic_cast<Memory *>(src);
+    //   auto mem_fields = mem_temp->get();
+    //   auto rv_temp = std::get<0>(mem_fields);
+    //   // if (dynamic_cast<Variable*>(rv_temp) != nullptr){
+    //   //   auto temp_var = dynamic_cast<Variable*>(rv_temp);
+    //   //   auto var_name = temp_var->toString();
+    //   //   std::string col = this->color_graph->g->lookupNode(var_name)->color;
+    //   //   int regi = color_to_reg[col];
+    //   //   auto num_temp = std::get<1>(mem_fields);
+    //   //   std::cout << "Before seg" << std::endl;
+    //   //   num_temp = dynamic_cast<Number *>(num_temp);
+    //   //   src_str = "mem " + get_enum_string(regi) + " " + num_temp->toString();
+    //   //   std::cout << "after seg" << std::endl;
+    //   // } else {
+    //     // auto mem_temp = dynamic_cast<Memory *>(src);
+    //   src_str = mem_temp->toString(); 
+    //   // }
+    // }
 
     this->outputFile << "\t\t" + dst_str + " <- " + src_str << std::endl;
     if (shouldPrint) std::cout << "ended visit to assignment instruction" << "\n";
@@ -108,74 +110,76 @@ namespace L2 {
     auto src = std::get<0>(fields);
     auto dst = std::get<1>(fields);
     auto op = std::get<2>(fields);
-    std::string dst_str, op_str, src_str;
+    // std::string dst_str, op_str, src_str;
+    std::string dst_str = dst->toString();
+    std::string op_str = op->toString();
+    std::string src_str = src->toString();
 
-    // dst - w + mem
-    if (dynamic_cast<Variable*>(dst) != nullptr) {
-      auto temp_var = dynamic_cast<Variable*>(dst);
-      auto var_name = temp_var->toString();
-      std::string col = this->color_graph->g->lookupNode(var_name)->color;
-      int regi = color_to_reg[col];
-      dst_str = get_enum_string(regi);
-    }else if (dynamic_cast<Register *>(dst) != nullptr) {
-      auto dst_temp = dynamic_cast<Register *>(dst);
-      dst_str = dst_temp->toString();
-    } else if (dynamic_cast<Memory *>(dst) != nullptr) {
-      auto mem_temp = dynamic_cast<Memory *>(dst);
-      auto mem_fields = mem_temp->get();
-      auto rv_temp = std::get<0>(mem_fields);
-      if (dynamic_cast<Variable*>(rv_temp) != nullptr){
-        auto temp_var = dynamic_cast<Variable*>(rv_temp);
-        auto var_name = temp_var->toString();
-        std::string col = this->color_graph->g->lookupNode(var_name)->color;
-        int regi = color_to_reg[col];
-        auto num_temp = std::get<1>(mem_fields);
-        std::cout << "Before seg" << std::endl;
-        num_temp = dynamic_cast<Number *>(num_temp);
-        dst_str = "mem " + get_enum_string(regi) + " " + num_temp->toString();
-        std::cout << "after seg" << std::endl;
-      } else {
-        auto mem_temp = dynamic_cast<Memory *>(dst);
-        dst_str = mem_temp->toString(); 
-      }
-    }
+    // // dst - w + mem
+    // // if (dynamic_cast<Variable*>(dst) != nullptr) {
+    // //   auto temp_var = dynamic_cast<Variable*>(dst);
+    // //   auto var_name = temp_var->toString();
+    // //   std::string col = this->color_graph->g->lookupNode(var_name)->color;
+    // //   int regi = color_to_reg[col];
+    // //   dst_str = get_enum_string(regi);
+    // if (dynamic_cast<Register *>(dst) != nullptr) {
+    //   auto dst_temp = dynamic_cast<Register *>(dst);
+    //   dst_str = dst_temp->toString();
+    // } else if (dynamic_cast<Memory *>(dst) != nullptr) {
+    //   auto mem_temp = dynamic_cast<Memory *>(dst);
+    //   auto mem_fields = mem_temp->get();
+    //   auto rv_temp = std::get<0>(mem_fields);
+    //   // if (dynamic_cast<Variable*>(rv_temp) != nullptr){
+    //   //   auto temp_var = dynamic_cast<Variable*>(rv_temp);
+    //   //   auto var_name = temp_var->toString();
+    //   //   std::string col = this->color_graph->g->lookupNode(var_name)->color;
+    //   //   int regi = color_to_reg[col];
+    //   //   auto num_temp = std::get<1>(mem_fields);
+    //   //   std::cout << "Before seg" << std::endl;
+    //   //   num_temp = dynamic_cast<Number *>(num_temp);
+    //   //   dst_str = "mem " + get_enum_string(regi) + " " + num_temp->toString();
+    //   //   std::cout << "after seg" << std::endl;
+    //   // } else {
+    //   dst_str = mem_temp->toString(); 
+    //   // }
+    // }
 
-    // op - op
-    auto op_temp = dynamic_cast<Operation *>(op);
-    op_str = op_temp->toString();
+    // // op - op
+    // auto op_temp = dynamic_cast<Operation *>(op);
+    // op_str = op_temp->toString();
 
-    // src - t + mem
-    if (dynamic_cast<Variable*>(src) != nullptr) {
-      auto temp_var = dynamic_cast<Variable*>(src);
-      auto var_name = temp_var->toString();
-      std::string col = this->color_graph->g->lookupNode(var_name)->color;
-      int regi = color_to_reg[col];
-      src_str = get_enum_string(regi);
-    } else if (dynamic_cast<Register *>(src) != nullptr) {
-      auto src_temp = dynamic_cast<Register *>(src);
-      src_str = src_temp->toString();
-    } else if (dynamic_cast<Number *>(src) != nullptr) {
-      auto src_temp = dynamic_cast<Number *>(src);
-      src_str = src_temp->toString();
-    } else if (dynamic_cast<Memory *>(src) != nullptr) {
-      auto mem_temp = dynamic_cast<Memory *>(src);
-      auto mem_fields = mem_temp->get();
-      auto rv_temp = std::get<0>(mem_fields);
-      if (dynamic_cast<Variable*>(rv_temp) != nullptr){
-        auto temp_var = dynamic_cast<Variable*>(rv_temp);
-        auto var_name = temp_var->toString();
-        std::string col = this->color_graph->g->lookupNode(var_name)->color;
-        int regi = color_to_reg[col];
-        auto num_temp = std::get<1>(mem_fields);
-        std::cout << "Before seg" << std::endl;
-        num_temp = dynamic_cast<Number *>(num_temp);
-        src_str = "mem " + get_enum_string(regi) + " " + num_temp->toString();
-        std::cout << "after seg" << std::endl;
-      } else {
-        // auto mem_temp = dynamic_cast<Memory *>(src);
-        src_str = mem_temp->toString(); 
-      }
-    }
+    // // src - t + mem
+    // // if (dynamic_cast<Variable*>(src) != nullptr) {
+    // //   auto temp_var = dynamic_cast<Variable*>(src);
+    // //   auto var_name = temp_var->toString();
+    // //   std::string col = this->color_graph->g->lookupNode(var_name)->color;
+    // //   int regi = color_to_reg[col];
+    // //   src_str = get_enum_string(regi);
+    // if (dynamic_cast<Register *>(src) != nullptr) {
+    //   auto src_temp = dynamic_cast<Register *>(src);
+    //   src_str = src_temp->toString();
+    // } else if (dynamic_cast<Number *>(src) != nullptr) {
+    //   auto src_temp = dynamic_cast<Number *>(src);
+    //   src_str = src_temp->toString();
+    // } else if (dynamic_cast<Memory *>(src) != nullptr) {
+    //   auto mem_temp = dynamic_cast<Memory *>(src);
+    //   auto mem_fields = mem_temp->get();
+    //   auto rv_temp = std::get<0>(mem_fields);
+    //   // if (dynamic_cast<Variable*>(rv_temp) != nullptr){
+    //   //   auto temp_var = dynamic_cast<Variable*>(rv_temp);
+    //   //   auto var_name = temp_var->toString();
+    //   //   std::string col = this->color_graph->g->lookupNode(var_name)->color;
+    //   //   int regi = color_to_reg[col];
+    //   //   auto num_temp = std::get<1>(mem_fields);
+    //   //   std::cout << "Before seg" << std::endl;
+    //   //   num_temp = dynamic_cast<Number *>(num_temp);
+    //   //   src_str = "mem " + get_enum_string(regi) + " " + num_temp->toString();
+    //   //   std::cout << "after seg" << std::endl;
+    //   // } else {
+    //     // auto mem_temp = dynamic_cast<Memory *>(src);
+    //   src_str = mem_temp->toString(); 
+    //   // }
+    // }
 
     this->outputFile << "\t\t" + dst_str + " " + op_str + " " + src_str << std::endl;
     if (shouldPrint) std::cout << "ended visit to Instruction_arithmetic" << "\n";
@@ -185,70 +189,77 @@ namespace L2 {
     auto fields = element->get();
     auto dst = std::get<0>(fields);
     auto op = std::get<1>(fields);
-    std::string dst_str, op_str;
+    // std::string dst_str, op_str;
+    std::string dst_str = dst->toString();
+    std::string op_str = op->toString();
 
-    // dst - w
-    if (dynamic_cast<Variable*>(dst) != nullptr) {
-      auto temp_var = dynamic_cast<Variable*>(dst);
-      auto var_name = temp_var->toString();
-      std::string col = this->color_graph->g->lookupNode(var_name)->color;
-      int regi = color_to_reg[col];
-      dst_str = get_enum_string(regi);
-    }
-    else {
-      auto dst_temp = dynamic_cast<Register *>(dst);
-      dst_str = dst_temp->toString();
-    }
+    // // dst - w
+    // // if (dynamic_cast<Variable*>(dst) != nullptr) {
+    // //   auto temp_var = dynamic_cast<Variable*>(dst);
+    // //   auto var_name = temp_var->toString();
+    // //   std::string col = this->color_graph->g->lookupNode(var_name)->color;
+    // //   int regi = color_to_reg[col];
+    // //   dst_str = get_enum_string(regi);
+    // // }
+    // // else {
+    // auto dst_temp = dynamic_cast<Register *>(dst);
+    // dst_str = dst_temp->toString();
+    // // }
 
-    // op - op
-    auto op_temp = dynamic_cast<Operation *>(op);
-    op_str = op_temp->toString();
+    // // op - op
+    // auto op_temp = dynamic_cast<Operation *>(op);
+    // op_str = op_temp->toString();
 
     this->outputFile << "\t\t" + dst_str + op_str << std::endl;
     if (shouldPrint) std::cout << "ended visit to Instruction_crement" << "\n";
   }
   void Gen_Code_Visitors::VisitInstruction (Instruction_shift *element) {
-    if (shouldPrint) std::cout << "visited Instruction_shift" << "\n";
+    // std::cout << "visited Instruction_shift" << "\n";
     auto fields = element->get();
     auto src = std::get<0>(fields);
     auto dst = std::get<1>(fields);
     auto sop = std::get<2>(fields);
-    std::string dst_str, sop_str, src_str;
+    // std::string dst_str, sop_str, src_str;
+    std::string dst_str = dst->toString();
+    std::string sop_str = sop->toString();
+    std::string src_str = src->toString();
 
-    // dst - w
-    if (dynamic_cast<Variable*>(dst) != nullptr) {
-      auto temp_var = dynamic_cast<Variable*>(dst);
-      auto var_name = temp_var->toString();
-      std::string col = this->color_graph->g->lookupNode(var_name)->color;
-      int regi = color_to_reg[col];
-      dst_str = get_enum_string(regi);
-    }
-    else {
-      auto dst_temp = dynamic_cast<Register *>(dst);
-      dst_str = dst_temp->toString();
-    }
+    // // dst - w
+    // // if (dynamic_cast<Variable*>(dst) != nullptr) {
+    // //   auto temp_var = dynamic_cast<Variable*>(dst);
+    // //   auto var_name = temp_var->toString();
+    // //   std::string col = this->color_graph->g->lookupNode(var_name)->color;
+    // //   int regi = color_to_reg[col];
+    // //   dst_str = get_enum_string(regi);
+    // // }
+    // // else {
+    // auto dst_temp = dynamic_cast<Register *>(dst);
+    // dst_str = dst_temp->toString();
+    // // }
 
-    // op - sop
-    auto sop_temp = dynamic_cast<Operation *>(sop);
-    sop_str = sop_temp->toString();
+    // // op - sop
+    // auto sop_temp = dynamic_cast<Operation *>(sop);
+    // sop_str = sop_temp->toString();
 
-    // src - sx
-    if (dynamic_cast<Variable*>(src) != nullptr) {
-      auto temp_var = dynamic_cast<Variable*>(src);
-      auto var_name = temp_var->toString();
-      std::string col = this->color_graph->g->lookupNode(var_name)->color;
-      int regi = color_to_reg[col];
-      src_str = get_enum_string(regi);
-    } else if (dynamic_cast<Register *>(src) != nullptr) {
-      auto src_temp = dynamic_cast<Register *>(src);
-      src_str = src_temp->toString();
-    } else if (dynamic_cast<Number *>(src) != nullptr) {
-      auto src_temp = dynamic_cast<Number *>(src);
-      src_str = src_temp->toString();
-    }
-
-    this->outputFile << "\t\t" + dst_str + " " + sop_str + " " + src_str << std::endl;
-    if (shouldPrint) std::cout << "ended visit to Instruction_shift" << "\n";
+    // // src - sx
+    // // if (dynamic_cast<Variable*>(src) != nullptr) {
+    // //   auto temp_var = dynamic_cast<Variable*>(src);
+    // //   auto var_name = temp_var->toString();
+    // //   std::string col = this->color_graph->g->lookupNode(var_name)->color;
+    // //   int regi = color_to_reg[col];
+    // //   src_str = get_enum_string(regi);
+    // if (dynamic_cast<Register *>(src) != nullptr) {
+    //   auto src_temp = dynamic_cast<Register *>(src);
+    //   src_str = src_temp->toString();
+    // } else if (dynamic_cast<Number *>(src) != nullptr) {
+    //   auto src_temp = dynamic_cast<Number *>(src);
+    //   src_str = src_temp->toString();
+    // }
+    // std::cout << "\t\trcx <- " + src_str << std::endl; // have to put shift amount into rcx for L1 constraint
+    // this->outputFile << "\t\trcx <- " + src_str << std::endl; // have to put shift amount into rcx for L1 constraint
+    this->outputFile << "\t\trcx <- " + src_str << std::endl << "\t\t" + dst_str + " " + sop_str + " rcx"  << std::endl;
+    // this->outputFile << "\t\t" + dst_str + " " + sop_str + " " + src_str << std::endl; //! ORIGINAL
+    // std::cout << "ended visit to Instruction_shift" << "\n";
   }
   void Gen_Code_Visitors::VisitInstruction (Instruction_cmp *element) {
     if (shouldPrint) std::cout << "visited Instruction_cmp" << "\n";
@@ -257,54 +268,58 @@ namespace L2 {
     auto a1 = std::get<1>(fields);
     auto a2 = std::get<2>(fields);
     auto op = std::get<3>(fields);
-    std::string dst_str, arg1_str, cmp_str, arg2_str;
+    // std::string dst_str, arg1_str, cmp_str, arg2_str;
+    std::string dst_str = dst->toString();
+    std::string arg1_str = a1->toString();
+    std::string cmp_str = op->toString();
+    std::string arg2_str = a2->toString();
 
-    // dst - w
-    if (dynamic_cast<Variable*>(dst) != nullptr) {
-      auto temp_var = dynamic_cast<Variable*>(dst);
-      auto var_name = temp_var->toString();
-      std::string col = this->color_graph->g->lookupNode(var_name)->color;
-      int regi = color_to_reg[col];
-      dst_str = get_enum_string(regi);
-    }
-    else {
-      auto dst_temp = dynamic_cast<Register *>(dst);
-      dst_str = dst_temp->toString();
-    }
+    // // dst - w
+    // // if (dynamic_cast<Variable*>(dst) != nullptr) {
+    // //   auto temp_var = dynamic_cast<Variable*>(dst);
+    // //   auto var_name = temp_var->toString();
+    // //   std::string col = this->color_graph->g->lookupNode(var_name)->color;
+    // //   int regi = color_to_reg[col];
+    // //   dst_str = get_enum_string(regi);
+    // // }
+    // // else {
+    // auto dst_temp = dynamic_cast<Register *>(dst);
+    // dst_str = dst_temp->toString();
+    // // }
 
-    // arg1 - t
-    if (dynamic_cast<Variable*>(a1) != nullptr) {
-      auto temp_var = dynamic_cast<Variable*>(a1);
-      auto var_name = temp_var->toString();
-      std::string col = this->color_graph->g->lookupNode(var_name)->color;
-      int regi = color_to_reg[col];
-      arg1_str = get_enum_string(regi);
-    } else if (dynamic_cast<Register *>(a1) != nullptr) {
-      auto arg1_temp = dynamic_cast<Register *>(a1);
-      arg1_str = arg1_temp->toString();
-    } else if (dynamic_cast<Number *>(a1) != nullptr) {
-      auto arg1_temp = dynamic_cast<Number *>(a1);
-      arg1_str = arg1_temp->toString();
-    }
+    // // arg1 - t
+    // // if (dynamic_cast<Variable*>(a1) != nullptr) {
+    // //   auto temp_var = dynamic_cast<Variable*>(a1);
+    // //   auto var_name = temp_var->toString();
+    // //   std::string col = this->color_graph->g->lookupNode(var_name)->color;
+    // //   int regi = color_to_reg[col];
+    // //   arg1_str = get_enum_string(regi);
+    // if (dynamic_cast<Register *>(a1) != nullptr) {
+    //   auto arg1_temp = dynamic_cast<Register *>(a1);
+    //   arg1_str = arg1_temp->toString();
+    // } else if (dynamic_cast<Number *>(a1) != nullptr) {
+    //   auto arg1_temp = dynamic_cast<Number *>(a1);
+    //   arg1_str = arg1_temp->toString();
+    // }
 
-    // op - cmp
-    auto cmp_temp = dynamic_cast<Operation *>(op);
-    cmp_str = cmp_temp->toString();
+    // // op - cmp
+    // auto cmp_temp = dynamic_cast<Operation *>(op);
+    // cmp_str = cmp_temp->toString();
 
-    // arg2 - t
-    if (dynamic_cast<Variable*>(a2) != nullptr) {
-      auto temp_var = dynamic_cast<Variable*>(a2);
-      auto var_name = temp_var->toString();
-      std::string col = this->color_graph->g->lookupNode(var_name)->color;
-      int regi = color_to_reg[col];
-      arg2_str = get_enum_string(regi);
-    } else if (dynamic_cast<Register *>(a2) != nullptr) {
-      auto arg2_temp = dynamic_cast<Register *>(a2);
-      arg2_str = arg2_temp->toString();
-    } else if (dynamic_cast<Number *>(a2) != nullptr) {
-      auto arg2_temp = dynamic_cast<Number *>(a2);
-      arg2_str = arg2_temp->toString();
-    }
+    // // arg2 - t
+    // // if (dynamic_cast<Variable*>(a2) != nullptr) {
+    // //   auto temp_var = dynamic_cast<Variable*>(a2);
+    // //   auto var_name = temp_var->toString();
+    // //   std::string col = this->color_graph->g->lookupNode(var_name)->color;
+    // //   int regi = color_to_reg[col];
+    // //   arg2_str = get_enum_string(regi);
+    // if (dynamic_cast<Register *>(a2) != nullptr) {
+    //   auto arg2_temp = dynamic_cast<Register *>(a2);
+    //   arg2_str = arg2_temp->toString();
+    // } else if (dynamic_cast<Number *>(a2) != nullptr) {
+    //   auto arg2_temp = dynamic_cast<Number *>(a2);
+    //   arg2_str = arg2_temp->toString();
+    // }
       
     this->outputFile << "\t\t" + dst_str + " <- " + arg1_str + " " + cmp_str + " " + arg2_str << std::endl;
     if (shouldPrint) std::cout << "ended visit to Instruction_cmp" << "\n";
@@ -316,45 +331,49 @@ namespace L2 {
     auto a2 = std::get<1>(fields);
     auto lab = std::get<2>(fields);
     auto op = std::get<3>(fields);
-    std::string arg1_str, cmp_str, arg2_str, lab_str;
+    // std::string arg1_str, cmp_str, arg2_str, lab_str;
+    std::string arg1_str = a1->toString();
+    std::string cmp_str = op->toString();
+    std::string arg2_str = a2->toString();
+    std::string lab_str = lab->toString();
 
-    // arg1 - t
-    if (dynamic_cast<Variable*>(a1) != nullptr) {
-      auto temp_var = dynamic_cast<Variable*>(a1);
-      auto var_name = temp_var->toString();
-      std::string col = this->color_graph->g->lookupNode(var_name)->color;
-      int regi = color_to_reg[col];
-      arg1_str = get_enum_string(regi);
-    } else if (dynamic_cast<Register *>(a1) != nullptr) {
-      auto arg1_temp = dynamic_cast<Register *>(a1);
-      arg1_str = arg1_temp->toString();
-    } else if (dynamic_cast<Number *>(a1) != nullptr) {
-      auto arg1_temp = dynamic_cast<Number *>(a1);
-      arg1_str = arg1_temp->toString();
-    }
+    // // arg1 - t
+    // // if (dynamic_cast<Variable*>(a1) != nullptr) {
+    // //   auto temp_var = dynamic_cast<Variable*>(a1);
+    // //   auto var_name = temp_var->toString();
+    // //   std::string col = this->color_graph->g->lookupNode(var_name)->color;
+    // //   int regi = color_to_reg[col];
+    // //   arg1_str = get_enum_string(regi);
+    // if (dynamic_cast<Register *>(a1) != nullptr) {
+    //   auto arg1_temp = dynamic_cast<Register *>(a1);
+    //   arg1_str = arg1_temp->toString();
+    // } else if (dynamic_cast<Number *>(a1) != nullptr) {
+    //   auto arg1_temp = dynamic_cast<Number *>(a1);
+    //   arg1_str = arg1_temp->toString();
+    // }
 
-    // op - cmp
-    auto cmp_temp = dynamic_cast<Operation *>(op);
-    cmp_str = cmp_temp->toString();
+    // // op - cmp
+    // auto cmp_temp = dynamic_cast<Operation *>(op);
+    // cmp_str = cmp_temp->toString();
 
-    // arg2 - t
-    if (dynamic_cast<Variable*>(a2) != nullptr) {
-      auto temp_var = dynamic_cast<Variable*>(a2);
-      auto var_name = temp_var->toString();
-      std::string col = this->color_graph->g->lookupNode(var_name)->color;
-      int regi = color_to_reg[col];
-      arg2_str = get_enum_string(regi);
-    } else if (dynamic_cast<Register *>(a2) != nullptr) {
-      auto arg2_temp = dynamic_cast<Register *>(a2);
-      arg2_str = arg2_temp->toString();
-    } else if (dynamic_cast<Number *>(a2) != nullptr) {
-      auto arg2_temp = dynamic_cast<Number *>(a2);
-      arg2_str = arg2_temp->toString();
-    }
+    // // arg2 - t
+    // // if (dynamic_cast<Variable*>(a2) != nullptr) {
+    // //   auto temp_var = dynamic_cast<Variable*>(a2);
+    // //   auto var_name = temp_var->toString();
+    // //   std::string col = this->color_graph->g->lookupNode(var_name)->color;
+    // //   int regi = color_to_reg[col];
+    // //   arg2_str = get_enum_string(regi);
+    // if (dynamic_cast<Register *>(a2) != nullptr) {
+    //   auto arg2_temp = dynamic_cast<Register *>(a2);
+    //   arg2_str = arg2_temp->toString();
+    // } else if (dynamic_cast<Number *>(a2) != nullptr) {
+    //   auto arg2_temp = dynamic_cast<Number *>(a2);
+    //   arg2_str = arg2_temp->toString();
+    // }
 
-    // lab - label
-    auto lab_temp = dynamic_cast<Label *>(lab);
-    lab_str = lab_temp->toString();
+    // // lab - label
+    // auto lab_temp = dynamic_cast<Label *>(lab);
+    // lab_str = lab_temp->toString();
 
     this->outputFile << "\t\t" << "cjump " + arg1_str + " " + cmp_str + " " + arg2_str + " " + lab_str << std::endl;
     if (shouldPrint) std::cout << "ended visit to Instruction_cjump" << "\n";
@@ -366,47 +385,51 @@ namespace L2 {
     auto a1 = std::get<1>(fields);
     auto a2 = std::get<2>(fields);
     auto mul = std::get<3>(fields);
-    std::string dst_str, arg1_str, arg2_str, mul_str;
+    // std::string dst_str, arg1_str, arg2_str, mul_str;
+    std::string dst_str = dst->toString();
+    std::string arg1_str = a1->toString();
+    std::string arg2_str = a2->toString();
+    std::string mul_str = mul->toString();
 
-    // dst - w
-    if (dynamic_cast<Variable*>(dst) != nullptr) {
-      auto temp_var = dynamic_cast<Variable*>(dst);
-      auto var_name = temp_var->toString();
-      std::string col = this->color_graph->g->lookupNode(var_name)->color;
-      int regi = color_to_reg[col];
-      dst_str = get_enum_string(regi);
-    } else {
-      auto dst_temp = dynamic_cast<Register *>(dst);
-      dst_str = dst_temp->toString();
-    }
+    // // dst - w
+    // // if (dynamic_cast<Variable*>(dst) != nullptr) {
+    // //   auto temp_var = dynamic_cast<Variable*>(dst);
+    // //   auto var_name = temp_var->toString();
+    // //   std::string col = this->color_graph->g->lookupNode(var_name)->color;
+    // //   int regi = color_to_reg[col];
+    // //   dst_str = get_enum_string(regi);
+    // // } else {
+    // auto dst_temp = dynamic_cast<Register *>(dst);
+    // dst_str = dst_temp->toString();
+    // // }
 
-    // arg1 - w
-    if (dynamic_cast<Variable*>(a1) != nullptr) {
-      auto temp_var = dynamic_cast<Variable*>(a1);
-      auto var_name = temp_var->toString();
-      std::string col = this->color_graph->g->lookupNode(var_name)->color;
-      int regi = color_to_reg[col];
-      arg1_str = get_enum_string(regi);
-    } else {
-      auto a1_temp = dynamic_cast<Register *>(a1);
-      arg1_str = a1_temp->toString();
-    }
+    // // arg1 - w
+    // // if (dynamic_cast<Variable*>(a1) != nullptr) {
+    // //   auto temp_var = dynamic_cast<Variable*>(a1);
+    // //   auto var_name = temp_var->toString();
+    // //   std::string col = this->color_graph->g->lookupNode(var_name)->color;
+    // //   int regi = color_to_reg[col];
+    // //   arg1_str = get_enum_string(regi);
+    // // } else {
+    // auto a1_temp = dynamic_cast<Register *>(a1);
+    // arg1_str = a1_temp->toString();
+    // // }
 
-    // arg2 - w
-    if (dynamic_cast<Variable*>(a2) != nullptr) {
-      auto temp_var = dynamic_cast<Variable*>(a2);
-      auto var_name = temp_var->toString();
-      std::string col = this->color_graph->g->lookupNode(var_name)->color;
-      int regi = color_to_reg[col];
-      arg2_str = get_enum_string(regi);
-    } else {
-      auto a2_temp = dynamic_cast<Register *>(a2);
-      arg2_str = a2_temp->toString();
-    }
+    // // arg2 - w
+    // // if (dynamic_cast<Variable*>(a2) != nullptr) {
+    // //   auto temp_var = dynamic_cast<Variable*>(a2);
+    // //   auto var_name = temp_var->toString();
+    // //   std::string col = this->color_graph->g->lookupNode(var_name)->color;
+    // //   int regi = color_to_reg[col];
+    // //   arg2_str = get_enum_string(regi);
+    // // } else {
+    // auto a2_temp = dynamic_cast<Register *>(a2);
+    // arg2_str = a2_temp->toString();
+    // // }
 
-    // mul - num
-    auto mul_temp = dynamic_cast<Number *>(mul);
-    mul_str = mul_temp->toString();
+    // // mul - num
+    // auto mul_temp = dynamic_cast<Number *>(mul);
+    // mul_str = mul_temp->toString();
 
     this->outputFile << "\t\t" + dst_str + " @ " + arg1_str + " " + arg2_str + " " + mul_str << std::endl;
     if (shouldPrint) std::cout << "ended visit to Instruction_lea" << "\n";
@@ -416,32 +439,34 @@ namespace L2 {
     auto fields = element->get();
     auto u = std::get<0>(fields);
     auto N = std::get<1>(fields);
-    std::string u_str, N_str;
+    // std::string u_str, N_str;
+    std::string u_str = u->toString();
+    std::string N_str = N->toString();
 
-    // u - w and label
-    if (dynamic_cast<Variable*>(u) != nullptr) {
-      auto temp_var = dynamic_cast<Variable*>(u);
-      auto var_name = temp_var->toString();
-      std::string col = this->color_graph->g->lookupNode(var_name)->color;
-      int regi = color_to_reg[col];
-      u_str = get_enum_string(regi);
-    } else if (dynamic_cast<Register *>(u) != nullptr) {
-      auto u_temp = dynamic_cast<Register *>(u);
-      u_str = u_temp->toString();
-      } else if (dynamic_cast<Label *>(u) != nullptr) {
-      auto u_temp = dynamic_cast<Label *>(u);
-      u_str = u_temp->toString();
-      }
+    // // u - w and label
+    // // if (dynamic_cast<Variable*>(u) != nullptr) {
+    // //   auto temp_var = dynamic_cast<Variable*>(u);
+    // //   auto var_name = temp_var->toString();
+    // //   std::string col = this->color_graph->g->lookupNode(var_name)->color;
+    // //   int regi = color_to_reg[col];
+    // //   u_str = get_enum_string(regi);
+    // if (dynamic_cast<Register *>(u) != nullptr) {
+    //   auto u_temp = dynamic_cast<Register *>(u);
+    //   u_str = u_temp->toString();
+    //   } else if (dynamic_cast<Label *>(u) != nullptr) {
+    //   auto u_temp = dynamic_cast<Label *>(u);
+    //   u_str = u_temp->toString();
+    //   }
 
-    // if variable pointer object, dynamic cast and get() -> return string
-    // use string in lookUp Node method, find the Node*
-    // from Node* -> get color from field
-    // use color as key in unordered map color_to_reg -> returns reg
-    // use get_enum_string() to get register string
+    // // if variable pointer object, dynamic cast and get() -> return string
+    // // use string in lookUp Node method, find the Node*
+    // // from Node* -> get color from field
+    // // use color as key in unordered map color_to_reg -> returns reg
+    // // use get_enum_string() to get register string
 
-    // N - number
-    auto N_temp = dynamic_cast<Number *>(N);
-    N_str = N_temp->toString();
+    // // N - number
+    // auto N_temp = dynamic_cast<Number *>(N);
+    // N_str = N_temp->toString();
 
     this->outputFile << "\t\t" << "call " + u_str + " " + N_str << std::endl;
     if (shouldPrint) std::cout << "ended visit to Instruction_calls" << "\n";
@@ -453,11 +478,11 @@ namespace L2 {
     if (shouldPrint) std::cout << "visited Instruction_label" << "\n";
     auto fields = element->get();
     auto lab = std::get<0>(fields);
-    std::string lab_str;
+    // std::string lab_str;
 
     // lab - label
-    auto lab_temp = dynamic_cast<Label *>(lab);
-    lab_str = lab_temp->toString();
+    // auto lab_temp = dynamic_cast<Label *>(lab);
+    std::string lab_str = lab->toString();
 
     this->outputFile << "\t\t" + lab_str << std::endl;
     if (shouldPrint) std::cout << "ended visit to Instruction_label" << "\n";
@@ -466,11 +491,11 @@ namespace L2 {
     if (shouldPrint) std::cout << "visited Instruction_goto" << "\n";
     auto fields = element->get();
     auto lab = std::get<0>(fields);
-    std::string lab_str;
+    // std::string lab_str;
 
     // lab - label
-    auto lab_temp = dynamic_cast<Label *>(lab);
-    lab_str = lab_temp->toString();
+    // auto lab_temp = dynamic_cast<Label *>(lab);
+    std::string lab_str = lab->toString();
 
     this->outputFile << "\t\t" << "goto " + lab_str << std::endl;
     if (shouldPrint) std::cout << "ended visit to Instruction_goto" << "\n";
@@ -480,25 +505,27 @@ namespace L2 {
     auto fields = element->get();
     auto dst = std::get<0>(fields);
     auto M = std::get<1>(fields);
-    std::string dst_str, M_str;
+    // std::string dst_str, M_str;
+    std::string dst_str = dst->toString();
+    std::string M_str = M->toString();
 
     // w
-    if (dynamic_cast<Variable*>(dst) != nullptr) {
-      auto temp_var = dynamic_cast<Variable*>(dst);
-      auto var_name = temp_var->toString();
-      std::string col = this->color_graph->g->lookupNode(var_name)->color;
-      int regi = color_to_reg[col];
-      dst_str = get_enum_string(regi);
-    } else {
-      auto dst_temp = dynamic_cast<Register *>(dst);
-      dst_str = dst_temp->toString();
-    }
+    // if (dynamic_cast<Variable*>(dst) != nullptr) {
+    //   auto temp_var = dynamic_cast<Variable*>(dst);
+    //   auto var_name = temp_var->toString();
+    //   std::string col = this->color_graph->g->lookupNode(var_name)->color;
+    //   int regi = color_to_reg[col];
+    //   dst_str = get_enum_string(regi);
+    // } else {
+    // auto dst_temp = dynamic_cast<Register *>(dst);
+    // dst_str = dst_temp->toString();
+    // // }
 
-    // number
-    auto M_temp = dynamic_cast<Number *>(M);
-    int num_temp = M_temp->get();
-    num_temp = this->f->num_locals * 8 + num_temp;
-    M_str = std::to_string(num_temp);
+    // // number
+    // auto M_temp = dynamic_cast<Number *>(M);
+    // int num_temp = M_temp->get();
+    // num_temp = this->f->num_locals * 8 + num_temp;
+    // M_str = std::to_string(num_temp);
 
     this->outputFile << "\t\t" << dst_str + " <- mem rsp " + M_str << std::endl;
     if (shouldPrint) std::cout << "ended visit to Instruction_stackarg" << "\n";
@@ -535,31 +562,44 @@ namespace L2 {
         std::cout << "iterate analysis" << std::endl;
         mustSpill = false;
         spill_list.clear();
+        std::cout << "starting liveness" << std::endl;
         create_liveness_list(func_copy);
         std::cout << "created liveness list" << std::endl;
         interference_graph = create_interference_graph(func_copy);
         std::cout << "created interference graph" << std::endl;
         color_graph = registerAllocate(interference_graph);
         std::cout << "created color graph" << std::endl;
+        std::cout << "starting color2reg" << std::endl;
         func_copy = color2reg(func_copy, color_graph);
         std::cout << "switched vars to registers from colors" << std::endl;
-        std::cout << "variables to be spilled: ";
-        for (auto var : color_graph->tobeSpilled) {
-          std::string var_name = var->toString();
-          if (var_name.compare(0, 22, prefix) != 0) {
-            spill_list.push_back(var);
-            // std::cout << var_name << " ";
+        if (color_graph->tobeSpilled.size() > 3) {
+          std::cout << "spilling all" << std::endl;
+          func_copy = f;
+          func_copy = spill_all(func_copy, prefix);
+          create_liveness_list(func_copy);
+          interference_graph = create_interference_graph(func_copy);
+          color_graph = registerAllocate(interference_graph);
+          func_copy = color2reg(func_copy, color_graph);
+        }
+        else {
+          std::cout << "variables to be spilled: ";
+          for (auto var : color_graph->tobeSpilled) {
+            std::string var_name = var->toString();
+            if (var_name.compare(0, 22, prefix) != 0) {
+              spill_list.push_back(var);
+              std::cout << var_name << " ";
+            }
+          }
+          std::cout << std::endl;
+          if (!spill_list.empty()) {
+            mustSpill = true;
+            std::cout << "spilling" << std::endl;
+            func_copy = spill_mult_var(func_copy, spill_list, prefix);
+            std::cout << "done spilling" << std::endl;
           }
         }
-        std::cout << std::endl;
-        if (!spill_list.empty()) {
-          mustSpill = true;
-          std::cout << "spilling" << std::endl;
-          func_copy = spill_mult_var(func_copy, color_graph->tobeSpilled, prefix);
-          std::cout << "done spilling" << std::endl;
-        }
       } while (mustSpill);
-      
+      std::cout << "finished analysis" << std::endl;
       /* Create function header */
       outputFile << "\t" << "(" << func_copy->name << std::endl;
       outputFile << "\t\t" << func_copy->arguments << " " << func_copy->num_locals << std::endl;
@@ -568,6 +608,7 @@ namespace L2 {
       Gen_Code_Visitors v {outputFile, func_copy, color_graph};
 
       for (auto i : func_copy->instructions) {
+        std::cout << i->toString() << std::endl;
         i->Accept(&v);
       }
 

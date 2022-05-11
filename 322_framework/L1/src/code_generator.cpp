@@ -186,7 +186,8 @@ namespace L1{
             if (temp_num > 0) {
               instruction += "addq $" + to_string(temp_num) + ", %rsp\n";
             }
-            instruction += single_tab + "retq";
+            // instruction += single_tab + "retq";
+            instruction += "retq";
             break;
           }
           case assignment:
@@ -295,6 +296,7 @@ namespace L1{
               }
               instruction += "cmpq " + arg2 + ", " + arg1 + new_line; // line 1
               instruction += single_tab + op_arg + " " + label; // line 2
+              // instruction += op_arg + " " + label;
             }
             break;
           }

@@ -116,11 +116,13 @@ namespace L2 {
       node1->isRegister = true;
       node1->color = all_color_list[ii];
       for (int jj = 0; jj < 15; jj++) {
-        std::string reg2 = all_gp_list[jj];
-        Node* node2 = graph->lookupNode(reg2);
-        node2->isRegister = true;
-        node2->color = all_color_list[jj];
-        graph->addEdge(node1, node2);
+        if (ii != jj) {
+          std::string reg2 = all_gp_list[jj];
+          Node* node2 = graph->lookupNode(reg2);
+          node2->isRegister = true;
+          node2->color = all_color_list[jj];
+          graph->addEdge(node1, node2);
+        }
       }
     }
     
@@ -168,14 +170,14 @@ namespace L2 {
       }
     }
     // graph->printDegrees();
-    // for (auto it = graph->g.begin(); it != graph->g.end(); ++it) {
-    //   auto temp = *it;
-    //   std::cout << temp.first->name << " ";
-    //   for (auto item : temp.second) {
-    //     std::cout << item->name << " ";
-    //   }
-    //   std::cout << std::endl;
-    // }
+    for (auto it = graph->g.begin(); it != graph->g.end(); ++it) {
+      auto temp = *it;
+      std::cout << temp.first->name << " ";
+      for (auto item : temp.second) {
+        std::cout << item->name << " ";
+      }
+      std::cout << std::endl;
+    }
     return graph;
   }
 }
