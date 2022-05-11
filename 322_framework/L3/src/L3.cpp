@@ -6,6 +6,11 @@ using namespace std;
 
 namespace L3
 {
+  /* helper functions */
+  std::string get_reg_string (int enum_value) {
+    return (reg_enum_str[enum_value]);
+  }
+  
   //Program 
   Program::Program() {}
   //Function 
@@ -18,16 +23,6 @@ namespace L3
     }
     Function::variables[variableName] = new Variable(variableName);
     return Function::variables[variableName];
-  }
-
-  void Function::format_function() {
-    // ::cout << "(" << this->name << endl;
-    // ::cout << "\t" << this->arguments << endl;
-    // for (auto i : this->instructions) {
-    //   ::cout << "\t" << i->toString() << endl;
-    // }
-
-    // ::cout << ")" << endl;
   }
 
   // Label Item
@@ -105,29 +100,6 @@ namespace L3
       return this->sName;
   }
   Empty::Empty() {}
-
-
-//   Instruction_ret * Instruction_ret::clone() { return new Instruction_ret(*this); }
-//   Instruction_assignment * Instruction_assignment::clone() { return new Instruction_assignment(*this); }
-//   Instruction_load * Instruction_load::clone() { return new Instruction_load(*this); }
-//   Instruction_shift * Instruction_shift::clone() { return new Instruction_shift(*this); }
-//   Instruction_store * Instruction_store::clone() { return new Instruction_store(*this); }
-//   Instruction_stack * Instruction_stack::clone() { return new Instruction_stack(*this); }
-//   Instruction_aop * Instruction_aop::clone() { return new Instruction_aop(*this); }
-//   Instruction_store_aop * Instruction_store_aop::clone() { return new Instruction_store_aop(*this); }
-//   Instruction_load_aop * Instruction_load_aop::clone() { return new Instruction_load_aop(*this); }
-//   Instruction_compare * Instruction_compare::clone() { return new Instruction_compare(*this); }
-//   Instruction_cjump * Instruction_cjump::clone() { return new Instruction_cjump(*this); }
-//   Instruction_call * Instruction_call::clone() { return new Instruction_call(*this); }
-//   Instruction_call_print * Instruction_call_print::clone() { return new Instruction_call_print(*this); }
-//   Instruction_call_input * Instruction_call_input::clone() { return new Instruction_call_input(*this); }
-//   Instruction_call_allocate * Instruction_call_allocate::clone() { return new Instruction_call_allocate(*this); }
-//   Instruction_call_error * Instruction_call_error::clone() { return new Instruction_call_error(*this); }
-//   Instruction_label * Instruction_label::clone() { return new Instruction_label(*this); }
-//   Instruction_increment * Instruction_increment::clone() { return new Instruction_increment(*this); }
-//   Instruction_decrement * Instruction_decrement::clone() { return new Instruction_decrement(*this); }
-//   Instruction_at * Instruction_at::clone() { return new Instruction_at(*this); }
-//   Instruction_goto * Instruction_goto::clone() { return new Instruction_goto(*this); }
 
 
 //assignment 

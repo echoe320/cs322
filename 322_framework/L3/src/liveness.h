@@ -1,8 +1,9 @@
 #pragma once
-#include "L3.h"
-#include "instructionSelect.h"
 #include <string>
 #include <iostream>
+
+#include "L3.h"
+#include "instruction_select.h"
 
 namespace L3 {
   struct AnalysisResult {

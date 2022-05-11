@@ -1,8 +1,9 @@
-#include <liveness.h>
 #include <set>
 #include <algorithm>
 #include <string>
 #include <iostream>
+
+#include <liveness.h>
 
 extern bool is_debug;
 

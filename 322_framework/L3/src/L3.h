@@ -2,6 +2,8 @@
 
 #include <vector>
 #include <string>
+
+#include <unordered_set>
 #include <set>
 #include <map>
 
@@ -9,6 +11,10 @@ using namespace std;
 
 namespace L3
 {
+  enum reg {rdi, rsi, rdx, rcx, r8, r9, rax, rbx, rbp, r10, r11, r12, r13, r14, r15, rsp};
+  static const char* reg_enum_str[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9", "rax", "rbx", "rbp", "r10", "r11", "r12", "r13", "r14", "r15", "rsp"};
+  std::string get_reg_string (int enum_value);
+
 
   class Visitor;
 

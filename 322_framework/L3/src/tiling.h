@@ -1,8 +1,9 @@
 
 #pragma once
-#include <L3.h>
 #include <stdint.h>
-#include <instructionSelect.h>
+
+#include <L3.h>
+#include <instruction_select.h>
 
 namespace L3 {
     

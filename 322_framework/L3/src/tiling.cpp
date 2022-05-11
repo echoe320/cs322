@@ -1,8 +1,8 @@
-
-#include <tiling.h>
-#include <codegenerator.h>
 #include <iostream>
 #include <queue>
+
+#include "tiling.h"
+#include "code_generator.h"
 
 using namespace std;
 

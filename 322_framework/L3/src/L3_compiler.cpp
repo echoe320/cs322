@@ -13,8 +13,8 @@
 #include <iostream>
 
 #include <L3.h>
-#include <parser.h>
-#include <codegenerator.h>
+#include <L3_parser.h>
+#include <code_generator.h>
 
 using namespace std;
 
