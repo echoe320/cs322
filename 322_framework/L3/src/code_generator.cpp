@@ -75,31 +75,31 @@ namespace L3{
   /* Defining Visitor Functions */
 
   void CodeGen::visit(Tile_return* t){
-      TreeNode *tree = t->getTree();
-      L2_instructions.push_back("\treturn\n");
+    Node *tree = t->getTree();
+    L2_instructions.push_back("\treturn\n");
   }
   void CodeGen::visit(Tile_return_t* t){
-      TreeNode *tree = t->getTree();
-      Variable* arg = dynamic_cast<Variable*>(tree->val); 
-      string line;
-      if(arg){
-          line = "\t" + t->root->oprand1->matched_node->val->toString() + " <- rdi\n";
-          L2_instructions.push_back(line);
-      }
-      line = "\trax <- " + t->root->oprand1->matched_node->val->toString() + "\n";
+    Node *tree = t->getTree();
+    Variable* arg = dynamic_cast<Variable*>(tree->val); 
+    string line;
+    if(arg){
+      line = "\t" + t->root->oprand1->matched_node->val->toString() + " <- rdi\n";
       L2_instructions.push_back(line);
-      L2_instructions.push_back("\treturn\n");
+    }
+    line = "\trax <- " + t->root->oprand1->matched_node->val->toString() + "\n";
+    L2_instructions.push_back(line);
+    L2_instructions.push_back("\treturn\n");
   }
   void CodeGen::visit(Tile_assign* t){
-      TreeNode *tree = t->getTree();
-      string dst = tree->val->toString();
-      string oprand = t->root->oprand1->matched_node->val->toString();
-      string line = "\t" + dst + " <- " + oprand + '\n';
-      L2_instructions.push_back(line);
+    Node *tree = t->getTree();
+    string dst = tree->val->toString();
+    string oprand = t->root->oprand1->matched_node->val->toString();
+    string line = "\t" + dst + " <- " + oprand + '\n';
+    L2_instructions.push_back(line);
   }
 
   void CodeGen::visit(Tile_math* t) {
-      TreeNode *tree = t->getTree();
+      Node *tree = t->getTree();
       if (!tree) cout << "bug " << endl;
       string dst = tree->val->toString();
       string oprand1 = t->root->oprand1->matched_node->val->toString();
@@ -134,7 +134,7 @@ namespace L3{
 
 
   void CodeGen::visit(Tile_compare *t){
-      TreeNode *tree = t->getTree();
+      Node *tree = t->getTree();
       string dst = tree->val->toString(); 
       string oprand1 = t->root->oprand1->matched_node->val->toString();
       string op = tree->op->toString(); 
@@ -154,7 +154,7 @@ namespace L3{
   }
 
   void CodeGen::visit(Tile_load *t){
-      TreeNode *tree = t->getTree();
+      Node *tree = t->getTree();
       string dst = tree->val->toString(); 
       string oprand1 = t->root->oprand1->matched_node->val->toString();
       //need to know current number of item on stack 
@@ -165,7 +165,7 @@ namespace L3{
       L2_instructions.push_back(line);
   }
   void CodeGen::visit(Tile_store *t){
-      TreeNode *tree = t->getTree();
+      Node *tree = t->getTree();
       string dst = tree->val->toString(); 
       string oprand1 = t->root->oprand1->matched_node->val->toString();
       //need to know current number of item on stack 
@@ -173,13 +173,13 @@ namespace L3{
       L2_instructions.push_back(line);
   }
   void CodeGen::visit(Tile_br* t){
-    TreeNode *tree = t->getTree();
+    Node *tree = t->getTree();
     string label = t->root->oprand1->matched_node->val->toString();
     string line = "\tgoto " + label + '\n'; 
     L2_instructions.push_back(line);
   }
   void CodeGen::visit(Tile_br_t* t){
-      TreeNode *tree = t->getTree();
+      Node *tree = t->getTree();
       while (!(tree->oprand1 && tree->oprand2)) {
           if (tree->oprand1) tree = tree->oprand1;
           if (tree->oprand2) tree = tree->oprand2;
@@ -200,7 +200,7 @@ namespace L3{
   }
 
   void CodeGen::visit(Tile_increment* t){
-      TreeNode *tree = t->getTree();
+      Node *tree = t->getTree();
       string dst = tree->val->toString(); 
       string line; 
       if(tree->op->toString() == "+"){
@@ -213,7 +213,7 @@ namespace L3{
   }
 
   void CodeGen::visit(Tile_at* t){
-      TreeNode *tree = t->getTree();
+      Node *tree = t->getTree();
       string dst = tree->val->toString(); 
       string src_add = t->root->oprand2->matched_node->val->toString(); 
       string src_mult = t->root->oprand1->oprand1->matched_node->val->toString(); 
@@ -222,10 +222,10 @@ namespace L3{
       L2_instructions.push_back(line);       
   }
 
-  void generate_code(Program p){
+  void generate_L2_file(Program p){
     /* 
-      * Open the output file and initialize
-      */ 
+     * Open the output file and initialize
+     */ 
     std::ofstream outputFile;
     outputFile.open("prog.L2");
     outputFile << "(:main\n";
@@ -258,7 +258,7 @@ namespace L3{
       }
 
       /* Instruction select */
-      vector<string> L2_instructions = L3::instructionSelection(p, f);
+      vector<string> L2_instructions = L3::inst_select(p, f);
       
       for(string s : L2_instructions) {
         outputFile << "\t" << s; 

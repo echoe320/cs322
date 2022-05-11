@@ -9,7 +9,7 @@ using namespace std;
 extern bool is_debug;
 namespace L3 {
 
-    bool TileRule_one::verify(TreeNode *tree) {
+    bool TileRule_one::verify(Node *tree) {
         Number *n = dynamic_cast<Number *>(tree->val);
         if (n) {
             return n->get() == 1;
@@ -18,7 +18,7 @@ namespace L3 {
         }
     }
 
-    bool TileRule_1248::verify(TreeNode *tree) {
+    bool TileRule_1248::verify(Node *tree) {
         Number *n = dynamic_cast<Number *>(tree->val);
         if (n) {
             return n->get() == 1 || n->get() == 2 || n->get() == 4 || n->get() == 8;
@@ -31,7 +31,7 @@ namespace L3 {
         return oprand1 == nullptr && oprand2 == nullptr;
     }
 
-    bool TileNode::match(TreeNode *tree) {
+    bool TileNode::match(Node *tree) {
         if (!tree) {
             return false;
         }
@@ -63,8 +63,8 @@ namespace L3 {
         }
     }
 
-    bool match_helper(TileNode *tile, TreeNode *tree,
-            std::map<pair<short, int64_t>, TreeNode *> &nodemap) {
+    bool match_helper(TileNode *tile, Node *tree,
+            std::map<pair<short, int64_t>, Node *> &nodemap) {
         if (tile == nullptr) {
             return true; // tile is null, it matches any tree
         }        
@@ -127,7 +127,7 @@ namespace L3 {
         return false;
     }
 
-    void getSubTrees(TileNode *root, set<TreeNode *> &subtrees) {
+    void getSubTrees(TileNode *root, set<Node *> &subtrees) {
         if (root == 0) {
             return;
         }
@@ -142,8 +142,8 @@ namespace L3 {
         return;
     }
 
-    bool Tile::match(TreeNode *t, set<TreeNode *> &subtrees) {
-        std::map<pair<short, int64_t>, TreeNode *> nodemap;
+    bool Tile::match(Node *t, set<Node *> &subtrees) {
+        std::map<pair<short, int64_t>, Node *> nodemap;
         // cout << "tile name :" << name << endl;
         bool matched = match_helper(root, t, nodemap);
         if (matched) getSubTrees(root, subtrees);
@@ -441,14 +441,14 @@ namespace L3 {
     }
 
 
-    void tiling(TreeNode *root, vector<Tile *>&res, const vector<Tile *> all_tiles) {
+    void tiling(Node *root, vector<Tile *>&res, const vector<Tile *> all_tiles) {
         bool flag = false;
         if (root == nullptr) {
             return;
         }
         // if (root->oprand1 == nullptr && root->oprand2 == nullptr) {
         //     //if it is a return
-        //     // vector<TreeNode *> subtrees;
+        //     // vector<Node *> subtrees;
         //     // Tile_return* r = new Tile_return(); 
         //     // if(r->match(root, subtrees)) {
         //     //     flag = true;
@@ -459,7 +459,7 @@ namespace L3 {
         //     // }
         // }
         for (auto t :all_tiles) {
-            set<TreeNode *> subtrees;
+            set<Node *> subtrees;
             Tile *t_clone = t->clone();
             // cout << "tring to match to: " << t->name << endl;
             if (t_clone->match(root, subtrees)) {

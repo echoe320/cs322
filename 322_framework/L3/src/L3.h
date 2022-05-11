@@ -15,7 +15,6 @@ namespace L3
   static const char* reg_enum_str[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9", "rax", "rbx", "rbp", "r10", "r11", "r12", "r13", "r14", "r15", "rsp"};
   std::string get_reg_string (int enum_value);
 
-
   class Visitor;
 
   enum ItemType {
@@ -289,8 +288,6 @@ class Instruction_br_t : public Instruction_br
     std::vector<Function *> functions;
     std::string ll;
     Program();
-  //  std::map<Architecture::RegisterID, Register*> registers; 
-  //  Register* getRegister(Architecture::RegisterID rid); 
   };
 
   class Visitor {

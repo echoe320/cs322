@@ -4,8 +4,9 @@
 #include <tiling.h>
 
 namespace L3{
+  void generate_L2_file(Program p);
   
-  /* Visitor */
+  /* Visitor Pattern */
   class CodeGen {
     public:
     CodeGen(/*Function* f*/); 
@@ -23,6 +24,4 @@ namespace L3{
      void visit(Tile_at *t); 
      void visit(Tile_compare *t);
   };
-
-  void generate_code(Program p);
 }

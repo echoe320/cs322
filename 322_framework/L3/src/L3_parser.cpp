@@ -158,6 +158,8 @@ namespace L3 {
                                 seps
                                     > {};
 
+  /* Instruction op */
+
   struct op_rule : pegtl::sor<TAOCPP_PEGTL_STRING("<<"), 
                             TAOCPP_PEGTL_STRING(">>"),
                             pegtl::one<'+'>, 
@@ -167,6 +169,8 @@ namespace L3 {
                             >
   {
   };
+
+
 
   struct Instruction_return_rule : pegtl::seq<
                                        str_return> {};

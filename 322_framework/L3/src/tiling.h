@@ -10,17 +10,17 @@ namespace L3 {
     class CodeGen;
     class TileRule {
         public:
-        virtual bool verify(TreeNode *tree) = 0;
+        virtual bool verify(Node *tree) = 0;
     };
 
     class TileRule_one: public TileRule {
         public:
-        bool verify(TreeNode *tree) override;
+        bool verify(Node *tree) override;
     };
 
     class TileRule_1248: public TileRule {
         public:
-        bool verify(TreeNode *) override;
+        bool verify(Node *) override;
     };
 
     class TileNode {
@@ -31,7 +31,7 @@ namespace L3 {
 #define TileNodeTypeOp 0x0010
 
         public:
-        TreeNode *matched_node = nullptr;
+        Node *matched_node = nullptr;
         unsigned short tile_type = 0;
         int64_t id = 0;
         Operation *op = nullptr;
@@ -40,7 +40,7 @@ namespace L3 {
         
         TileNode *oprand1 = nullptr;
         TileNode *oprand2 = nullptr;
-        bool match(TreeNode *);
+        bool match(Node *);
         bool isLeaf();
         TileRule *rule = nullptr;
     };
@@ -57,13 +57,13 @@ namespace L3 {
          * @return true if matching is successful
          * @return false unsuccessful
          */
-        bool match(TreeNode *, set<TreeNode *> &subtrees);
+        bool match(Node *, set<Node *> &subtrees);
         int64_t getSize();
         // void accept();
         // vector<L2::Instruction *> getInstructions();
         virtual Tile *clone() = 0;
         virtual void accept(CodeGen *) = 0;
-        TreeNode *getTree() { return root->matched_node; }
+        Node *getTree() { return root->matched_node; }
         TileNode *root;
         
         private:
@@ -167,6 +167,6 @@ namespace L3 {
      * @param root the root of the tree to be tiled
      * @param res the result
      */
-    void tiling(TreeNode *root, vector<Tile *>&res, const vector<Tile *> all_tiles);
+    void tiling(Node *root, vector<Tile *>&res, const vector<Tile *> all_tiles);
     vector<Tile *> getAllTiles();
 }
