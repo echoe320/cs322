@@ -515,7 +515,7 @@ namespace L2 {
     // spilled_func->spill_count = spill_visitor->count;
 
     // return spilled_func;
-  } 
+  }
 
   Function* spill_mult_var(Function* f, std::vector<Variable*> toSpill, std::string prefix) {
     // std::cout << "start spilling" << std::endl;
