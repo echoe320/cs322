@@ -7,8 +7,7 @@ namespace L3 {
   class Tile;
   class Context{
     public:
-    // void inline add(Instruction *i) { instructions.push_back(i);}
-    bool isEmpty(); //{ return instructions.size() == 0; }
+    bool isEmpty();
     vector<Instruction *> instructions;
     int64_t start;
     int64_t end;
@@ -26,17 +25,17 @@ namespace L3 {
       Node* oprand2 = nullptr; 
       void printNode(Node* node, int space);
   };
-  class Tree : public Visitor{
+  class Trees_Visitor : public Visitor{
     public:
       vector<Tile *> tiles;
       Node* root; 
-      Tree(Instruction* i); 
+      Trees_Visitor(Instruction* i); 
       bool isEmpty() {return root == nullptr;};
       vector<Item*> uses; 
       vector<Item*> define;
       vector<string> L2_instructions;
       Instruction* getInstruction();
-      void printTree(Tree* tree);
+      void printTree(Trees_Visitor* tree);
 
       void visit(Instruction_ret_not *i) override;
       void visit(Instruction_ret_t *i) override;

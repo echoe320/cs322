@@ -37,14 +37,10 @@ namespace L2 {
       temp->degree--;
       this->degree_dict[temp->degree].insert(temp);
     }
-    // this->g.erase(found); // erases the node key from unordered map
-    // this->name_dict.erase(found->name);
     found->didPop = true;
     this->degree_dict[found->degree].erase(found);
     std::pair<Node*, std::set<Node*>> popped{found, node_edges};
-    // std::set<Node*> popped{node_edges};
     return popped;
-    // return found->name;
   }
 
   bool Graph::nodeExists(std::string node_name) {
@@ -116,13 +112,11 @@ namespace L2 {
       node1->isRegister = true;
       node1->color = all_color_list[ii];
       for (int jj = 0; jj < 15; jj++) {
-        if (ii != jj) {
-          std::string reg2 = all_gp_list[jj];
-          Node* node2 = graph->lookupNode(reg2);
-          node2->isRegister = true;
-          node2->color = all_color_list[jj];
-          graph->addEdge(node1, node2);
-        }
+        std::string reg2 = all_gp_list[jj];
+        Node* node2 = graph->lookupNode(reg2);
+        node2->isRegister = true;
+        node2->color = all_color_list[jj];
+        graph->addEdge(node1, node2);
       }
     }
     
