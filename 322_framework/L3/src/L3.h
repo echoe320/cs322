@@ -33,6 +33,15 @@ namespace L3
     virtual ItemType getType(void) = 0;
   };
 
+  class Register : public Item {
+    public:
+      Register(reg regi);
+      reg get(void);
+      std::string toString(void) override;
+    private:
+      reg r;
+  };
+
   class Number : public Item
   {
   public:
@@ -105,11 +114,14 @@ class Empty : public Item
   class Instruction
   {
   public:
-    vector<Item *> uses;
-    vector<Item *> define;
-
-    virtual void accept(Visitor* visitor) = 0; 
+    virtual void Accept(Visitor* visitor) = 0; 
     virtual std::string toString() = 0; //for debug
+
+    std::set<int> successor_idx;
+    std::unordered_set<Item *> reads; // Gen
+    std::unordered_set<Item *> writes; // Kill
+    std::unordered_set<Item *> IN; // IN
+    std::unordered_set<Item *> OUT; // OUT
   };
 
   /*
@@ -120,14 +132,14 @@ class Empty : public Item
     public:
       Operation* op;
       virtual std::string toString() = 0;
-      virtual void accept(Visitor *v) = 0;
+      virtual void Accept(Visitor *v) = 0;
   };
 
   class Instruction_ret_not : public Instruction_ret
   {
     public:
       std::string toString() override { return "return"; }
-      void accept(Visitor *v) override; 
+      void Accept(Visitor *v) override; 
   };
 
   class Instruction_ret_t : public Instruction_ret
@@ -136,7 +148,7 @@ class Empty : public Item
       // Operation* op;
       Item* arg; 
       std::string toString() override { return "return " + arg->toString(); }
-      void accept(Visitor *v) override; 
+      void Accept(Visitor *v) override; 
   };
 
   class Instruction_assignment : public Instruction
@@ -145,7 +157,7 @@ class Empty : public Item
     Variable* dst;
     Item* src;
     std::string toString() override { return this->dst->toString() + " <- " + this->src->toString(); }
-    void accept(Visitor *v) override; 
+    void Accept(Visitor *v) override; 
   };
 
   // load instruction
@@ -159,11 +171,11 @@ class Empty : public Item
       return this->dst->toString() + " <- load "
           + this->src->toString();
     }
-    void accept(Visitor *v) override; 
+    void Accept(Visitor *v) override; 
   };
 
   // math instruction
-  class Instruction_math : public Instruction
+  class Instruction_arithmetic : public Instruction
   {
   public:
     Variable *dst;
@@ -171,7 +183,7 @@ class Empty : public Item
     Item *oprand1;
     Item *oprand2; 
     std::string toString() override { return dst->toString() +" <- "+ oprand1->toString() + " " + op->toString() + " " + oprand2->toString(); }
-    void accept(Visitor *v) override; 
+    void Accept(Visitor *v) override; 
   };
 
   // store instruction
@@ -182,10 +194,10 @@ class Empty : public Item
     Item *dst;
     Operation* op;
     std::string toString() override { return "store " + dst->toString() + " <- " + src->toString(); }
-    void accept(Visitor *v) override; 
+    void Accept(Visitor *v) override; 
   };
 
-  class Instruction_compare : public Instruction
+  class Instruction_cmp : public Instruction
   {
   public:
     Variable *dst;
@@ -193,7 +205,7 @@ class Empty : public Item
     Item *op;
     Item *oprand2;
     std::string toString() override { return dst->toString() + " " + oprand1->toString()+ " " + op->toString()+ " " + oprand2->toString(); }
-    void accept(Visitor *v) override; 
+    void Accept(Visitor *v) override; 
   };
 
   class Instruction_br : public Instruction {
@@ -201,14 +213,14 @@ class Empty : public Item
     Label *label;
     Operation* op; 
     virtual std::string toString() = 0;
-    virtual void accept(Visitor *v) = 0;
+    virtual void Accept(Visitor *v) = 0;
   };
 
   class Instruction_br_label : public Instruction_br
   {
   public:
     std::string toString() override { return "br " + label->toString(); }
-    void accept(Visitor *v) override; 
+    void Accept(Visitor *v) override; 
   };
 
 class Instruction_br_t : public Instruction_br
@@ -216,7 +228,7 @@ class Instruction_br_t : public Instruction_br
   public:
     Item *condition;
     std::string toString() override { return "br " + condition->toString() + " " +label->toString(); }
-    void accept(Visitor *v) override; 
+    void Accept(Visitor *v) override; 
   };
 
   class Instruction_call : public Instruction {
@@ -224,31 +236,29 @@ class Instruction_br_t : public Instruction_br
     Item *callee;
     vector<Item*> args; 
     virtual std::string toString() = 0;
-    virtual void accept(Visitor *v) = 0;
+    virtual void Accept(Visitor *v) = 0;
   };
 
   // call callee (args) instruction
-  class Instruction_call_noassign : public Instruction_call
-  {
+  class Instruction_call_noassign : public Instruction_call {
   public:
     std::string toString() override { 
-        string s = "call " + callee->toString() + " "; 
-        for(Item* i : args) s += i->toString() + " ";
-        return s; 
+      string s = "call " + callee->toString() + " "; 
+      for(Item* i : args) s += i->toString() + " ";
+      return s; 
     }
-    void accept(Visitor *v) override; 
+    void Accept(Visitor *v) override; 
   };
   // var <- call callee (args) instruction
-  class Instruction_call_assignment : public Instruction_call
-  {
+  class Instruction_call_assignment : public Instruction_call {
   public:
     Variable *dst;
     std::string toString() override { 
-        string s = dst->toString() + " <- call " + callee->toString() + " "; 
-        for(Item* i : args) s += i->toString() + " ";
-        return s; 
+      string s = dst->toString() + " <- call " + callee->toString() + " "; 
+      for(Item* i : args) s += i->toString() + " ";
+      return s; 
     }
-    void accept(Visitor *v) override; 
+    void Accept(Visitor *v) override; 
   };
 
   // label instruction
@@ -257,7 +267,7 @@ class Instruction_br_t : public Instruction_br
   public:
     Label *label;
     std::string toString() override { return label->toString(); }
-    void accept(Visitor *v) override; 
+    void Accept(Visitor *v) override; 
   };
 
   /*
@@ -275,6 +285,13 @@ class Instruction_br_t : public Instruction_br
     Function(); 
     void format_function();
     int64_t sizeOfStack;
+
+    void findSuccessorsPredecessors();
+    //Initialize vectors
+    std::vector<std::unordered_set<Item *>> GEN; //* GEN[i] = all variables read by instruction i
+    std::vector<std::unordered_set<Item *>> KILL;//* KILL[i] = all variables written/defined by instruction i
+    std::vector<std::unordered_set<Item *>> IN;
+    std::vector<std::unordered_set<Item *>> OUT;
   };
 
   /*
@@ -292,18 +309,18 @@ class Instruction_br_t : public Instruction_br
 
   class Visitor {
     public: 
-      virtual void visit(Instruction_ret_not *i) = 0;
-      virtual void visit(Instruction_ret_t *i) = 0;
-      virtual void visit(Instruction_assignment *i) = 0;
-      virtual void visit(Instruction_load *i) = 0;
-      virtual void visit(Instruction_math *i) = 0;
-      virtual void visit(Instruction_store *i) = 0;
-      virtual void visit(Instruction_compare *i) = 0;
-      virtual void visit(Instruction_br_label *i) = 0;
-      virtual void visit(Instruction_br_t *i) = 0;
-      virtual void visit(Instruction_call_noassign *i) = 0;
-      virtual void visit(Instruction_call_assignment *i) = 0;
-      virtual void visit(Instruction_label *i) = 0;
+      virtual void VisitInstruction(Instruction_ret_not *element) = 0;
+      virtual void VisitInstruction(Instruction_ret_t *element) = 0;
+      virtual void VisitInstruction(Instruction_assignment *element) = 0;
+      virtual void VisitInstruction(Instruction_load *element) = 0;
+      virtual void VisitInstruction(Instruction_arithmetic *element) = 0;
+      virtual void VisitInstruction(Instruction_store *element) = 0;
+      virtual void VisitInstruction(Instruction_cmp *element) = 0;
+      virtual void VisitInstruction(Instruction_br_label *element) = 0;
+      virtual void VisitInstruction(Instruction_br_t *element) = 0;
+      virtual void VisitInstruction(Instruction_call_noassign *element) = 0;
+      virtual void VisitInstruction(Instruction_call_assignment *element) = 0;
+      virtual void VisitInstruction(Instruction_label *element) = 0;
   };
 
 }

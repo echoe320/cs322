@@ -198,7 +198,7 @@ namespace L3 {
           var_rule>
     > {};
 
-  struct Instruction_math_rule :
+  struct Instruction_arithmetic_rule :
     pegtl::seq<
       var_rule,
       seps,
@@ -245,7 +245,7 @@ namespace L3 {
       TAOCPP_PEGTL_STRING("=")
     > {};
 
-  struct Instruction_compare_rule :
+  struct Instruction_cmp_rule :
     pegtl::seq<
       var_rule,
       seps,
@@ -324,8 +324,8 @@ namespace L3 {
     pegtl::seq<pegtl::at<Instruction_br_t_rule>, Instruction_br_t_rule>,
     pegtl::seq<pegtl::at<Instruction_return_t_rule>, Instruction_return_t_rule>,
     pegtl::seq<pegtl::at<Instruction_return_rule>, Instruction_return_rule>,
-    pegtl::seq<pegtl::at<Instruction_compare_rule>, Instruction_compare_rule>,
-    pegtl::seq<pegtl::at<Instruction_math_rule>, Instruction_math_rule>,
+    pegtl::seq<pegtl::at<Instruction_cmp_rule>, Instruction_cmp_rule>,
+    pegtl::seq<pegtl::at<Instruction_arithmetic_rule>, Instruction_arithmetic_rule>,
     pegtl::seq<pegtl::at<Instruction_load_rule>, Instruction_load_rule>,
     pegtl::seq<pegtl::at<Instruction_store_rule>, Instruction_store_rule>,
     pegtl::seq<pegtl::at<Instruction_call_rule>, Instruction_call_rule>,
@@ -637,15 +637,15 @@ template <>
   };
   // action for var <- t op t
   template <>
-  struct action<Instruction_math_rule>
+  struct action<Instruction_arithmetic_rule>
   {
     template <typename Input>
     static void apply(const Input &in, Program &p)
     {
       if (shouldPrint)
-        cout << "Instruction_math_rule: " << in.string() << endl;
+        cout << "Instruction_arithmetic_rule: " << in.string() << endl;
       auto currentF = p.functions.back();
-      auto i = new Instruction_math();
+      auto i = new Instruction_arithmetic();
       i->oprand2 = parsed_items.back();
       parsed_items.pop_back();
       i->op = parsed_items.back();
@@ -832,16 +832,16 @@ template <>
   };
 
   template <>
-  struct action<Instruction_compare_rule>
+  struct action<Instruction_cmp_rule>
   {
     template <typename Input>
     static void apply(const Input &in, Program &p)
     {
       if (shouldPrint)
-        cout << "Instruction_compare_rule: " << in.string() << endl;
+        cout << "Instruction_cmp_rule: " << in.string() << endl;
       auto currentF = p.functions.back();
 
-      auto i = new Instruction_compare();
+      auto i = new Instruction_cmp();
       i->oprand2 = parsed_items.back();
       parsed_items.pop_back();
       i->op = parsed_items.back();

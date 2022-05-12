@@ -1,27 +1,28 @@
 #pragma once
 
 #include <L3.h>
-#include <tiling.h>
 
 namespace L3{
   void generate_L2_file(Program p);
   
   /* Visitor Pattern */
-  class CodeGen {
+  class Gen_Code_Visitors : public Visitor {
     public:
-    CodeGen(/*Function* f*/); 
-    vector<std::string> L2_instructions;
-     void visit(Tile_return_t *t) ;
-     void visit(Tile_return *t) ;
-     void visit(Tile_br *t) ;
-     void visit(Tile_br_t *t) ;
-     void visit(Tile_math *t) ;
-     void visit(Tile_math_specialized *t) ;
-     void visit(Tile_load *t) ;
-     void visit(Tile_store *t) ;
-     void visit(Tile_assign *t) ;
-     void visit(Tile_increment *t); 
-     void visit(Tile_at *t); 
-     void visit(Tile_compare *t);
+      Gen_Code_Visitors(std::ofstream &outF); 
+      // vector<std::string> L2_instructions;
+
+      virtual void VisitInstruction(Instruction_ret_not *element) override;
+      virtual void VisitInstruction(Instruction_ret_t *element) override;
+      virtual void VisitInstruction(Instruction_assignment *element) override;
+      virtual void VisitInstruction(Instruction_load *element) override;
+      virtual void VisitInstruction(Instruction_arithmetic *element) override;
+      virtual void VisitInstruction(Instruction_store *element) override;
+      virtual void VisitInstruction(Instruction_cmp *element) override;
+      virtual void VisitInstruction(Instruction_br_label *element) override;
+      virtual void VisitInstruction(Instruction_br_t *element) override;
+      virtual void VisitInstruction(Instruction_call_noassign *element) override;
+      virtual void VisitInstruction(Instruction_call_assignment *element) override;
+      virtual void VisitInstruction(Instruction_label *element) override;
+      std::ofstream &outputFile;
   };
 }

@@ -1,32 +1,30 @@
 #pragma once
-#include <string>
-#include <iostream>
 
-#include "L3.h"
-#include "instruction_select.h"
+#include <L3.h>
 
-namespace L3 {
-  struct AnalysisResult {
-    std::map<Instruction*, std::set<Item*>> gens; 
-    std::map<Instruction*, std::set<Item*>> kills; 
-    std::map<Instruction*, std::set<Item*>> ins; 
-    std::map<Instruction*, std::set<Item*>> outs; 
+namespace L3{
+  void create_liveness_list(Function* f);
+
+  class Gen_Kill_Visitors : public Visitor {
+    void VisitInstruction (Instruction_ret_not *element) override;
+    virtual void VisitInstruction(Instruction_ret_t *element) override;
+    void VisitInstruction (Instruction_assignment *element) override;
+    void VisitInstruction (Instruction_arithmetic *element) override;
+    // void VisitInstruction (Instruction_crement *element) override;
+    // void VisitInstruction (Instruction_shift *element) override;
+    void VisitInstruction (Instruction_cmp *element) override;
+    // void VisitInstruction (Instruction_cjump *element) override;
+    // void VisitInstruction (Instruction_lea *element) override;
+    void VisitInstruction (Instruction_calls *element) override;
+    // void VisitInstruction (Instruction_runtime *element) override;
+    void VisitInstruction (Instruction_label *element) override;
+    // void VisitInstruction (Instruction_goto *element) override;
+    // void VisitInstruction (Instruction_stackarg *element) override;
+    void VisitInstruction(Instruction_load *element) override;
+    void VisitInstruction(Instruction_store *element) override;
+    void VisitInstruction(Instruction_br_label *element) override;
+    void VisitInstruction(Instruction_br_t *element) override;
+    void VisitInstruction(Instruction_call_noassign *element) override;
+    void VisitInstruction(Instruction_call_assignment *element) override;
   };
-
-  class GenKill: public Visitor {
-    public: 
-      void visit(Instruction_ret_not *i);
-      void visit(Instruction_ret_t *i);
-      void visit(Instruction_assignment *i);
-      void visit(Instruction_load *i);
-      void visit(Instruction_math *i);
-      void visit(Instruction_store *i);
-      void visit(Instruction_compare *i);
-      void visit(Instruction_br_label *i);
-      void visit(Instruction_br_t *i);
-      void visit(Instruction_call_noassign *i);
-      void visit(Instruction_call_assignment *i);
-      void visit(Instruction_label *i);
-  };
-  AnalysisResult* computeLiveness(Function* function);
 }

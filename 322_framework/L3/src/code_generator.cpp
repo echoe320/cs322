@@ -27,8 +27,7 @@ namespace L3{
     }
     p->ll = "";
 
-    if (labels.size() == 0)
-        return;
+    if (labels.size() == 0) return;
     std::sort(labels.begin(), labels.end(), comp_label);
 
     std::string llg = labels[0]->get().substr(1);
@@ -70,156 +69,58 @@ namespace L3{
       return "%tmp_" + varname.substr(1);
   }
 
-  CodeGen::CodeGen(/*Function *f*/) {}
+  Gen_Code_Visitors::Gen_Code_Visitors(std::ofstream &outF) : outputFile(outF) {
+    
+  }
 
   /* Defining Visitor Functions */
 
-  void CodeGen::visit(Tile_return* t){
-    Node *tree = t->getTree();
-    L2_instructions.push_back("\treturn\n");
+  void Gen_Code_Visitors::VisitInstruction(Instruction_ret_not *element){
+    
   }
-  void CodeGen::visit(Tile_return_t* t){
-    Node *tree = t->getTree();
-    Variable* arg = dynamic_cast<Variable*>(tree->val); 
-    string line;
-    if(arg){
-      line = "\t" + t->root->oprand1->matched_node->val->toString() + " <- rdi\n";
-      L2_instructions.push_back(line);
-    }
-    line = "\trax <- " + t->root->oprand1->matched_node->val->toString() + "\n";
-    L2_instructions.push_back(line);
-    L2_instructions.push_back("\treturn\n");
-  }
-  void CodeGen::visit(Tile_assign* t){
-    Node *tree = t->getTree();
-    string dst = tree->val->toString();
-    string oprand = t->root->oprand1->matched_node->val->toString();
-    string line = "\t" + dst + " <- " + oprand + '\n';
-    L2_instructions.push_back(line);
+  
+  void Gen_Code_Visitors::VisitInstruction(Instruction_ret_t *element){
+    
   }
 
-  void CodeGen::visit(Tile_math* t) {
-      Node *tree = t->getTree();
-      if (!tree) cout << "bug " << endl;
-      string dst = tree->val->toString();
-      string oprand1 = t->root->oprand1->matched_node->val->toString();
-      string op = tree->op->toString(); 
-      string oprand2 = t->root->oprand2->matched_node->val->toString();
-      if (op == "*" || op == "+" || op == "&") {
-          string line = '\t' + dst + " <- " + oprand1 + '\n'; 
-          L2_instructions.push_back(line);
-          line = '\t' + dst + " " + op + "= " + oprand2 + '\n';
-          L2_instructions.push_back(line);
-      } else if (op == "-" || op == "<<" || op == ">>") {
-          string tmp = temp_var("%tmp");
-          string line = '\t' + tmp + " <- " + oprand1 + '\n'; 
-          L2_instructions.push_back(line);
-          line = '\t' + tmp + " " + op + "= " + oprand2 + '\n'; 
-          L2_instructions.push_back(line);
-          line = '\t' + dst + " <- " + tmp + '\n'; 
-          L2_instructions.push_back(line);
-      }
-
+  void Gen_Code_Visitors::VisitInstruction(Instruction_assignment *element) {
+    
   }
 
-  void CodeGen::visit(Tile_math_specialized* t) {
-      string dst = t->root->matched_node->val->toString();
-
-      string other = t->root->oprand2->matched_node->val->toString();
-      string op = t->root->op->get();
-
-      string line = '\t' + dst + " " + op + "= " + other + '\n';   
-      L2_instructions.push_back(line);
+  void Gen_Code_Visitors::VisitInstruction(Instruction_load *element) {
+    
   }
 
-
-  void CodeGen::visit(Tile_compare *t){
-      Node *tree = t->getTree();
-      string dst = tree->val->toString(); 
-      string oprand1 = t->root->oprand1->matched_node->val->toString();
-      string op = tree->op->toString(); 
-      string oprand2 = t->root->oprand2->matched_node->val->toString();
-      string line;
-      
-      if(op == ">="){
-          line = '\t' + dst + " <- " + oprand2 + " <= " + oprand1 +  '\n'; 
-      }
-      else if(op == ">"){
-          line = '\t' + dst + " <- " + oprand2 + " < " + oprand1 +  '\n'; 
-      }
-      else {
-          line = '\t' + dst + " <- " + oprand1 + " " + op + " " + oprand2 +  '\n'; 
-      }
-      L2_instructions.push_back(line);
+  void Gen_Code_Visitors::VisitInstruction(Instruction_arithmetic *element){
+    
   }
 
-  void CodeGen::visit(Tile_load *t){
-      Node *tree = t->getTree();
-      string dst = tree->val->toString(); 
-      string oprand1 = t->root->oprand1->matched_node->val->toString();
-      //need to know current number of item on stack 
-      // string M = to_string(this->f->sizeOfStack * 8);
-      // string line = '\t' + dst + " <- mem " + oprand1 + " " + M + '\n'; 
-
-      string line = '\t' + dst + " <- mem " + oprand1 + " 0\n"; 
-      L2_instructions.push_back(line);
-  }
-  void CodeGen::visit(Tile_store *t){
-      Node *tree = t->getTree();
-      string dst = tree->val->toString(); 
-      string oprand1 = t->root->oprand1->matched_node->val->toString();
-      //need to know current number of item on stack 
-      string line = "\tmem" + dst + " 0 <- " + oprand1 + '\n'; 
-      L2_instructions.push_back(line);
-  }
-  void CodeGen::visit(Tile_br* t){
-    Node *tree = t->getTree();
-    string label = t->root->oprand1->matched_node->val->toString();
-    string line = "\tgoto " + label + '\n'; 
-    L2_instructions.push_back(line);
-  }
-  void CodeGen::visit(Tile_br_t* t){
-      Node *tree = t->getTree();
-      while (!(tree->oprand1 && tree->oprand2)) {
-          if (tree->oprand1) tree = tree->oprand1;
-          if (tree->oprand2) tree = tree->oprand2;
-      }
-      string label = tree->oprand2->val->toString(); 
-      Item* condition = tree->oprand1->val;
-      Number* n = dynamic_cast<Number*>(condition); 
-      string line; 
-      if(n != nullptr){
-          if(n->get() == 0) line = "\tcjump 0 = 1 " + label + '\n'; 
-          else line = "\tcjump 1 = 1 " + label + '\n'; 
-      }
-      else {
-          //condition is a variable, find the two nodes in the tree that define this variable
-          line = "\tcjump " + condition->toString() + " = 1 " + label + "\n";   
-      }
-      L2_instructions.push_back(line);
+  void Gen_Code_Visitors::VisitInstruction(Instruction_store *element){
+    
   }
 
-  void CodeGen::visit(Tile_increment* t){
-      Node *tree = t->getTree();
-      string dst = tree->val->toString(); 
-      string line; 
-      if(tree->op->toString() == "+"){
-          line = "\t" + dst + "++\n";
-      }
-      else {
-          line = "\t" + dst + "--\n";
-      }
-      L2_instructions.push_back(line);
+  void Gen_Code_Visitors::VisitInstruction(Instruction_cmp *element){
+    
   }
 
-  void CodeGen::visit(Tile_at* t){
-      Node *tree = t->getTree();
-      string dst = tree->val->toString(); 
-      string src_add = t->root->oprand2->matched_node->val->toString(); 
-      string src_mult = t->root->oprand1->oprand1->matched_node->val->toString(); 
-      string src_const = t->root->oprand1->oprand2->matched_node->val->toString(); 
-      string line = "\t" + dst + " @ " + src_add + " " + src_mult + " " + src_const + "\n";
-      L2_instructions.push_back(line);       
+  void Gen_Code_Visitors::VisitInstruction(Instruction_br_label *element){
+   
+  }
+
+  void Gen_Code_Visitors::VisitInstruction(Instruction_br_t *element){
+    
+  }
+
+  void Gen_Code_Visitors::VisitInstruction(Instruction_call_noassign *element){
+         
+  }
+
+  void Gen_Code_Visitors::VisitInstruction(Instruction_call_assignment *element){
+    
+  }
+
+  void Gen_Code_Visitors::VisitInstruction(Instruction_label *element){
+    
   }
 
   void generate_L2_file(Program p){
@@ -257,12 +158,20 @@ namespace L3{
         }
       }
 
-      /* Instruction select */
-      vector<string> L2_instructions = L3::inst_select(p, f);
-      
-      for(string s : L2_instructions) {
-        outputFile << "\t" << s; 
+      Gen_Code_Visitors v {outputFile};
+
+      /* Naive Solution */
+      for (auto i : f->instructions) {
+        std::cout << i->toString() << std::endl;
+        i->Accept(&v);
       }
+
+      /* Instruction select TODO*/
+      // vector<string> L2_instructions = L3::inst_select(p, f);
+      
+      // for(string s : L2_instructions) {
+      //   outputFile << "\t" << s; 
+      // }
       
       /* end of function */
       outputFile << "\t)\n"; 

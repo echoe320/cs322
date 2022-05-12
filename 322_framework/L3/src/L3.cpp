@@ -2,6 +2,8 @@
 #include <iostream>
 #include <string>
 
+#include <unordered_map>
+
 using namespace std;
 
 namespace L3
@@ -102,43 +104,101 @@ namespace L3
   Empty::Empty() {}
 
 
-//assignment 
-void Instruction_assignment::accept(Visitor* v) {
-  v->visit(this);
-}
-
-void Instruction_load::accept(Visitor* v) {
-  v->visit(this);
-}
-
-void Instruction_store::accept(Visitor* v) {
-  v->visit(this);
-}
-void Instruction_ret_not::accept(Visitor* v) {
-  v->visit(this);
-}
-void Instruction_ret_t::accept(Visitor* v) {
-  v->visit(this);
-}
-void Instruction_math::accept(Visitor* v) {
-  v->visit(this);
-}
-void Instruction_compare::accept(Visitor* v) {
-  v->visit(this);
-}
-void Instruction_br_label::accept(Visitor* v) {
-  v->visit(this);
-}
-void Instruction_br_t::accept(Visitor* v) {
-  v->visit(this);
-}
-void Instruction_call_noassign::accept(Visitor* v) {
-  v->visit(this);
-}
-void Instruction_call_assignment::accept(Visitor* v) {
-  v->visit(this);
-}
-void Instruction_label::accept(Visitor* v) {
-  v->visit(this);
-}
+  //assignment 
+  void Instruction_assignment::Accept(Visitor* v) {
+    v->VisitInstruction(this);
   }
+
+  void Instruction_load::Accept(Visitor* v) {
+    v->VisitInstruction(this);
+  }
+
+  void Instruction_store::Accept(Visitor* v) {
+    v->VisitInstruction(this);
+  }
+  void Instruction_ret_not::Accept(Visitor* v) {
+    v->VisitInstruction(this);
+  }
+  void Instruction_ret_t::Accept(Visitor* v) {
+    v->VisitInstruction(this);
+  }
+  void Instruction_arithmetic::Accept(Visitor* v) {
+    v->VisitInstruction(this);
+  }
+  void Instruction_cmp::Accept(Visitor* v) {
+    v->VisitInstruction(this);
+  }
+  void Instruction_br_label::Accept(Visitor* v) {
+    v->VisitInstruction(this);
+  }
+  void Instruction_br_t::Accept(Visitor* v) {
+    v->VisitInstruction(this);
+  }
+  void Instruction_call_noassign::Accept(Visitor* v) {
+    v->VisitInstruction(this);
+  }
+  void Instruction_call_assignment::Accept(Visitor* v) {
+    v->VisitInstruction(this);
+  }
+  void Instruction_label::Accept(Visitor* v) {
+    v->VisitInstruction(this);
+  }
+
+    //* FUNCTION - setting successors and predecessors
+  void Function::findSuccessorsPredecessors() {
+    int instructions_len = this->instructions.size();
+
+    //* initialize label target map
+    std::unordered_map<std::string, int> label_dict;
+    for (int i = 0; i < instructions_len; i++) {
+      if (dynamic_cast<Instruction_label *>(this->instructions[i]) != nullptr) {
+        auto inst_temp = static_cast<Instruction_label *>(this->instructions[i]);
+        auto label = std::get<0>(inst_temp->get());
+        label_dict[label->toString()] = i;
+      }
+    }
+
+    for (int ii = 0; ii < instructions_len; ii++) {
+      this->instructions[ii]->successor_idx.clear();
+      // this->instructions[ii]->prede_idx.clear();
+      // return instruction has no successors
+      if (dynamic_cast<Instruction_ret *>(this->instructions[ii]) != nullptr) {
+        // if (doiprint) std::cout << "return succ" << std::endl;
+        this->instructions[ii]->successor_idx.clear();
+      }
+
+      // call tensor_error has no successors
+      // else if (dynamic_cast<Instruction_runtime *>(this->instructions[ii]) != nullptr) {
+      //   if (doiprint) std::cout << "runtime succ" << std::endl;
+      //   auto inst_temp = static_cast<Instruction_runtime *>(this->instructions[ii]);
+      //   auto rt = static_cast<Runtime *>(std::get<0>(inst_temp->get()));
+      //   auto rt_code = rt->get();
+      //   if (rt_code == rt_tensor_error) continue;
+      //   else this->instructions[ii]->successor_idx.insert(ii + 1);
+      // }
+
+      //cjump has two successors: target + instruction right after
+      // else if (dynamic_cast<Instruction_cjump *>(this->instructions[ii]) != nullptr) {
+      //   if (doiprint) std::cout << "cjump succ" << std::endl;
+      //   this->instructions[ii]->successor_idx.insert(ii + 1);
+      //   auto inst_temp = dynamic_cast<Instruction_cjump *>(this->instructions[ii]);
+      //   auto target = static_cast<Label *>(std::get<2>(inst_temp->get()));
+      //   this->instructions[ii]->successor_idx.insert(label_dict[target->toString()]);
+      // }
+
+      // goto instruction's successor is the target (label)
+      // else if (dynamic_cast<Instruction_goto *>(this->instructions[ii]) != nullptr) {
+      //   if (doiprint) std::cout << "goto succ" << std::endl;
+      //   auto inst_temp = dynamic_cast<Instruction_goto *>(this->instructions[ii]);
+      //   auto target = static_cast<Label *>(std::get<0>(inst_temp->get()));
+      //   this->instructions[ii]->successor_idx.insert(label_dict[target->toString()]);
+      // }
+
+      // if not a special case, successor is the instruction right after
+      else {
+        // if (doiprint) std::cout << "everyday succ" << std::endl;
+        this->instructions[ii]->successor_idx.insert(ii + 1);
+      }
+    }
+  }
+}
