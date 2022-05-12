@@ -51,6 +51,9 @@ namespace IR {
     std::pair<var_type, std::string> var{this->varType, this->varName};
     return var;
   }
+  var_type Variable::toType(void) {
+    return this->varType;
+  }
   std::string Variable::toString(void) {
     return this->varName;
   }
@@ -83,7 +86,7 @@ namespace IR {
     return this->ce;
   }
   std::string Callee::toString(void) {
-    return "callee";
+    return get_callee(this->ce);
   }
 
   //* ============================= INSTRUCTIONS =============================
@@ -320,6 +323,10 @@ namespace IR {
 
   std::string get_enum_string (int enum_value) {
     return (op_enum_str[enum_value]);
+  }
+
+  std::string get_callee (int enum_value) {
+    return (callee_str[enum_value]);
   }
 
 }

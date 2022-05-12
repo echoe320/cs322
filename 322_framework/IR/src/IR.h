@@ -22,7 +22,11 @@ namespace IR {
 
   enum calleeCode {cc_print, cc_input, cc_tensor_error};
 
+  static const char* callee_str[] = {"print", "input", "tensor-error"};
+
   std::string get_enum_string (int enum_value);
+
+  std::string get_callee (int enum_value);
   
   class Item {
     public:
@@ -52,6 +56,8 @@ namespace IR {
       Variable(var_type tp, std::string vn);
       std::pair<var_type, std::string> get(void);
       std::string toString(void) override;
+      var_type toType(void);
+      int dim = 0;
     private:
       var_type varType;
       std::string varName;
@@ -156,7 +162,6 @@ namespace IR {
       void Accept(Visitor *visitor) override;
       std::tuple<Item*, Item*, Item*> get();
       std::string typeAsString(void) override;
-    private:
       Item *dst, *src, *dim;
   };
 
@@ -166,7 +171,6 @@ namespace IR {
       void Accept(Visitor *visitor) override;
       std::tuple<Item*, std::vector<Item*>> get();
       std::string typeAsString(void) override;
-    private:
       Item *callee;
       std::vector<Item*> args;
   };
@@ -177,7 +181,6 @@ namespace IR {
       void Accept(Visitor *visitor) override;
       std::tuple<Item*, Item*, std::vector<Item*>> get();
       std::string typeAsString(void) override;
-    private:
       Item *dst, *callee;
       std::vector<Item*> args;
   };
@@ -188,7 +191,6 @@ namespace IR {
       void Accept(Visitor *visitor) override;
       std::tuple<Item*, std::vector<Item*>> get();
       std::string typeAsString(void) override;
-    private:
       Item* dst; 
       std::vector<Item*> args;
   };
@@ -199,7 +201,6 @@ namespace IR {
       void Accept(Visitor *visitor) override;
       std::tuple<Item*, Item *> get();
       std::string typeAsString(void) override;
-    private:
       Item* dst, * arg;
   };
 
@@ -221,7 +222,6 @@ namespace IR {
       void Accept(Visitor *visitor) override;
       std::tuple<Item*> get();
       std::string typeAsString(void) override;
-    private:
       Item *label;
   };
 
@@ -231,7 +231,6 @@ namespace IR {
       void Accept(Visitor *visitor) override;
       std::tuple<Item*, Item*, Item*> get();
       std::string typeAsString(void) override;
-    private:
       Item *t, *label1, *label2;
   };
 

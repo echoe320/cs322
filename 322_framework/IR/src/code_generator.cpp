@@ -8,8 +8,36 @@
 // using namespace std;
 
 extern bool shouldPrint;
-
+int count = 0;
 namespace IR {
+
+  /* Helper Functions */
+  // std::string decode(Item *v) {
+  //     return v->toString() + " <- " + v->toString() + ">> 1\n";
+  // }
+
+  std::string decode(std::string var) {
+    std::string ret = var + " <- " + var + " >> 1\n";
+    return ret;
+  }
+
+  // std::string encode(Item *v) {
+  //   std::string res = v->toString() + " <- " + v->toString() + " << 1\n";
+  //   res += "\t" + v->toString() + " <- " + v->toString() + " + 1\n";
+  //   return res;
+  // }
+
+  std::string encode(std::string var) {
+    std::string l1 = var + " <- " + var + " << 1\n";
+    std::string l2 = "\t" + var + " <- " + var + " + 1\n";
+    return l1 + l2;
+  }
+
+  std::string newTempVar() {
+    std::string var =  "%temp_" + std::to_string(count);
+    count++;
+    return var;
+  }
 
   /* Visitor Constructor */
 
@@ -81,28 +109,162 @@ namespace IR {
     return;
   }
   void IR_Visitors::VisitInstruction(Instruction_length *element) {
-    return;
+    auto * d = dynamic_cast<Variable *>(element->dst);
+    auto * s = dynamic_cast<Variable *>(element->src);
+    Item * dim_temp;
+    Variable * v = dynamic_cast<Variable *>(element->dim);
+    Number * n = dynamic_cast<Number *>(element->dim);
+    if (v) {
+      dim_temp = v;
+    } else if (n) {
+      dim_temp = n;
+    }
+    std::string os_t = newTempVar();
+    std::string dim_t = newTempVar();
+    std::string ptr_t = newTempVar();
+    outputFile << "\t" << os_t << " <- 16" << std::endl; 
+    outputFile << "\t" << dim_t << " <- 8 * " << dim_temp->toString() << std::endl; 
+    outputFile << "\t" << os_t << " <- " << os_t << " + " << dim_t << std::endl; 
+    outputFile << "\t" << ptr_t << " <- " << s->toString() << " + " << os_t << std::endl;
+    outputFile << "\t" << d->toString() << " <- load " << ptr_t << std::endl;
   }
   void IR_Visitors::VisitInstruction(Instruction_call *element) {
-    return;
+    auto args_temp = element->args;
+    Item * callee_temp;
+    Variable * v = dynamic_cast<Variable *>(element->callee);
+    Label * n = dynamic_cast<Label *>(element->callee);
+    Callee * c = dynamic_cast<Callee *>(element->callee);
+    if (v) {
+      callee_temp = v;
+    } else if (n) {
+      callee_temp = n;
+    } else {
+      callee_temp = c;
+    }
+
+    outputFile << "\t" << "call "<< callee_temp->toString() << " (";
+    
+    while(!args_temp.empty()) {
+      Variable * a = dynamic_cast<Variable *>(args_temp.back());
+      outputFile << a->toString();
+      if (args_temp.size() > 1) {
+        outputFile << ", ";
+      }
+      args_temp.pop_back();
+    }
+    outputFile << ")" << std::endl;
   }
   void IR_Visitors::VisitInstruction(Instruction_call_assign *element) {
-    return;
+    auto dst_temp = dynamic_cast<Variable*>(element->dst);
+    auto args_temp = element->args;
+    Item * callee_temp;
+    Variable * v = dynamic_cast<Variable *>(element->callee);
+    Label * n = dynamic_cast<Label *>(element->callee);
+    Callee * c = dynamic_cast<Callee *>(element->callee);
+    if (v) {
+      callee_temp = v;
+    } else if (n) {
+      callee_temp = n;
+    } else {
+      callee_temp = c;
+    }
+
+    outputFile << "\t" << dst_temp->toString() << " <- call "<< callee_temp->toString() << " (";
+    
+    while(!args_temp.empty()) {
+      Variable * a = dynamic_cast<Variable *>(args_temp.back());
+      outputFile << a->toString();
+      if (args_temp.size() > 1) {
+        outputFile << ", ";
+      }
+      args_temp.pop_back();
+    }
+    outputFile << ")" << std::endl;
   }
   void IR_Visitors::VisitInstruction(Instruction_array *element) {
-    return;
+    auto args_temp = element->args;
+    int64_t dimension = args_temp.size();
+    auto dst_temp = dynamic_cast<Variable *>(element->dst);
+
+    std::string total_len_var = newTempVar();
+    outputFile << "\t" << total_len_var << " <- 1\n";
+    while (!args_temp.empty()) {
+      std::string temp = newTempVar();
+      Item * arg;
+      Variable * v = dynamic_cast<Variable *>(args_temp.back());
+      Number * n = dynamic_cast<Number *>(args_temp.back());
+      if (v) {
+        arg = v;
+      } else if (n) {
+        arg = n;
+      }
+      outputFile << "\t" << temp + " <- " + arg->toString() + "\n";
+      outputFile << "\t" << decode(temp);
+      outputFile << "\t" << total_len_var + " <- " + total_len_var + " * " + temp << std::endl;
+      args_temp.pop_back();
+    }
+    outputFile << "\t" << total_len_var << " <- " << total_len_var << " + " << (dimension + 1) << std::endl;
+    outputFile << "\t" << encode(total_len_var);
+
+    std::string array_ptr_t = dst_temp->toString();
+    outputFile << "\t" << array_ptr_t << " <- " << "call allocate(" << total_len_var << ", 1)" << std::endl;
+
+    // std::string dimension_ptr = newTempVar();
+    // int64_t dimension_encoded = dimension << 1;
+    // dimension_encoded += 1;
+    // outputFile << "\t" << dimension_ptr << " <- " << array_ptr_t << " + 8" << std::endl;
+    // outputFile << "\t" << "store " << dimension_ptr << " <- " << dimension_encoded << std::endl;
+    
+    // for (int k = 0; k < dimension; k++) {
+    //   std::string tmp_ptr = newTempVar();
+    //   int64_t offset = 16 + k * 8;
+    //   Item * arg;
+    //   Variable * v = dynamic_cast<Variable *>(args_temp[k]);
+    //   Number * n = dynamic_cast<Number *>(args_temp[k]);
+    //   if (v) {
+    //     arg = v;
+    //   } else if (n) {
+    //     arg = n;
+    //   }
+    //   outputFile << "\t" << tmp_ptr << " <- " << array_ptr_t << " + " << offset << std::endl;
+    //   outputFile << "\t" << "store " << tmp_ptr << " <- " << arg->toString() << std::endl;
+    // }
   }
   void IR_Visitors::VisitInstruction(Instruction_tuple *element) {
-    return;
+    auto dst_temp = dynamic_cast<Variable *>(element->dst);
+    Item * arg_temp;
+    Variable * v = dynamic_cast<Variable *>(element->arg);
+    Number * n = dynamic_cast<Number*>(element->arg);
+    if (v) {
+      arg_temp = v;
+    } else if (n) {
+      arg_temp = n;
+    }
+
+    outputFile << "\t" << dst_temp->toString() << " <- call allocate(" << arg_temp->toString() << ", 1)" << std::endl;
   }
   void IR_Visitors::VisitInstruction(Instruction_label *element) {
     return;
   }
   void IR_Visitors::VisitInstruction(te_br_label *element) {
-    outputFile << "\t" << "return" << std::endl;
+    auto lab = dynamic_cast<Label *>(element->label);
+    outputFile << "\t" << "br " << lab->toString() << std::endl;
   }
   void IR_Visitors::VisitInstruction(te_br_t *element) {
-    outputFile << "\t" << "return" << std::endl;
+    Item * temp; 
+    Variable * v = dynamic_cast<Variable *>(element->t);
+    Number * n = dynamic_cast<Number*>(element->t);
+    if (v) {
+      temp = v;
+    } else if (n) {
+      temp = n;
+    }
+
+    auto lab1 = dynamic_cast<Label *>(element->label1);
+    auto lab2 = dynamic_cast<Label *>(element->label2);
+
+    outputFile << "\t" << "br " << temp->toString() << " " << lab1->toString() << std::endl;
+    outputFile << "\t" << "br " << lab2->toString() << std::endl;
   }
   void IR_Visitors::VisitInstruction(te_return *element) {
     outputFile << "\t" << "return" << std::endl;
@@ -138,6 +300,15 @@ namespace IR {
 
       /* args */
       outputFile << " (";
+
+      // if (f->arguments.size()) { // didn't go through other items yet so this doesn't work
+      //   while(!f->arguments.empty()) {
+      //     std::cout << std::to_string(f->arguments.size()) << std::endl;
+      //     auto v_temp = f->arguments.back();
+      //     outputFile << v_temp->toString();
+      //     f->arguments.pop_back();
+      //   }
+      // }
 
       outputFile << "){\n";
 

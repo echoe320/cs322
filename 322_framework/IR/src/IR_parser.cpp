@@ -16,6 +16,7 @@
 #include <tao/pegtl/analyze.hpp>
 #include <tao/pegtl/contrib/raw_string.hpp>
 
+#include "IR.h"
 #include <IR_parser.h>
 
 namespace pegtl = tao::TAO_PEGTL_NAMESPACE;
@@ -416,9 +417,9 @@ namespace IR {
 
   // Instruction_new_tuple_rule
 
-  // struct str_tuple : TAOCPP_PEGTL_STRING( "Tuple" ) {};
+  struct str_Tuple : TAOCPP_PEGTL_STRING( "Tuple" ) {};
 
-  struct tuple_rule : str_tuple {};
+  struct Tuple_rule : str_Tuple {};
 
   struct Instruction_new_tuple_rule :
     pegtl::seq<
@@ -429,7 +430,7 @@ namespace IR {
       seps,
       new_rule,
       seps,
-      tuple_rule,
+      Tuple_rule,
       seps,
       pegtl::one< '(' >,
       seps,
@@ -632,7 +633,7 @@ namespace IR {
   template<> struct action < function_type > {
     template< typename Input >
 	static void apply( const Input & in, Program & p){
-      if (shouldPrint) cout << "function_type (no end)\n";
+      if (shouldPrint) cout << "function_type start\n";
       auto newF = new Function();
       if (in.string() == "int64") 
       {
@@ -652,6 +653,7 @@ namespace IR {
       }
       
       p.functions.push_back(newF);
+      if (shouldPrint) cout << "function_type end\n";
     }
   };
 
@@ -662,6 +664,63 @@ namespace IR {
       auto currentF = p.functions.back();
       if (in.string() == ":main") currentF->isMain = true;
       currentF->name = in.string();
+      if (shouldPrint) cout << "function_name action started\n";
+    }
+  };
+
+  template<> struct action < function_arguments_rule > {
+    template< typename Input >
+	static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "function_arguments_rule started\n";
+
+      /* 
+       * Fetch the current function.
+       */ 
+      auto currentF = p.functions.back();
+      while(!parsed_items.empty()){
+        auto v_temp = dynamic_cast<Variable*>(parsed_items.back()); 
+        currentF->arguments.push_back(v_temp); 
+        parsed_items.pop_back();
+      }
+
+      // auto b = currentF->basicblocks.back();
+
+      // std::vector<std::string> v;
+      // std::string s = in.string();
+      // int l = s.length();
+      // int c = count(s.begin(), s.end(), ' ');
+      // remove(s.begin(), s.end(), ' ');
+      // s.resize(l - c);
+
+      // std::stringstream ss(s);
+  
+      // while (ss.good()) {
+      //     std::string substr;
+      //     std::getline(ss, substr, ',');
+      //     v.push_back(substr);
+      // }
+
+      // std::vector<Item *> parsed_args = {};
+      // if (s.size() == 0) {
+      //   vec_of_args.push_back(parsed_args);
+      //   if (shouldPrint) cout << "function_arguments_rule ended, 0 args\n";
+      //   return;
+      // }
+
+      // for (auto i : v) {
+        // if (std::regex_match(i, std::regex("(%)(.*)"))) {
+          // Variable * v_temp = new Variable();
+          // currentF->existing_vars[i];
+          // parsed_args.push_back(v_temp);
+      //   } else {
+      //     Number* n_temp = new Number(std::stol(i));
+      //     parsed_args.push_back(n_temp);
+      //   }
+      // }
+      // currentF->arguments
+      // vec_of_args.push_back(parsed_args);
+
+      if (shouldPrint) cout << "function_arguments_rule ended\n";
     }
   };
 
@@ -691,19 +750,22 @@ namespace IR {
   template<> struct action < type_rule > { // need to edit this to scan for two parts
     template< typename Input >
     static void apply( const Input & in, Program & p){
-      if (shouldPrint) cout << "type_rule started\n";
-      if (in.string() == "int64") 
-      {
+      if (shouldPrint) cout << "type_rule started " << in.string() << "\n";
+      std::regex arr("(int64\\[\\])(.*)");
+
+      if (in.string() == "int64") {
         vType_curr.push_back(var_type::int64);
-      } else if (std::regex_match (in.string(), std::regex("(int64[])(.*)")))
-      {
+      } else if (std::regex_match(in.string(), arr)) {
+        if (shouldPrint) cout << "type_rule breakpoint 1 :" << std::to_string(var_type::int64_arr) <<"\n";
         vType_curr.push_back(var_type::int64_arr);
-      } else if (in.string() == "tuple")
-      {
+        // int dimension = count(in.string().begin(), in.string().end(), '[');
+        if (shouldPrint) cout << "type_rule breakpoint 1\n";
+      } else if (in.string() == "tuple") {
         vType_curr.push_back(var_type::tup);
-      } else if (in.string() == "code")
-      {
+      } else if (in.string() == "code") {
         vType_curr.push_back(var_type::code);
+      } else {
+        if (shouldPrint) cout << "no match\n";
       }
       if (shouldPrint) cout << "type_rule ended\n";
     }
@@ -712,14 +774,31 @@ namespace IR {
   template<> struct action < var_rule > { // need to edit this to scan for two parts
     template< typename Input >
     static void apply( const Input & in, Program & p){
-      if (shouldPrint) cout << "var started\n";
-      var_type vtype_temp = vType_curr.back();
-      vType_curr.pop_back();
-      Variable* v = new Variable(vtype_temp, in.string());
+      if (shouldPrint) cout << "var started :" << in.string() << "\n";
+      auto currentF = p.functions.back();
+      std::string varname = in.string();
+      var_type vtype_temp;
+
+      if (shouldPrint) cout << "var breakpoint 1\n";
+
+      if (currentF->existing_vars.count(varname)) {
+        if (shouldPrint) cout << "var breakpoint 2\n";
+        Variable * temp = currentF->existing_vars[varname];
+        vtype_temp = temp->toType();
+      } else { // errors when variable is already declared
+        if (shouldPrint) cout << "var breakpoint 3\n";
+        vtype_temp = vType_curr.back(); 
+        vType_curr.pop_back();
+      }
+
+      if (shouldPrint) cout << "var breakpoint 4\n";
+      Variable* v = new Variable(vtype_temp, varname);
       parsed_items.push_back(v);
 
-      auto currentF = p.functions.back();
-      currentF->existing_vars[in.string()] = v;
+      if (!currentF->existing_vars.count(varname)) {
+        currentF->existing_vars[in.string()] = v;
+      }
+
       if (shouldPrint) cout << "var ended\n";
     }
   };
@@ -841,7 +920,7 @@ namespace IR {
   template<> struct action < Instruction_label_rule > { 
     template< typename Input >
     static void apply( const Input & in, Program & p){
-      if (shouldPrint) cout << "var started\n";
+      if (shouldPrint) cout << "Instruction_label_rule started\n";
       auto currentF = p.functions.back();
       Basic_Block* b = new Basic_Block();
       auto lab = parsed_items.back();
@@ -849,7 +928,7 @@ namespace IR {
       auto lab_temp = dynamic_cast<Label *>(lab);
       b->label = lab_temp;
       currentF->basicblocks.push_back(b);
-      if (shouldPrint) cout << "var ended\n";
+      if (shouldPrint) cout << "Instruction_label_rule ended\n";
     }
   };
 
@@ -995,223 +1074,225 @@ namespace IR {
   //   }
   // };
 
-  // template<> struct action < Instruction_length_rule > {
-  //   template< typename Input >
-	// static void apply( const Input & in, Program & p){
-  //     if (shouldPrint) cout << "Instruction_length_rule started\n";
+  template<> struct action < Instruction_length_rule > {
+    template< typename Input >
+	static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "Instruction_length_rule started\n";
 
-  //     /* 
-  //      * Fetch the current function.
-  //      */ 
-  //     auto currentF = p.functions.back();
-  //     auto b = currentF->basicblocks.back();
+      /* 
+       * Fetch the current function.
+       */ 
+      auto currentF = p.functions.back();
+      auto b = currentF->basicblocks.back();
 
-  //     /* 
-  //      * Create the instruction.
-  //      */ 
-  //     auto dim = parsed_items.back();
-  //     parsed_items.pop_back();
-  //     auto src = parsed_items.back();
-  //     parsed_items.pop_back();
-  //     auto dst = parsed_items.back();
-  //     parsed_items.pop_back();
-  //     auto i = new Instruction_length(dst, src, dim);
+      /* 
+       * Create the instruction.
+       */ 
+      auto dim = parsed_items.back();
+      parsed_items.pop_back();
+      auto src = parsed_items.back();
+      parsed_items.pop_back();
+      auto dst = parsed_items.back();
+      parsed_items.pop_back();
+      auto i = new Instruction_length(dst, src, dim);
 
-  //     /* 
-  //      * Add the just-created instruction to the current function.
-  //      */ 
-  //     b->instructions.push_back(i);
-  //     if (shouldPrint) cout << "Instruction_length_rule ended\n";
-  //   }
-  // };
+      /* 
+       * Add the just-created instruction to the current function.
+       */ 
+      b->instructions.push_back(i);
+      if (shouldPrint) cout << "Instruction_length_rule ended\n";
+    }
+  };
 
-  // template<> struct action < print_rule > {
-  //   template< typename Input >
-  //   static void apply( const Input & in, Program & p){
-  //     if (shouldPrint) std::cout << "print_rule started\n";
-  //     Callee* cc = new Callee(cc_print);
-  //     parsed_items.push_back(cc);
-  //     if (shouldPrint) std::cout << "print_rule ended\n";
-  //   }
-  // };
+  template<> struct action < print_rule > {
+    template< typename Input >
+    static void apply( const Input & in, Program & p){
+      if (shouldPrint) std::cout << "print_rule started\n";
+      Callee* cc = new Callee(cc_print);
+      parsed_items.push_back(cc);
+      if (shouldPrint) std::cout << "print_rule ended\n";
+    }
+  };
 
-  // template<> struct action < input_rule > {
-  //   template< typename Input >
-  //   static void apply( const Input & in, Program & p){
-  //     if (shouldPrint) std::cout << "input_rule started\n";
-  //     Callee* cc = new Callee(cc_input);
-  //     parsed_items.push_back(cc);
-  //     if (shouldPrint) std::cout << "input_rule ended\n";
-  //   }
-  // };
+  template<> struct action < input_rule > {
+    template< typename Input >
+    static void apply( const Input & in, Program & p){
+      if (shouldPrint) std::cout << "input_rule started\n";
+      Callee* cc = new Callee(cc_input);
+      parsed_items.push_back(cc);
+      if (shouldPrint) std::cout << "input_rule ended\n";
+    }
+  };
 
-  // template<> struct action < tensor_error_rule > {
-  //   template< typename Input >
-  //   static void apply( const Input & in, Program & p){
-  //     if (shouldPrint) std::cout << "tensor_error_rule started\n";
-  //     Callee* cc = new Callee(cc_tensor_error);
-  //     parsed_items.push_back(cc);
-  //     if (shouldPrint) std::cout << "tensor_error_rule ended\n";
-  //   }
-  // };
+  template<> struct action < tensor_error_rule > {
+    template< typename Input >
+    static void apply( const Input & in, Program & p){
+      if (shouldPrint) std::cout << "tensor_error_rule started\n";
+      Callee* cc = new Callee(cc_tensor_error);
+      parsed_items.push_back(cc);
+      if (shouldPrint) std::cout << "tensor_error_rule ended\n";
+    }
+  };
 
-  // template<> struct action < arguments_rule > {
-  //   template< typename Input >
-	// static void apply( const Input & in, Program & p){
-  //     if (shouldPrint) cout << "arguments_rule started\n";
+  template<> struct action < arguments_rule > {
+    template< typename Input >
+	static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "arguments_rule started\n";
 
-  //     /* 
-  //      * Fetch the current function.
-  //      */ 
-  //     auto currentF = p.functions.back();
-  //     // auto b = currentF->basicblocks.back();
+      /* 
+       * Fetch the current function.
+       */ 
+      auto currentF = p.functions.back();
+      // auto b = currentF->basicblocks.back();
 
-  //     std::vector<std::string> v;
-  //     std::string s = in.string();
-  //     int l = s.length();
-  //     int c = count(s.begin(), s.end(), ' ');
-  //     remove(s.begin(), s.end(), ' ');
-  //     s.resize(l - c);
+      std::vector<std::string> v;
+      std::string s = in.string();
+      if (shouldPrint) cout << "arguments_rule : " << s << "\n";
+      int l = s.length();
+      int c = count(s.begin(), s.end(), ' ');
+      remove(s.begin(), s.end(), ' ');
+      s.resize(l - c);
 
-  //     std::stringstream ss(s);
+      std::stringstream ss(s);
   
-  //     while (ss.good()) {
-  //         std::string substr;
-  //         std::getline(ss, substr, ',');
-  //         v.push_back(substr);
-  //     }
+      while (ss.good()) {
+          std::string substr;
+          std::getline(ss, substr, ',');
+          v.push_back(substr);
+      }
 
-  //     std::vector<Item *> parsed_args;
+      std::vector<Item *> parsed_args;
 
-  //     for (auto i : v) {
-  //       if (std::regex_match(i, std::regex("(%)(.*)"))) {
-  //         Variable * v_temp = currentF->existing_vars[i];
-  //         parsed_args.push_back(v_temp);
-  //       } else {
-  //         Number* n_temp = new Number(std::stol(i));
-  //         parsed_args.push_back(n_temp);
-  //       }
-  //     }
+      for (auto i : v) {
+        if (shouldPrint) cout << "arguments_rule : " << i << "\n";
+        if (std::regex_match(i, std::regex("(%)(.*)"))) {
+          Variable * v_temp = currentF->existing_vars[i];
+          parsed_args.push_back(v_temp);
+        } else {
+          Number* n_temp = new Number(std::stol(i));
+          parsed_args.push_back(n_temp);
+        }
+      }
 
-  //     vec_of_args.push_back(parsed_args);
+      vec_of_args.push_back(parsed_args);
 
-  //     if (shouldPrint) cout << "arguments_rule ended\n";
-  //   }
-  // };
+      if (shouldPrint) cout << "arguments_rule ended\n";
+    }
+  };
 
-  // template<> struct action < Instruction_call_rule > {
-  //   template< typename Input >
-	// static void apply( const Input & in, Program & p){
-  //     if (shouldPrint) cout << "Instruction_call_rule started\n";
+  template<> struct action < Instruction_call_rule > {
+    template< typename Input >
+	static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "Instruction_call_rule started\n";
 
-  //     /* 
-  //      * Fetch the current function.
-  //      */ 
-  //     auto currentF = p.functions.back();
-  //     auto b = currentF->basicblocks.back();
+      /* 
+       * Fetch the current function.
+       */ 
+      auto currentF = p.functions.back();
+      auto b = currentF->basicblocks.back();
 
-  //     /* 
-  //      * Create the instruction.
-  //      */ 
-  //     auto vec_arg = vec_of_args.back();
-  //     vec_of_args.pop_back();
-  //     auto call = parsed_items.back();
-  //     parsed_items.pop_back();
-  //     auto i = new Instruction_call(call, vec_arg);
+      /* 
+       * Create the instruction.
+       */ 
+      auto vec_arg = vec_of_args.back();
+      vec_of_args.pop_back();
+      auto call = parsed_items.back();
+      parsed_items.pop_back();
+      auto i = new Instruction_call(call, vec_arg);
 
-  //     /* 
-  //      * Add the just-created instruction to the current function.
-  //      */ 
-  //     b->instructions.push_back(i);
-  //     if (shouldPrint) cout << "Instruction_call_rule ended\n";
-  //   }
-  // };
+      /* 
+       * Add the just-created instruction to the current function.
+       */ 
+      b->instructions.push_back(i);
+      if (shouldPrint) cout << "Instruction_call_rule ended\n";
+    }
+  };
 
-  // template<> struct action < Instruction_call_assign_rule > {
-  //   template< typename Input >
-	// static void apply( const Input & in, Program & p){
-  //     if (shouldPrint) cout << "Instruction_call_assign_rule started\n";
+  template<> struct action < Instruction_call_assign_rule > {
+    template< typename Input >
+	static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "Instruction_call_assign_rule started\n";
 
-  //     /* 
-  //      * Fetch the current function.
-  //      */ 
-  //     auto currentF = p.functions.back();
-  //     auto b = currentF->basicblocks.back();
+      /* 
+       * Fetch the current function.
+       */ 
+      auto currentF = p.functions.back();
+      auto b = currentF->basicblocks.back();
 
-  //     /* 
-  //      * Create the instruction.
-  //      */ 
-  //     auto vec_arg = vec_of_args.back();
-  //     vec_of_args.pop_back();
-  //     auto call = parsed_items.back();
-  //     parsed_items.pop_back();
-  //     auto dst = parsed_items.back();
-  //     parsed_items.pop_back();
-  //     auto i = new Instruction_call_assign(dst, call, vec_arg);
+      /* 
+       * Create the instruction.
+       */ 
+      auto vec_arg = vec_of_args.back();
+      vec_of_args.pop_back();
+      auto call = parsed_items.back();
+      parsed_items.pop_back();
+      auto dst = parsed_items.back();
+      parsed_items.pop_back();
+      auto i = new Instruction_call_assign(dst, call, vec_arg);
 
-  //     /* 
-  //      * Add the just-created instruction to the current function.
-  //      */ 
-  //     b->instructions.push_back(i);
-  //     if (shouldPrint) cout << "Instruction_call_assign_rule ended\n";
-  //   }
-  // };
+      /* 
+       * Add the just-created instruction to the current function.
+       */ 
+      b->instructions.push_back(i);
+      if (shouldPrint) cout << "Instruction_call_assign_rule ended\n";
+    }
+  };
 
-  // template<> struct action < Instruction_new_array_rule > {
-  //   template< typename Input >
-	// static void apply( const Input & in, Program & p){
-  //     if (shouldPrint) cout << "Instruction_new_array_rule started\n";
+  template<> struct action < Instruction_new_array_rule > {
+    template< typename Input >
+	static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "Instruction_new_array_rule started\n";
 
-  //     /* 
-  //      * Fetch the current function.
-  //      */ 
-  //     auto currentF = p.functions.back();
-  //     auto b = currentF->basicblocks.back();
+      /* 
+       * Fetch the current function.
+       */ 
+      auto currentF = p.functions.back();
+      auto b = currentF->basicblocks.back();
 
-  //     /* 
-  //      * Create the instruction.
-  //      */ 
-  //     auto vec_arg = vec_of_args.back();
-  //     vec_of_args.pop_back();
-  //     auto dst = parsed_items.back();
-  //     parsed_items.pop_back();
-  //     auto i = new Instruction_array(dst, vec_arg);
+      /* 
+       * Create the instruction.
+       */ 
+      auto vec_arg = vec_of_args.back();
+      vec_of_args.pop_back();
+      auto dst = parsed_items.back();
+      parsed_items.pop_back();
+      auto i = new Instruction_array(dst, vec_arg);
 
-  //     /* 
-  //      * Add the just-created instruction to the current function.
-  //      */ 
-  //     b->instructions.push_back(i);
-  //     if (shouldPrint) cout << "Instruction_new_array_rule ended\n";
-  //   }
-  // };
+      /* 
+       * Add the just-created instruction to the current function.
+       */ 
+      b->instructions.push_back(i);
+      if (shouldPrint) cout << "Instruction_new_array_rule ended\n";
+    }
+  };
 
-  // template<> struct action < Instruction_new_tuple_rule > {
-  //   template< typename Input >
-	// static void apply( const Input & in, Program & p){
-  //     if (shouldPrint) cout << "Instruction_new_tuple_rule started\n";
+  template<> struct action < Instruction_new_tuple_rule > {
+    template< typename Input >
+	static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "Instruction_new_tuple_rule started\n";
 
-  //     /* 
-  //      * Fetch the current function.
-  //      */ 
-  //     auto currentF = p.functions.back();
-  //     auto b = currentF->basicblocks.back();
+      /* 
+       * Fetch the current function.
+       */ 
+      auto currentF = p.functions.back();
+      auto b = currentF->basicblocks.back();
 
-  //     /* 
-  //      * Create the instruction.
-  //      */ 
-  //     auto arg = parsed_items.back();
-  //     parsed_items.pop_back();
-  //     auto dst = parsed_items.back();
-  //     parsed_items.pop_back();
-  //     auto i = new Instruction_tuple(dst, arg);
+      /* 
+       * Create the instruction.
+       */ 
+      auto arg = parsed_items.back();
+      parsed_items.pop_back();
+      auto dst = parsed_items.back();
+      parsed_items.pop_back();
+      auto i = new Instruction_tuple(dst, arg);
 
-  //     /* 
-  //      * Add the just-created instruction to the current function.
-  //      */ 
-  //     b->instructions.push_back(i);
-  //     if (shouldPrint) cout << "Instruction_new_tuple_rule ended\n";
-  //   }
-  // };
+      /* 
+       * Add the just-created instruction to the current function.
+       */ 
+      b->instructions.push_back(i);
+      if (shouldPrint) cout << "Instruction_new_tuple_rule ended\n";
+    }
+  };
 
   //te rules
 
@@ -1262,6 +1343,62 @@ namespace IR {
        */ 
       b->instructions.push_back(i);
       if (shouldPrint) cout << "te_return_t_rule ended\n";
+    }
+  };
+
+  template<> struct action < te_br_label_rule > {
+    template< typename Input >
+	static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "te_br_label_rule started\n";
+
+      /* 
+       * Fetch the current function.
+       */ 
+      auto currentF = p.functions.back();
+      auto b = currentF->basicblocks.back();
+      auto arg = parsed_items.back();
+      parsed_items.pop_back();
+
+      /* 
+       * Create the instruction.
+       */ 
+      auto i = new te_br_label(arg);
+
+      /* 
+       * Add the just-created instruction to the current function.
+       */ 
+      b->instructions.push_back(i);
+      if (shouldPrint) cout << "te_br_label_rule ended\n";
+    }
+  };
+
+  template<> struct action < te_br_t_rule > {
+    template< typename Input >
+	static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "te_br_t_rule started\n";
+
+      /* 
+       * Fetch the current function.
+       */ 
+      auto currentF = p.functions.back();
+      auto b = currentF->basicblocks.back();
+
+      /* 
+       * Create the instruction.
+       */ 
+      auto lab2 = parsed_items.back();
+      parsed_items.pop_back();
+      auto lab1 = parsed_items.back();
+      parsed_items.pop_back();
+      auto t = parsed_items.back();
+      parsed_items.pop_back();
+      auto i = new te_br_t(t,lab1, lab2);
+
+      /* 
+       * Add the just-created instruction to the current function.
+       */ 
+      b->instructions.push_back(i);
+      if (shouldPrint) cout << "te_br_t_rule ended\n";
     }
   };
 
