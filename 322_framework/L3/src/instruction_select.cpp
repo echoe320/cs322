@@ -88,37 +88,37 @@ namespace L3 {
       val = nullptr;
   }
   void Node::printNode(Node* node, int space){
-      if(node == nullptr) return ;
+      if (node == nullptr) return ;
       space += count;
       if (node->oprand2 != nullptr) printNode(node->oprand2, space);
       for(int i = count; i < space; i++) cout <<" ";
-      if(node->op != nullptr && node->val != nullptr) {
+      if (node->op != nullptr && node->val != nullptr) {
           cout << node->val->toString() << "   " << node->op->toString() << endl;
       }
-      else if(node->op != nullptr) {
+      else if (node->op != nullptr) {
           cout << node->op->toString() << endl;
       }
-      else {cout << node->val->toString() << endl;}
-      if(node->oprand1 != nullptr) printNode(node->oprand1, space) ; 
+      else cout << node->val->toString() << endl;
+      if (node->oprand1 != nullptr) printNode(node->oprand1, space) ; 
   }
-  Tree::Tree(Instruction* i) {
+  Trees_Visitor::Trees_Visitor(Instruction* i) {
       this->instruction = i;
   }
-  Instruction* Tree::getInstruction() {
+  Instruction* Trees_Visitor::getInstruction() {
       return this->instruction;
   }
-  void Tree::printTree(Tree* tree) {
+  void Trees_Visitor::printTree(Trees_Visitor* tree) {
       if(tree->root == nullptr) return; 
       tree->root->printNode(tree->root, 0); 
   }
-  void Tree::visit(Instruction_ret_not* i) {
+  void Trees_Visitor::visit(Instruction_ret_not* i) {
       Node* node = new Node(new Empty());
       node->op = i->op;
       root = node;
       uses = i->uses; 
       define = i->define;
   }
-  void Tree::visit(Instruction_ret_t* i) {
+  void Trees_Visitor::visit(Instruction_ret_t* i) {
       Node* node = new Node(new Empty());
       node->op = i->op;
       node->oprand1 = new Node(i->arg); 
@@ -126,7 +126,7 @@ namespace L3 {
       uses = i->uses; 
       define = i->define;
   }
-  void Tree::visit(Instruction_assignment* i) {
+  void Trees_Visitor::visit(Instruction_assignment* i) {
       Node* node = new Node(i->dst);
       node->op = new Operation("<-");
       node->oprand1 = new Node(i->src); 
@@ -134,7 +134,7 @@ namespace L3 {
       uses = i->uses; 
       define = i->define;
   }
-  void Tree::visit(Instruction_math* i) {
+  void Trees_Visitor::visit(Instruction_math* i) {
       Node* node = new Node(i->dst); 
       node->oprand1 = new Node(i->oprand1); 
       node->op = dynamic_cast<Operation*>(i->op); 
@@ -143,7 +143,7 @@ namespace L3 {
       uses = i->uses; 
       define = i->define;
   }
-  void Tree::visit(Instruction_compare* i) {
+  void Trees_Visitor::visit(Instruction_compare* i) {
         
       Node* node = new Node(i->dst); 
       node->oprand1 = new Node(i->oprand1); 
@@ -153,7 +153,7 @@ namespace L3 {
       uses = i->uses; 
       define = i->define;
   }
-  void Tree::visit(Instruction_load* i) {
+  void Trees_Visitor::visit(Instruction_load* i) {
         
       Node* node = new Node(i->dst); 
       node->oprand1 = new Node(i->src); 
@@ -162,7 +162,7 @@ namespace L3 {
       uses = i->uses; 
       define = i->define;
   }
-  void Tree::visit(Instruction_store* i) {
+  void Trees_Visitor::visit(Instruction_store* i) {
       Node* node = new Node(i->dst); 
       node->oprand1 = new Node(i->src); 
       node->op = dynamic_cast<Operation*>(i->op);  
@@ -170,7 +170,7 @@ namespace L3 {
       uses = i->uses; 
       define = i->define;
   }
-  void Tree::visit(Instruction_br_t* i) {
+  void Trees_Visitor::visit(Instruction_br_t* i) {
       Node* node = new Node(new Empty()); 
       node->op = i->op;
       node->oprand1 = new Node(i->condition); 
@@ -179,7 +179,7 @@ namespace L3 {
       uses = i->uses; 
       define = i->define;
   }
-  void Tree::visit(Instruction_br_label* i) {
+  void Trees_Visitor::visit(Instruction_br_label* i) {
       Node* node = new Node(new Empty()); 
       node->op = i->op;
       node->oprand1 = new Node(i->label); 
@@ -187,15 +187,15 @@ namespace L3 {
       uses = i->uses; 
       define = i->define;
   }
-  void Tree::visit(Instruction_call_noassign *i) {}
-  void Tree::visit(Instruction_call_assignment *i) {}
-  void Tree::visit(Instruction_label *i) {}
+  void Trees_Visitor::visit(Instruction_call_noassign *i) {}
+  void Trees_Visitor::visit(Instruction_call_assignment *i) {}
+  void Trees_Visitor::visit(Instruction_label *i) {}
 
   //check if there is no definitions of variables used by T2 between T2 and T1
-  bool checkDependency(int a, int b, Tree* T2, Variable* v, vector<Tree*>& trees){
+  bool checkDependency(int a, int b, Trees_Visitor* T2, Variable* v, vector<Trees_Visitor*>& trees){
       //between [T2,T1)
       for(int i = a; i <= b; i++){
-          Tree* t = trees[i]; 
+          Trees_Visitor* t = trees[i]; 
           //check v not used
           for(Item* item : t->uses){
               Variable* u = dynamic_cast<Variable*>(item); 
@@ -227,9 +227,9 @@ namespace L3 {
       }
       return true;
   }
-  bool checkDead(int a, Item* v, AnalysisResult* res, vector<Tree*> trees){
+  bool checkDead(int a, Item* v, AnalysisResult* res, vector<Trees_Visitor*> trees){
       for(int i = a; i < trees.size(); i++){
-          Tree* t = trees[i]; 
+          Trees_Visitor* t = trees[i]; 
           set<Item*> out = res->outs[t->getInstruction()]; 
           if(out.find(v) != out.end()){
               return false; 
@@ -244,10 +244,10 @@ namespace L3 {
       }
       return true;
   }
-  vector<Tree*> getAllTree(Context* context){
-      vector<Tree*> trees; 
+  vector<Trees_Visitor*> getAllTree(Context* context){
+      vector<Trees_Visitor*> trees; 
       for(auto i : context->instructions) {
-          Tree* t = new Tree(i); 
+          Trees_Visitor* t = new Trees_Visitor(i); 
           i->accept(t);
           // cout << "tree: " << endl; 
           // t->printTree(t);
@@ -255,17 +255,17 @@ namespace L3 {
       }
       return trees;
   }
-  vector<Tree*> mergeTrees(Context* context, AnalysisResult* res){
+  vector<Trees_Visitor*> mergeTrees(Context* context, AnalysisResult* res){
       int64_t size = context->instructions.size(); 
-      vector<Tree*> trees = getAllTree(context); 
+      vector<Trees_Visitor*> trees = getAllTree(context); 
       for(int i = 0; i < size; i++){
-          Tree* T2 = trees[i];
+          Trees_Visitor* T2 = trees[i];
           Variable* v = dynamic_cast<Variable*>(T2->root->val); 
           //current root is not a variable
           //instruction must be return, br, return t, br t, skip
           if(v != nullptr){
               for(int j = i + 1; j < size; j++){
-                  Tree* T1 = trees[j]; 
+                  Trees_Visitor* T1 = trees[j]; 
                   // if(is_debug) {
                   //     cout << "T2: " << T2->getInstruction()->toString() << endl;
                   //     cout << "T1: " << T1->getInstruction()->toString() << endl;
@@ -320,7 +320,7 @@ namespace L3 {
               }
           }
       }
-      vector <Tree *> merged_trees;
+      vector <Trees_Visitor *> merged_trees;
       for (auto t : trees) {
           // t->printTree(t);
           if (t->root->isroot) {
@@ -331,7 +331,7 @@ namespace L3 {
   }
 
   vector<std::string> translate_context(Context *c, AnalysisResult *res, vector<Tile *> alltiles) {
-      vector<Tree*> merged; 
+      vector<Trees_Visitor*> merged; 
       CodeGen codegen;
       merged = mergeTrees(c, res); 
       for (auto t : merged) {
