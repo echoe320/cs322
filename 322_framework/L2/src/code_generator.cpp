@@ -572,32 +572,33 @@ namespace L2 {
         std::cout << "starting color2reg" << std::endl;
         func_copy = color2reg(func_copy, color_graph);
         std::cout << "switched vars to registers from colors" << std::endl;
-        if (color_graph->tobeSpilled.size() > 3) {
+        std::cout << "variables to be spilled: ";
+        for (auto var : color_graph->tobeSpilled) {
+          std::string var_name = var->toString();
+          if (var_name.compare(0, 21, prefix) == 0) {
+            spill_list.push_back(var);
+            std::cout << var_name << " ";
+          }
+        }
+        std::cout << std::endl;
+        if (spill_list.size() == color_graph->tobeSpilled.size() && !spill_list.empty()) {
+          mustSpill = true;
+          std::cout << "spilling" << std::endl;
+          func_copy = spill_mult_var(func_copy, spill_list, prefix);
+          std::cout << "done spilling" << std::endl;
+        }
+        else {
+          // spill all
           std::cout << "spilling all" << std::endl;
-          func_copy = f;
-          func_copy = spill_all(func_copy, prefix);
+          // func_copy = f;
+          func_copy = spill_all(f, prefix);
+          // func_copy = spill_mult_var(f, spill_list, prefix);
           create_liveness_list(func_copy);
           interference_graph = create_interference_graph(func_copy);
           color_graph = registerAllocate(interference_graph);
           func_copy = color2reg(func_copy, color_graph);
         }
-        else {
-          std::cout << "variables to be spilled: ";
-          for (auto var : color_graph->tobeSpilled) {
-            std::string var_name = var->toString();
-            if (var_name.compare(0, 22, prefix) != 0) {
-              spill_list.push_back(var);
-              std::cout << var_name << " ";
-            }
-          }
-          std::cout << std::endl;
-          if (!spill_list.empty()) {
-            mustSpill = true;
-            std::cout << "spilling" << std::endl;
-            func_copy = spill_mult_var(func_copy, spill_list, prefix);
-            std::cout << "done spilling" << std::endl;
-          }
-        }
+        // }
       } while (mustSpill);
       std::cout << "finished analysis" << std::endl;
       /* Create function header */

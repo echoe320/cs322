@@ -11,6 +11,7 @@ namespace L2{
       Color_Visitors(ColorGraph* cgraph);
       ColorGraph* cgraph;
       std::vector<Instruction*> new_inst;
+      bool failedtoColor = false;
       void VisitInstruction (Instruction_ret *element) override;
       void VisitInstruction (Instruction_assignment *element) override;
       void VisitInstruction (Instruction_arithmetic *element) override;
