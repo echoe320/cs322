@@ -279,9 +279,9 @@ namespace IR {
 
   class Basic_Block {
     public:
-    Label* label; 
-    std::vector<Instruction*> instructions;
-    Instruction* te; 
+      Label* label; 
+      std::vector<Instruction*> instructions;
+      Instruction* te; 
   };
 
   /*
@@ -292,6 +292,7 @@ namespace IR {
       func_type type; 
       std::string name;
       bool isMain;
+      std::string entry_label;
       std::vector<Variable *> arguments;
       std::vector<Basic_Block *> basicblocks;
       std::map<std::string, Variable *> existing_vars;

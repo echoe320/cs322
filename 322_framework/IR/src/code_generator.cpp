@@ -12,20 +12,11 @@ int count = 0;
 namespace IR {
 
   /* Helper Functions */
-  // std::string decode(Item *v) {
-  //     return v->toString() + " <- " + v->toString() + ">> 1\n";
-  // }
 
   std::string decode(std::string var) {
     std::string ret = var + " <- " + var + " >> 1\n";
     return ret;
   }
-
-  // std::string encode(Item *v) {
-  //   std::string res = v->toString() + " <- " + v->toString() + " << 1\n";
-  //   res += "\t" + v->toString() + " <- " + v->toString() + " + 1\n";
-  //   return res;
-  // }
 
   std::string encode(std::string var) {
     std::string l1 = var + " <- " + var + " << 1\n";
@@ -184,7 +175,17 @@ namespace IR {
   void IR_Visitors::VisitInstruction(Instruction_array *element) {
     auto args_temp = element->args;
     int64_t dimension = args_temp.size();
-    auto dst_temp = dynamic_cast<Variable *>(element->dst);
+    // auto dst_temp = dynamic_cast<Variable *>(element->dst);
+    Item * dst_temp;
+      Variable * v = dynamic_cast<Variable *>(element->dst);
+      Number * n = dynamic_cast<Number *>(element->dst);
+      if (v) {
+        dst_temp = v;
+        std::cout << "dst print v" << std::endl;
+      } else if (n) {
+        dst_temp = n;
+        std::cout << "dst print n" << std::endl;
+      }
 
     std::string total_len_var = newTempVar();
     outputFile << "\t" << total_len_var << " <- 1\n";

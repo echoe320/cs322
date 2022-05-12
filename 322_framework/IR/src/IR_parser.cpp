@@ -1018,61 +1018,61 @@ namespace IR {
     }
   };
 
-  // template<> struct action < Instruction_load_rule > {
-  //   template< typename Input >
-	// static void apply( const Input & in, Program & p){
-  //     if (shouldPrint) cout << "Instruction_load_rule started\n";
+  template<> struct action < Instruction_load_rule > {
+    template< typename Input >
+	static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "Instruction_load_rule started\n";
 
-  //     /* 
-  //      * Fetch the current function.
-  //      */ 
-  //     auto currentF = p.functions.back();
-  //     auto b = currentF->basicblocks.back();
+      /* 
+       * Fetch the current function.
+       */ 
+      auto currentF = p.functions.back();
+      auto b = currentF->basicblocks.back();
 
-  //     /* 
-  //      * Create the instruction.
-  //      */ 
-  //     auto src = parsed_items.back();
-  //     parsed_items.pop_back();
-  //     auto dst = parsed_items.back();
-  //     parsed_items.pop_back();
-  //     auto i = new Instruction_load(dst, src);
+      /* 
+       * Create the instruction.
+       */ 
+      auto src = parsed_items.back();
+      parsed_items.pop_back();
+      auto dst = parsed_items.back();
+      parsed_items.pop_back();
+      auto i = new Instruction_load(dst, src);
 
-  //     /* 
-  //      * Add the just-created instruction to the current function.
-  //      */ 
-  //     b->instructions.push_back(i);
-  //     if (shouldPrint) cout << "Instruction_load_rule ended\n";
-  //   }
-  // };
+      /* 
+       * Add the just-created instruction to the current function.
+       */ 
+      b->instructions.push_back(i);
+      if (shouldPrint) cout << "Instruction_load_rule ended\n";
+    }
+  };
 
-  // template<> struct action < Instruction_store_rule > {
-  //   template< typename Input >
-	// static void apply( const Input & in, Program & p){
-  //     if (shouldPrint) cout << "Instruction_store_rule started\n";
+  template<> struct action < Instruction_store_rule > {
+    template< typename Input >
+	static void apply( const Input & in, Program & p){
+      if (shouldPrint) cout << "Instruction_store_rule started\n";
 
-  //     /* 
-  //      * Fetch the current function.
-  //      */ 
-  //     auto currentF = p.functions.back();
-  //     auto b = currentF->basicblocks.back();
+      /* 
+       * Fetch the current function.
+       */ 
+      auto currentF = p.functions.back();
+      auto b = currentF->basicblocks.back();
 
-  //     /* 
-  //      * Create the instruction.
-  //      */ 
-  //     auto src = parsed_items.back();
-  //     parsed_items.pop_back();
-  //     auto dst = parsed_items.back();
-  //     parsed_items.pop_back();
-  //     auto i = new Instruction_store(dst, src);
+      /* 
+       * Create the instruction.
+       */ 
+      auto src = parsed_items.back();
+      parsed_items.pop_back();
+      auto dst = parsed_items.back();
+      parsed_items.pop_back();
+      auto i = new Instruction_store(dst, src);
 
-  //     /* 
-  //      * Add the just-created instruction to the current function.
-  //      */ 
-  //     b->instructions.push_back(i);
-  //     if (shouldPrint) cout << "Instruction_store_rule ended\n";
-  //   }
-  // };
+      /* 
+       * Add the just-created instruction to the current function.
+       */ 
+      b->instructions.push_back(i);
+      if (shouldPrint) cout << "Instruction_store_rule ended\n";
+    }
+  };
 
   template<> struct action < Instruction_length_rule > {
     template< typename Input >

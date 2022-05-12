@@ -1,5 +1,4 @@
-define :vec_ctor (){
-	%res <- call allocate(7, 1)
+define :main (){
 	%temp_0 <- 1
 	%temp_1 <- 5
 	%temp_1 <- %temp_1 >> 1
@@ -8,3 +7,8 @@ define :vec_ctor (){
 	%temp_2 <- %temp_2 >> 1
 	%temp_0 <- %temp_0 * %temp_2
 	%temp_0 <- %temp_0 + 3
+	%temp_0 <- %temp_0 << 1
+	%temp_0 <- %temp_0 + 1
+	5 <- call allocate(%temp_0, 1)
+	call %a (%a)
+	call %a (%a)
