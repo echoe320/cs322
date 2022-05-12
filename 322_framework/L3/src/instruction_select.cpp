@@ -4,7 +4,6 @@
 
 #include "L3.h"
 #include "code_generator.h"
-#include "tiling.h"
 #include "instruction_select.h"
 #include "liveness.h"
 using namespace std; 
@@ -50,78 +49,83 @@ namespace L3 {
     return contexts;
   }
 
-  // Tree Node
-  constexpr int count = 10;
+  /* Nodes */
   Node::Node(Item* item) {
-      val = item;
-  }
-  Node::Node() {
-      val = nullptr;
+    val = item;
   }
 
+  /* Trees */
   Trees_Visitor::Trees_Visitor(Instruction* i) {
     this->instruction = i;
   }
-  Instruction* Trees_Visitor::getInstruction() {
-    return this->instruction;
+
+  bool Trees_Visitor::isEmpty(){
+    return root == nullptr;
   }
 
   void Trees_Visitor::VisitInstruction(Instruction_ret_not* i) {
     Node* node = new Node(new Empty());
     node->op = i->op;
     root = node;
-    uses = i->uses; 
-    define = i->define;
+
+    uses = i->reads; 
+    define = i->writes;
   }
   void Trees_Visitor::VisitInstruction(Instruction_ret_t* i) {
     Node* node = new Node(new Empty());
     node->op = i->op;
     node->oprand1 = new Node(i->arg); 
+
     root = node;
-    uses = i->uses; 
-    define = i->define;
+    uses = i->reads; 
+    define = i->writes;
   }
   void Trees_Visitor::VisitInstruction(Instruction_assignment* i) {
     Node* node = new Node(i->dst);
     node->op = new Operation("<-");
     node->oprand1 = new Node(i->src); 
+
     root = node;
-    uses = i->uses; 
-    define = i->define;
+    uses = i->reads; 
+    define = i->writes;
   }
   void Trees_Visitor::VisitInstruction(Instruction_arithmetic* i) {
     Node* node = new Node(i->dst); 
     node->oprand1 = new Node(i->oprand1); 
     node->op = dynamic_cast<Operation*>(i->op); 
     node->oprand2 = new Node(i->oprand2);
+
     root = node;
-    uses = i->uses; 
-    define = i->define;
+    uses = i->reads; 
+    define = i->writes;
   }
   void Trees_Visitor::VisitInstruction(Instruction_cmp* i) {
     Node* node = new Node(i->dst); 
     node->oprand1 = new Node(i->oprand1); 
     node->op = dynamic_cast<Operation*>(i->op); 
     node->oprand2 = new Node(i->oprand2);
+
     root = node;
-    uses = i->uses; 
-    define = i->define;
+    uses = i->reads; 
+    define = i->writes;
   }
   void Trees_Visitor::VisitInstruction(Instruction_load* i) {
     Node* node = new Node(i->dst); 
     node->oprand1 = new Node(i->src); 
     node->op = dynamic_cast<Operation*>(i->op); 
     root = node;
-    uses = i->uses; 
-    define = i->define;
+
+    uses = i->reads; 
+    define = i->writes;
   }
   void Trees_Visitor::VisitInstruction(Instruction_store* i) {
     Node* node = new Node(i->dst); 
     node->oprand1 = new Node(i->src); 
     node->op = dynamic_cast<Operation*>(i->op);  
     root = node;
-    uses = i->uses; 
-    define = i->define;
+
+    uses = i->reads; 
+    define = i->writes;
   }
   void Trees_Visitor::VisitInstruction(Instruction_br_t* i) {
     Node* node = new Node(new Empty()); 
@@ -129,16 +133,18 @@ namespace L3 {
     node->oprand1 = new Node(i->condition); 
     node->oprand2 = new Node(i->label); 
     root = node;
-    uses = i->uses; 
-    define = i->define;
+
+    uses = i->reads; 
+    define = i->writes;
   }
   void Trees_Visitor::VisitInstruction(Instruction_br_label* i) {
     Node* node = new Node(new Empty()); 
     node->op = i->op;
     node->oprand1 = new Node(i->label); 
     root = node;
-    uses = i->uses; 
-    define = i->define;
+    
+    uses = i->reads; 
+    define = i->writes;
   }
   void Trees_Visitor::VisitInstruction(Instruction_call_noassign *i) {}
   void Trees_Visitor::VisitInstruction(Instruction_call_assignment *i) {}
@@ -146,18 +152,21 @@ namespace L3 {
 
   vector<Trees_Visitor*> getAllTree(Context* context){
     vector<Trees_Visitor*> trees; 
-    for (auto i : context->instructions) {
-      Trees_Visitor* t = new Trees_Visitor();
-      i->accept(t);
-      trees.push_back(t);
-    }
+    // for (auto i : context->instructions) {
+    //   Trees_Visitor* t = new Trees_Visitor();
+    //   // Trees_Visitor::Trees_Visitor(auto &i) : i(i) {}
+    //   // }
+    //   i->Accept(t);
+    //   trees.push_back(t);
+    // }
     return trees;
   }
-  vector<Trees_Visitor*> mergeTrees(Context* context){
+  void mergeTrees(Context* context){
     //TODO
   }
 
-  vector<std::string> select_instruction(Program p, Function* f){   
+  void select_instruction(Program p, Function* f){   
     //TODO: identify context, compute liveness, translate context into trees, merge trees, match trees to tiles 
+
   }
 }

@@ -5,7 +5,7 @@
 
 using namespace std;
 namespace L3 {
-  // class Tile;
+  /* Context */
   class Context{
     public:
     bool isEmpty();
@@ -15,6 +15,8 @@ namespace L3 {
   };
 
   vector<Context *> identify_context(Function *f);
+
+  /* Node */
   class Node {
     public: 
       Node(); 
@@ -26,16 +28,16 @@ namespace L3 {
       Node* oprand2 = nullptr; 
   };
 
+  /* Trees */
   class Trees_Visitor : public Visitor{
-    public:
-      // vector<Tile *> tiles;
-      Node* root; 
+    public: 
       Trees_Visitor(Instruction* i); 
-      bool isEmpty() {return root == nullptr;};
-      vector<Item*> uses; 
-      vector<Item*> define;
-      vector<string> L2_instructions;
-      Instruction* getInstruction();
+      bool isEmpty();
+
+      unordered_set<Item*> uses; 
+      unordered_set<Item*> define;
+      Node* root;
+      Instruction* instruction;
 
       void VisitInstruction(Instruction_ret_not *i) override;
       void VisitInstruction(Instruction_ret_t *i) override;
@@ -49,8 +51,10 @@ namespace L3 {
       void VisitInstruction(Instruction_call_noassign *i) override;
       void VisitInstruction(Instruction_call_assignment *i) override;
       void VisitInstruction(Instruction_label *i) override;
-    private: 
-      Instruction* instruction;
   };
-  vector<string> select_instruction(Program p, Function* f);
+
+  /* Tiles */
+  // TODO
+
+  void select_instruction(Program p, Function* f);
 }

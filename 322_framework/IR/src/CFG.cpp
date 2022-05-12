@@ -40,6 +40,7 @@ namespace IR {
         g->exit_nodes.insert(n_temp);
       }
     }
+    return g;
   }
 
   /*  */

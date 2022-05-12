@@ -1,0 +1,165 @@
+(:main
+	(:main
+		0
+		:entry_global_main_entry
+		%var_var1 <- 1
+		%var_var2 <- 2
+		%var_var3 %var_var1 = %var_var2
+		%var_var4 %var_var1 < %var_var2
+		%var_var5 <- %var_var1 + %var_var2
+		%var_var6 <- %var_var1 << %var_var2
+		%var_var7 <- call :addOne %var_var6 
+		%var_var8 <- call :sum2 %var_var6 %var_var7 
+		%var_var9 <- %var_var8 * 3
+		%var_var9 <- %var_var9 + 2
+		%var_var10 <- call :sum3 %var_var7 %var_var8 %var_var9 
+		%var_encoded <- 7
+		%var_encoded <- %var_encoded << 1
+		%var_encoded <- %var_encoded + 1
+		call print %var_encoded 
+		%var_array <- call allocate %var_encoded 3 
+		%var_newVar <- %var_array + 8
+		store %var_newVar <- 5
+		%var_newVar2 <- %var_array + 16
+		store %var_newVar2 <- 7
+		%var_newVar3 <- %var_array + 24
+		store %var_newVar3 <- 9
+		%var_var11 <- load %var_newVar2
+		%var_var12 %var_var10 > %var_var11
+		%var_var13 <- call :sum4 %var_var9 %var_var10 %var_var11 %var_var12 
+		%var_var14 <- call :substract %var_var12 %var_var13 
+		%var_var15 <- call :substract3 %var_var1 %var_var13 %var_var14 
+		%var_var16 <- call :substract4 %var_var11 %var_var12 %var_var13 %var_var9 
+		%var_var17 <- call :sum4 %var_var9 %var_var10 %var_var11 %var_var12 
+		%var_var18 <- call :product %var_var2 %var_var13 
+		%var_var19 <- call :product3 %var_var1 %var_var2 %var_var7 
+		%var_var20 <- call :product4 %var_var11 %var_var8 %var_var5 %var_var9 
+		%var_var21 <- call :left_shift %var_var20 %var_var1 
+		%var_var22 <- call :right_shift %var_var20 %var_var2 
+		%var_newVar3 <- %var_array + 32
+		%var_var13 <- %var_var13 + 8
+		%var_callFL <- :otherF
+		call :otherF 
+		call %var_callFL 
+		%var_callerFP <- :otherF2
+		%var_res1 <- call %var_callerFP 2 
+		%var_res2 <- call :otherF2 %var_var3 
+		%var_res2 <- %var_res2 - 1
+		call print %var_res2 
+		:entry_global_main_end
+		return
+	)
+	(:addOne
+		1
+		%var_p1 <- rdi
+		%var_p2 <- %var_p1 + 1
+		return %var_p2
+	)
+	(:sum2
+		2
+		%var_p1 <- rdi
+		%var_p2 <- rsi
+		%var_p3 <- %var_p1 + %var_p2
+		return %var_p3
+	)
+	(:sum3
+		3
+		%var_p1 <- rdi
+		%var_p2 <- rsi
+		%var_p3 <- rdx
+		%var_p4 <- %var_p1 + %var_p2
+		%var_p5 <- %var_p4 + %var_p3
+		return %var_p5
+	)
+	(:sum4
+		4
+		%var_p1 <- rdi
+		%var_p2 <- rsi
+		%var_p3 <- rdx
+		%var_p4 <- rcx
+		%var_p5 <- %var_p1 + %var_p2
+		%var_p6 <- %var_p5 + %var_p3
+		%var_p7 <- %var_p6 + %var_p4
+		return %var_p7
+	)
+	(:otherF
+		0
+		%var_p1 <- 11
+		return
+	)
+	(:otherF2
+		1
+		%var_var <- rdi
+		%var_var <- %var_var * %var_var
+		return %var_var
+	)
+	(:substract
+		2
+		%var_p1 <- rdi
+		%var_p2 <- rsi
+		%var_p3 <- %var_p1 - %var_p2
+		return %var_p3
+	)
+	(:substract3
+		3
+		%var_p1 <- rdi
+		%var_p2 <- rsi
+		%var_p3 <- rdx
+		%var_p4 <- %var_p1 - %var_p2
+		%var_p5 <- %var_p4 - %var_p3
+		return %var_p5
+	)
+	(:substract4
+		4
+		%var_p1 <- rdi
+		%var_p2 <- rsi
+		%var_p3 <- rdx
+		%var_p4 <- rcx
+		%var_p5 <- %var_p1 - %var_p2
+		%var_p6 <- %var_p5 - %var_p3
+		%var_p7 <- %var_p6 - %var_p4
+		return %var_p7
+	)
+	(:product
+		2
+		%var_p1 <- rdi
+		%var_p2 <- rsi
+		%var_p3 <- %var_p1 * %var_p2
+		return %var_p3
+	)
+	(:product3
+		3
+		%var_p1 <- rdi
+		%var_p2 <- rsi
+		%var_p3 <- rdx
+		%var_p4 <- %var_p1 * %var_p2
+		%var_p5 <- %var_p4 * %var_p3
+		return %var_p5
+	)
+	(:product4
+		4
+		%var_p1 <- rdi
+		%var_p2 <- rsi
+		%var_p3 <- rdx
+		%var_p4 <- rcx
+		%var_p5 <- %var_p1 * %var_p2
+		%var_p6 <- %var_p5 * %var_p3
+		%var_p7 <- %var_p6 * %var_p4
+		return %var_p7
+	)
+	(:left_shift
+		2
+		%var_p1 <- rdi
+		%var_p2 <- rsi
+		%var_p3 <- %var_p1 << %var_p2
+		return %var_p3
+	)
+	(:right_shift
+		2
+		%var_p1 <- rdi
+		%var_p2 <- rsi
+		%var_p3 <- %var_p1 >> %var_p2
+		return %var_p3
+	)
+)
+

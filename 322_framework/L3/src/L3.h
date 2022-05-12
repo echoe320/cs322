@@ -2,35 +2,23 @@
 
 #include <vector>
 #include <string>
-
 #include <unordered_set>
 #include <set>
 #include <map>
 
 using namespace std;
 
-namespace L3
-{
+namespace L3 {
   enum reg {rdi, rsi, rdx, rcx, r8, r9, rax, rbx, rbp, r10, r11, r12, r13, r14, r15, rsp};
   static const char* reg_enum_str[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9", "rax", "rbx", "rbp", "r10", "r11", "r12", "r13", "r14", "r15", "rsp"};
   std::string get_reg_string (int enum_value);
 
-  class Visitor;
+  enum ItemType {it_number, it_label, it_variable, it_string, it_operation, it_empty};
 
-  enum ItemType {
-    item_number,
-    item_label,
-    item_variable,
-    item_string,
-    item_operation,
-    item_empty
-  };
-
-  class Item
-  {
-  public:
-    virtual string toString(void) = 0;
-    virtual ItemType getType(void) = 0;
+  class Item {
+    public:
+      virtual string toString(void) = 0;
+      virtual ItemType getType(void) = 0;
   };
 
   class Register : public Item {
@@ -38,55 +26,61 @@ namespace L3
       Register(reg regi);
       reg get(void);
       std::string toString(void) override;
+      ItemType getType(void) override { 
+        return it_number;
+      }
     private:
       reg r;
   };
 
-  class Number : public Item
-  {
-  public:
-    Number(int64_t n); 
-    int64_t get (void); 
-    bool operator == (const Number &other); 
-    std::string toString(void) override; 
-    ItemType getType(void) override { return item_number; }
-  private: 
-    int64_t num;
+  class Number : public Item {
+    public:
+      Number(int64_t n); 
+      int64_t get (void); 
+      bool operator == (const Number &other); 
+      std::string toString(void) override; 
+      ItemType getType(void) override { 
+        return it_number; 
+      }
+    private: 
+      int64_t num;
   };
 
-  class Label : public Item
-  {
-  public:
-    Label(string l); 
-    string get(); 
-    bool operator== (const Label &other); 
-    string toString(void) override; 
-    ItemType getType(void) override { return item_label; }
-  private: 
-    string labelname;
+  class Variable : public Item {
+    public:
+      Variable(string varName); 
+      string get (void); 
+      string toString(void) override;
+      ItemType getType(void) override { 
+        return it_variable; 
+      }
+    private: 
+      string variableName;
   };
 
-  class Variable : public Item
-  {
-  public:
-    Variable(string varName); 
-    string get (void); 
-    bool operator == (const Variable &other); 
-    string toString(void) override;
-    ItemType getType(void) override { return item_variable; }
-  private: 
-    string variableName;
+  class Label : public Item {
+    public:
+      Label(string l); 
+      string get(); 
+      string toString(void) override; 
+      ItemType getType(void) override { 
+        return it_label; 
+      }
+    private: 
+      string labelname;
   };
   
   class String : public Item 
   {
     public: 
-    String(string sName);
-    string get(); 
-    string toString() override; 
-    ItemType getType(void) override { return item_string; }
+      String(string sName);
+      string get(); 
+      string toString() override; 
+      ItemType getType(void) override { 
+        return it_string; 
+      }
     private: 
-    string sName;
+      string sName;
   };
 
 class Operation : public Item
@@ -94,9 +88,10 @@ class Operation : public Item
   public:
     Operation(string op); 
     string get (void); 
-    // bool operator == (const Operation &other) const; 
     string toString(void) override;
-    ItemType getType(void) override { return item_operation; }
+    ItemType getType(void) override { 
+      return it_operation; 
+    }
   private: 
     string op;
   };
@@ -105,9 +100,16 @@ class Empty : public Item
   {
     public:
     Empty(); 
-    string toString() override {return "";};
-    ItemType getType(void) override { return item_empty; }
+    string toString() override {
+      return "";
+    };
+    ItemType getType(void) override { 
+      return it_empty; 
+    }
   };
+
+  class Visitor;
+
   /*
    * Instruction interface.
    */
@@ -138,7 +140,9 @@ class Empty : public Item
   class Instruction_ret_not : public Instruction_ret
   {
     public:
-      std::string toString() override { return "return"; }
+      std::string toString() override { 
+        return "return"; 
+      }
       void Accept(Visitor *v) override; 
   };
 
@@ -147,7 +151,9 @@ class Empty : public Item
     public:
       // Operation* op;
       Item* arg; 
-      std::string toString() override { return "return " + arg->toString(); }
+      std::string toString() override { 
+        return "return " + arg->toString(); 
+      }
       void Accept(Visitor *v) override; 
   };
 
@@ -156,7 +162,9 @@ class Empty : public Item
   public:
     Variable* dst;
     Item* src;
-    std::string toString() override { return this->dst->toString() + " <- " + this->src->toString(); }
+    std::string toString() override { 
+      return this->dst->toString() + " <- " + this->src->toString(); 
+    }
     void Accept(Visitor *v) override; 
   };
 
@@ -168,8 +176,7 @@ class Empty : public Item
     Variable* src;
     Operation* op;
     std::string toString() override { 
-      return this->dst->toString() + " <- load "
-          + this->src->toString();
+      return this->dst->toString() + " <- load " + this->src->toString();
     }
     void Accept(Visitor *v) override; 
   };
@@ -182,7 +189,9 @@ class Empty : public Item
     Item *op;
     Item *oprand1;
     Item *oprand2; 
-    std::string toString() override { return dst->toString() +" <- "+ oprand1->toString() + " " + op->toString() + " " + oprand2->toString(); }
+    std::string toString() override { 
+      return dst->toString() +" <- "+ oprand1->toString() + " " + op->toString() + " " + oprand2->toString(); 
+    }
     void Accept(Visitor *v) override; 
   };
 
@@ -193,7 +202,9 @@ class Empty : public Item
     Item *src;
     Item *dst;
     Operation* op;
-    std::string toString() override { return "store " + dst->toString() + " <- " + src->toString(); }
+    std::string toString() override { 
+      return "store " + dst->toString() + " <- " + src->toString(); 
+    }
     void Accept(Visitor *v) override; 
   };
 
@@ -204,7 +215,9 @@ class Empty : public Item
     Item *oprand1;
     Item *op;
     Item *oprand2;
-    std::string toString() override { return dst->toString() + " " + oprand1->toString()+ " " + op->toString()+ " " + oprand2->toString(); }
+    std::string toString() override { 
+      return dst->toString() + " " + oprand1->toString()+ " " + op->toString()+ " " + oprand2->toString(); 
+    }
     void Accept(Visitor *v) override; 
   };
 
@@ -219,7 +232,9 @@ class Empty : public Item
   class Instruction_br_label : public Instruction_br
   {
   public:
-    std::string toString() override { return "br " + label->toString(); }
+    std::string toString() override { 
+      return "br " + label->toString(); 
+    }
     void Accept(Visitor *v) override; 
   };
 
@@ -227,7 +242,9 @@ class Instruction_br_t : public Instruction_br
   {
   public:
     Item *condition;
-    std::string toString() override { return "br " + condition->toString() + " " +label->toString(); }
+    std::string toString() override { 
+      return "br " + condition->toString() + " " +label->toString(); 
+    }
     void Accept(Visitor *v) override; 
   };
 
@@ -244,7 +261,9 @@ class Instruction_br_t : public Instruction_br
   public:
     std::string toString() override { 
       string s = "call " + callee->toString() + " "; 
-      for(Item* i : args) s += i->toString() + " ";
+      for(Item* i : args) {
+        s += i->toString() + " ";
+      }
       return s; 
     }
     void Accept(Visitor *v) override; 
@@ -255,7 +274,9 @@ class Instruction_br_t : public Instruction_br
     Variable *dst;
     std::string toString() override { 
       string s = dst->toString() + " <- call " + callee->toString() + " "; 
-      for(Item* i : args) s += i->toString() + " ";
+      for(Item* i : args) {
+        s += i->toString() + " ";
+      } 
       return s; 
     }
     void Accept(Visitor *v) override; 
@@ -322,5 +343,4 @@ class Instruction_br_t : public Instruction_br
       virtual void VisitInstruction(Instruction_call_assignment *element) = 0;
       virtual void VisitInstruction(Instruction_label *element) = 0;
   };
-
 }

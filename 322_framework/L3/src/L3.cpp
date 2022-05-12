@@ -1,95 +1,57 @@
-#include "L3.h"
 #include <iostream>
 #include <string>
-
 #include <unordered_map>
+
+#include "L3.h"
 
 using namespace std;
 
-namespace L3
-{
+namespace L3 {
   /* helper functions */
   std::string get_reg_string (int enum_value) {
     return (reg_enum_str[enum_value]);
   }
-  
-  //Program 
-  Program::Program() {}
-  //Function 
-  Function::Function(void) {}
-
-  Variable* Function::newVariable(std::string variable){
-    std::string variableName = "%var_" + variable.substr(1);
-    if(Function::variables.find(variableName) != Function::variables.end()){
-      return Function::variables[variableName];
-    }
-    Function::variables[variableName] = new Variable(variableName);
-    return Function::variables[variableName];
-  }
 
   // Label Item
-  Label::Label(string l){
+  Label::Label(string l) {
       this->labelname = l;
   } 
-  string Label::get()
-  {
+  string Label::get() {
     return this->labelname;
   }
-  bool Label::operator==(const Label &other)
-  {
-    return *this == other;
-  }
-  string Label::toString()
-  {
+  string Label::toString() {
     return this->labelname;
   }
 
   // Number Item
-  Number::Number(int64_t n)
-  {
+  Number::Number(int64_t n) {
     this->num = n;
   }
-  int64_t Number::get()
-  {
+  int64_t Number::get() {
     return this->num;
   }
-  bool Number::operator==(const Number &other)
-  {
-    return *this == other;
-  }
-  string Number::toString()
-  {
+  string Number::toString() {
     return to_string(this->num);
   }
 
   // Variable Item
-  Variable::Variable(string v)
-  {
+  Variable::Variable(string v) {
     this->variableName = v;
   }
-  string Variable::get()
-  {
+  string Variable::get() {
     return this->variableName;
   }
-  bool Variable::operator==(const Variable &other)
-  {
-    return *this == other;
-  }
-  string Variable::toString()
-  {
+  string Variable::toString() {
     return this->variableName;
   }
   // Operation Item
-  Operation::Operation(string op)
-  {
+  Operation::Operation(string op) {
     this->op = op;
   }
-  string Operation::get()
-  {
+  string Operation::get() {
     return this->op;
   }
-  string Operation::toString()
-  {
+  string Operation::toString() {
     return this->op;
   }
   String::String(std::string sName){
@@ -103,16 +65,12 @@ namespace L3
   }
   Empty::Empty() {}
 
-
-  //assignment 
   void Instruction_assignment::Accept(Visitor* v) {
     v->VisitInstruction(this);
   }
-
   void Instruction_load::Accept(Visitor* v) {
     v->VisitInstruction(this);
   }
-
   void Instruction_store::Accept(Visitor* v) {
     v->VisitInstruction(this);
   }
@@ -153,8 +111,8 @@ namespace L3
     for (int i = 0; i < instructions_len; i++) {
       if (dynamic_cast<Instruction_label *>(this->instructions[i]) != nullptr) {
         auto inst_temp = static_cast<Instruction_label *>(this->instructions[i]);
-        auto label = std::get<0>(inst_temp->get());
-        label_dict[label->toString()] = i;
+        auto label = inst_temp->toString();
+        label_dict[label] = i;
       }
     }
 
@@ -200,5 +158,19 @@ namespace L3
         this->instructions[ii]->successor_idx.insert(ii + 1);
       }
     }
+  }
+
+  //Program 
+  Program::Program() {}
+  //Function 
+  Function::Function(void) {}
+
+  Variable* Function::newVariable(std::string variable){
+    std::string variableName = "%var_" + variable.substr(1);
+    if(Function::variables.find(variableName) != Function::variables.end()){
+      return Function::variables[variableName];
+    }
+    Function::variables[variableName] = new Variable(variableName);
+    return Function::variables[variableName];
   }
 }

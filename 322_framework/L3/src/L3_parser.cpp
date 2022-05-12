@@ -127,7 +127,6 @@ namespace L3 {
   struct number_rule : number {};
 
   struct var_rule : var {};
-  // struct parameter_rule :var {};
   struct vars_rule :
     pegtl::sor<
       pegtl::seq<
@@ -260,20 +259,22 @@ namespace L3 {
   /*
   call
   */
-  struct call_string_rule : pegtl::sor<
-                                TAOCPP_PEGTL_STRING("print"), 
-                                TAOCPP_PEGTL_STRING("allocate"), 
-                                TAOCPP_PEGTL_STRING("input"), 
-                                TAOCPP_PEGTL_STRING("tensor-error")> {};
+  struct call_string_rule : 
+    pegtl::sor<
+      TAOCPP_PEGTL_STRING("print"), 
+      TAOCPP_PEGTL_STRING("allocate"), 
+      TAOCPP_PEGTL_STRING("input"), 
+      TAOCPP_PEGTL_STRING("tensor-error")
+  > {};
 
   struct Instruction_call_rule :
     pegtl::seq<
       str_call,
       seps,
       pegtl::sor<
-          Label_rule,
-          var_rule,
-          call_string_rule>,
+        Label_rule,
+        var_rule,
+        call_string_rule>,
       seps,
       TAOCPP_PEGTL_STRING("("),
       pegtl::sor<seps, pegtl::eol>,
@@ -335,11 +336,11 @@ namespace L3 {
 
   struct Instructions_rule : pegtl::plus<
     pegtl::seq<
-        seps,
-        Instruction_rule,
-        seps
-      >
-    > {};
+      seps,
+      Instruction_rule,
+      seps
+    >
+  > {};
 
   struct Function_rule : pegtl::seq<
     TAOCPP_PEGTL_STRING("define"),
@@ -369,30 +370,24 @@ namespace L3 {
   struct grammar : pegtl::must<
     Functions_rule
     > {};
+
+
   /*
    * Actions attached to grammar rules.
    */
   template <typename Rule>
-  struct action : pegtl::nothing<Rule>
-  {
-  };
+  struct action : pegtl::nothing<Rule> {};
 
-  template <>
-  struct action<Function_rule>
-  {
+  template <> struct action<Function_rule>{
     template <typename Input>
-    static void apply(const Input &in, Program &p)
-    {
+  static void apply(const Input &in, Program &p) {
       if (shouldPrint) cout << "Function_rule" << endl;
     }
   };
 
-  template <>
-  struct action<function_name>
-  {
+  template <> struct action<function_name> {
     template <typename Input>
-    static void apply(const Input &in, Program &p)
-    {
+  static void apply(const Input &in, Program &p) {
       if (shouldPrint) cout << "new function: " << in.string() << endl;
       auto newF = new Function();
       newF->name = in.string();
@@ -402,12 +397,161 @@ namespace L3 {
     }
   };
 
-  template <>
-  struct action<Instruction_return_rule>
-  {
+  template <> struct action<number_rule> {
     template <typename Input>
-    static void apply(const Input &in, Program &p)
-    {
+  static void apply(const Input &in, Program &p) {
+      Number *i = new Number(std::stoll(in.string()));
+      parsed_items.push_back(i);
+    }
+  };
+
+  template <> struct action<Label_rule> {
+    template <typename Input>
+  static void apply(const Input &in, Program &p) {
+      Label *i = new Label(in.string());
+      parsed_items.push_back(i);   
+    }
+  };
+
+  template <> struct action<var_rule> {
+    template <typename Input>
+  static void apply(const Input &in, Program &p) {
+      auto currentF = p.functions.back();
+      std::string var_name = in.string(); 
+      Variable *i = currentF->newVariable(var_name);
+      parsed_items.push_back(i);
+    }
+  };    
+
+  template <> struct action<vars_rule> {
+    template <typename Input>
+  static void apply(const Input &in, Program &p) {
+      if (shouldPrint) cout << "vars_rule: " << in.string() << endl;
+      auto currentF = p.functions.back();
+      std::string vars = in.string(); 
+      while(vars.find(',') != vars.npos){
+        int n = vars.find(','); 
+        std::string temp = vars.substr(0, n); 
+        temp.erase(std::remove_if(temp.begin(), temp.end(), [](unsigned char x){return std::isspace(x);}), temp.end()); 
+        if(temp[0] == '%') {
+          Variable *i = currentF->newVariable(temp);
+          currentF->variables[temp] = i;
+          currentF->arguments.push_back(i);
+        } else if(temp.size() == 0) {
+          continue;
+        } else {
+          Number* i = new Number(std::stoll(temp)); 
+          currentF->arguments.push_back(i);
+        }
+        vars = vars.substr(n+1);
+      }
+      vars.erase(std::remove_if(vars.begin(), vars.end(), [](unsigned char x){return std::isspace(x);}), vars.end()); 
+      if(shouldPrint) cout << "vars after parsed: " << vars << " size: " << vars.size() << endl;
+      if(vars.size() == 0) return ;
+      else if(!(vars[0] == '%')){
+        Number* i = new Number(std::stoll(vars)); 
+        currentF->arguments.push_back(i);
+      } else {
+        Variable* i = currentF->newVariable(vars); 
+        currentF->variables[vars] = i; 
+        currentF->arguments.push_back(i);
+      }
+    }
+  };
+
+  template <> struct action<args_rule> {
+    template <typename Input>
+  static void apply(const Input &in, Program &p) {
+      if (shouldPrint) cout << "args_rule: " << in.string() << endl;
+      auto currentF = p.functions.back();
+      std::string args = in.string(); 
+      if(args.size() == 0) return ;
+      while(args.find(',') != args.npos){
+        int n = args.find(','); 
+        std::string temp = args.substr(0, n); 
+        temp.erase(std::remove_if(temp.begin(), temp.end(), [](unsigned char x){return std::isspace(x);}), temp.end()); 
+        if(shouldPrint) cout << "args: " << temp << endl;
+        if(!(temp[0] == '%')){
+          Number* i = new Number(std::stoll(temp)); 
+          list_of_args.push_back(i);
+        } else {
+          Variable *i = currentF->newVariable(temp);
+          currentF->variables[temp] = i;
+          list_of_args.push_back(i);
+        }
+        args = args.substr(n+1);
+      }
+      args.erase(std::remove_if(args.begin(), args.end(), [](unsigned char x){return std::isspace(x);}), args.end()); 
+      if(!(args[0] == '%')){
+        Number* i = new Number(std::stoll(args)); 
+        list_of_args.push_back(i);
+      } else {
+        Variable* i = currentF->newVariable(args); 
+        currentF->variables[args] = i; 
+        list_of_args.push_back(i);
+      }
+    }
+  };
+
+  template <> struct action<op_rule> {
+    template <typename Input>
+  static void apply(const Input &in, Program &p) {
+      Operation *i = new Operation(in.string());
+      parsed_items.push_back(i);
+    }
+  };
+
+  template <> struct action<str_return> {
+    template <typename Input>
+  static void apply(const Input &in, Program &p) {
+      Operation *i = new Operation(in.string());
+      parsed_items.push_back(i);
+    }
+  };
+
+  template <> struct action<str_br> {
+    template <typename Input>
+  static void apply(const Input &in, Program &p) {
+      Operation *i = new Operation(in.string());
+      parsed_items.push_back(i);
+    }
+  };
+
+  template <> struct action<str_load> {
+    template <typename Input>
+  static void apply(const Input &in, Program &p) {
+      Operation *i = new Operation(in.string());
+      parsed_items.push_back(i);
+    }
+  };
+
+  template <> struct action<str_store> {
+    template <typename Input>
+  static void apply(const Input &in, Program &p) {
+      Operation *i = new Operation(in.string());
+      parsed_items.push_back(i);
+    }
+  };
+
+  template <> struct action<call_string_rule> {
+    template <typename Input>
+  static void apply(const Input &in, Program &p) {
+      String *i = new String(in.string());
+      parsed_items.push_back(i);
+    }
+  };
+
+  template <> struct action<compare_op_rule> {
+    template <typename Input>
+  static void apply(const Input &in, Program &p) {
+      Operation *i = new Operation(in.string());
+      parsed_items.push_back(i);
+    }
+  };
+
+  template <> struct action<Instruction_return_rule> {
+    template <typename Input>
+  static void apply(const Input &in, Program &p) {
       if (shouldPrint)
         cout << "Instruction_ret: " << in.string() << endl;
       auto currentF = p.functions.back();
@@ -418,14 +562,11 @@ namespace L3 {
       currentF->instructions.push_back(i);
     }
   };
-  template <>
-  struct action<Instruction_return_t_rule>
-  {
+
+  template <> struct action<Instruction_return_t_rule> {
     template <typename Input>
-    static void apply(const Input &in, Program &p)
-    {
-      if (shouldPrint)
-        cout << "Instruction_ret_t: " << in.string() << endl;
+  static void apply(const Input &in, Program &p) {
+      if (shouldPrint) cout << "Instruction_ret_t: " << in.string() << endl;
       auto currentF = p.functions.back();
       auto i = new Instruction_ret_t();
       i->arg = parsed_items.back(); 
@@ -436,288 +577,11 @@ namespace L3 {
       if(shouldPrint) cout << i->toString() << endl;
     }
   };
-  template <>
-  struct action<Label_rule>
-  {
-    template <typename Input>
-    static void apply(const Input &in, Program &p)
-    {
-      Label *i = new Label(in.string());
-      parsed_items.push_back(i);   
-    }
-  };
 
-  template <>
-  struct action<var_rule>
-  {
+  template <> struct action<Instruction_br_label_rule> {
     template <typename Input>
-    static void apply(const Input &in, Program &p)
-    {
-      // if (shouldPrint)
-      //   cout << "var_rule: " << in.string() << endl;
-      auto currentF = p.functions.back();
-      std::string var_name = in.string(); 
-      Variable *i = currentF->newVariable(var_name);
-      parsed_items.push_back(i);
-    }
-  };    
-
-template <>
-  struct action<vars_rule>
-  {
-    template <typename Input>
-    static void apply(const Input &in, Program &p)
-    {
-      if (shouldPrint)
-        cout << "vars_rule: " << in.string() << endl;
-      auto currentF = p.functions.back();
-      std::string vars = in.string(); 
-      while(vars.find(',') != vars.npos){
-          int n = vars.find(','); 
-          std::string temp = vars.substr(0, n); 
-          temp.erase(std::remove_if(temp.begin(), temp.end(), [](unsigned char x){return std::isspace(x);}), temp.end()); 
-          if(temp.size() == 0) continue;
-          else if(temp[0] == '%'){
-            Variable *i = currentF->newVariable(temp);
-            currentF->variables[temp] = i;
-            currentF->arguments.push_back(i);
-          }
-          else {
-              Number* i = new Number(std::stoll(temp)); 
-              currentF->arguments.push_back(i);
-          }
-          vars = vars.substr(n+1);
-      }
-      vars.erase(std::remove_if(vars.begin(), vars.end(), [](unsigned char x){return std::isspace(x);}), vars.end()); 
-      if(shouldPrint) cout << "vars after parsed: " << vars << " size: " << vars.size() << endl;
-      if(vars.size() == 0) return ;
-      else if(vars[0] == '%'){
-          Variable* i = currentF->newVariable(vars); 
-          currentF->variables[vars] = i; 
-          currentF->arguments.push_back(i);
-      }
-      else {
-         Number* i = new Number(std::stoll(vars)); 
-        currentF->arguments.push_back(i);
-      }
-    }
-  };
-template <>
-  struct action<args_rule>
-  {
-    template <typename Input>
-    static void apply(const Input &in, Program &p)
-    {
-      if (shouldPrint)
-        cout << "args_rule: " << in.string() << endl;
-      auto currentF = p.functions.back();
-      std::string args = in.string(); 
-      if(args.size() == 0) return ;
-      while(args.find(',') != args.npos){
-          int n = args.find(','); 
-          //eliminate any space in 0-n
-          std::string temp = args.substr(0, n); 
-          temp.erase(std::remove_if(temp.begin(), temp.end(), [](unsigned char x){return std::isspace(x);}), temp.end()); 
-          if(shouldPrint) cout << "args: " << temp << endl;
-          if(temp[0] == '%'){
-            Variable *i = currentF->newVariable(temp);
-            currentF->variables[temp] = i;
-            list_of_args.push_back(i);
-          }
-          else {
-              Number* i = new Number(std::stoll(temp)); 
-              list_of_args.push_back(i);
-          }
-          args = args.substr(n+1);
-      }
-      if(shouldPrint) cout << "args after parsed: " << args << endl;
-      args.erase(std::remove_if(args.begin(), args.end(), [](unsigned char x){return std::isspace(x);}), args.end()); 
-      if(args[0] == '%'){
-          Variable* i = currentF->newVariable(args); 
-          currentF->variables[args] = i; 
-          list_of_args.push_back(i);
-      }
-      else {
-         Number* i = new Number(std::stoll(args)); 
-        list_of_args.push_back(i);
-      }
-    }
-  };
-  // action for + - & * << >>
-  template <>
-  struct action<op_rule>
-  {
-    template <typename Input>
-    static void apply(const Input &in, Program &p)
-    {
-      Operation *i = new Operation(in.string());
-      parsed_items.push_back(i);
-    }
-  };
-  template <>
-  struct action<str_return>
-  {
-    template <typename Input>
-    static void apply(const Input &in, Program &p)
-    {
-      Operation *i = new Operation(in.string());
-      parsed_items.push_back(i);
-    }
-  };
-  template <>
-  struct action<str_br>
-  {
-    template <typename Input>
-    static void apply(const Input &in, Program &p)
-    {
-      Operation *i = new Operation(in.string());
-      parsed_items.push_back(i);
-    }
-  };
-  template <>
-  struct action<str_load>
-  {
-    template <typename Input>
-    static void apply(const Input &in, Program &p)
-    {
-      Operation *i = new Operation(in.string());
-      parsed_items.push_back(i);
-    }
-  };
-  template <>
-  struct action<str_store>
-  {
-    template <typename Input>
-    static void apply(const Input &in, Program &p)
-    {
-      Operation *i = new Operation(in.string());
-      parsed_items.push_back(i);
-    }
-  };
-  
-  template <>
-  struct action<number_rule>
-  {
-    template <typename Input>
-    static void apply(const Input &in, Program &p)
-    {
-      Number *i = new Number(std::stoll(in.string()));
-      parsed_items.push_back(i);
-    }
-  };
-
-  //                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              action when value is a print, allocate, input, tensor-error
-  template <>
-  struct action<call_string_rule>
-  {
-    template <typename Input>
-    static void apply(const Input &in, Program &p)
-    {
-      String *i = new String(in.string());
-      parsed_items.push_back(i);
-    }
-  };
-
-  // action for :label
-  template <>
-  struct action<Instruction_label_rule>
-  {
-    template <typename Input>
-    static void apply(const Input &in, Program &p)
-    {
-      if (shouldPrint)
-        cout << "Instruction_label_rule: " << in.string() << endl;
-      auto currentF = p.functions.back();
-      auto i = new Instruction_label();
-      Label *item = new Label(in.string());
-      i->label = item;
-      if(shouldPrint) cout << i->toString() << endl;
-      currentF->instructions.push_back(i);
-    }
-  };
-  // action for var <- t op t
-  template <>
-  struct action<Instruction_arithmetic_rule>
-  {
-    template <typename Input>
-    static void apply(const Input &in, Program &p)
-    {
-      if (shouldPrint)
-        cout << "Instruction_arithmetic_rule: " << in.string() << endl;
-      auto currentF = p.functions.back();
-      auto i = new Instruction_arithmetic();
-      i->oprand2 = parsed_items.back();
-      parsed_items.pop_back();
-      i->op = parsed_items.back();
-      parsed_items.pop_back();
-      i->oprand1 = parsed_items.back();
-      parsed_items.pop_back();
-      i->dst = dynamic_cast<Variable*>(parsed_items.back());
-      if(dynamic_cast<Variable*>(parsed_items.back()) == nullptr) cout << "NULL" <<endl;
-      parsed_items.pop_back();
-      if(shouldPrint) cout << i->toString() << endl;
-      currentF->instructions.push_back(i);
-    }
-  };
-  /*
-   call actions
-  */
-  // action for call callee (args)
-  template <>
-  struct action<Instruction_call_rule>
-  {
-    template <typename Input>
-    static void apply(const Input &in, Program &p)
-    {
-      if (shouldPrint)
-        cout << "Instruction_call_rule: " << in.string() << endl;
-      auto currentF = p.functions.back();
-      auto i = new Instruction_call_noassign();
-      reverse(list_of_args.begin(), list_of_args.end());
-      while(!list_of_args.empty()) {
-          i->args.push_back(list_of_args.back());
-          list_of_args.pop_back();
-          parsed_items.pop_back();
-      }
-      i->callee = parsed_items.back();
-      parsed_items.pop_back();
-      if(shouldPrint) cout << i->toString() << endl;
-      currentF->instructions.push_back(i);
-    }
-  };
-
-  template <>
-  struct action<Instruction_call_assignment_rule>
-  {
-    template <typename Input>
-    static void apply(const Input &in, Program &p)
-    {
-      if (shouldPrint)
-        cout << "Instruction_call_assignment_rule: " << in.string() << endl;
-      auto currentF = p.functions.back();
-      auto i = new Instruction_call_assignment();
-      for(Item* item : list_of_args) {
-         i->args.push_back(item);
-         parsed_items.pop_back();
-      }
-      list_of_args = {};
-      i->callee = parsed_items.back();
-      parsed_items.pop_back();
-      i->dst = dynamic_cast<Variable*>(parsed_items.back());;
-       parsed_items.pop_back();
-      currentF->instructions.push_back(i);
-    }
-  };
-
-  // action for br label
-  template <>
-  struct action<Instruction_br_label_rule>
-  {
-    template <typename Input>
-    static void apply(const Input &in, Program &p)
-    {
-      if (shouldPrint)
-        cout << "Instruction_br_rule: " << in.string() << endl;
+  static void apply(const Input &in, Program &p) {
+      if (shouldPrint) cout << "Instruction_br_rule start" << endl;
       auto currentF = p.functions.back();
       auto i = new Instruction_br_label();
       i->label = dynamic_cast<Label*>(parsed_items.back());;
@@ -725,18 +589,13 @@ template <>
       i->op = dynamic_cast<Operation*>(parsed_items.back());;
       parsed_items.pop_back();
       currentF->instructions.push_back(i);
-      if(shouldPrint) cout << i->toString() << endl;
-    }
+      if (shouldPrint) cout << "Instruction_br_rule end" << endl;    }
   };
-  // action for br t label
-  template <>
-  struct action<Instruction_br_t_rule>
-  {
+
+  template <> struct action<Instruction_br_t_rule> {
     template <typename Input>
-    static void apply(const Input &in, Program &p)
-    {
-      if (shouldPrint)
-        cout << "Instruction_br_t_rule: " << in.string() << endl;
+  static void apply(const Input &in, Program &p) {
+      if (shouldPrint) cout << "Instruction_br_t_rule start" << endl;
       auto currentF = p.functions.back();
       auto i = new Instruction_br_t();
       i->label = dynamic_cast<Label*>(parsed_items.back());;
@@ -746,18 +605,28 @@ template <>
       i->op = dynamic_cast<Operation*>(parsed_items.back());;
       parsed_items.pop_back();
       currentF->instructions.push_back(i);
-      if(shouldPrint) cout << i->toString() << endl;
+      if (shouldPrint) cout << "Instruction_br_t_rule end" << endl;
     }
   };
 
-  template <>
-  struct action<Instruction_assignment_rule>
-  {
+  template <> struct action<Instruction_label_rule> {
     template <typename Input>
-    static void apply(const Input &in, Program &p)
-    {
-      if (shouldPrint)
-        cout << "Instruction_assignment_rule: " << in.string() << endl;
+  static void apply(const Input &in, Program &p) {
+      if (shouldPrint) cout << "Instruction_label_rule start" << endl;
+      auto currentF = p.functions.back();
+      auto i = new Instruction_label();
+      Label *item = new Label(in.string());
+      i->label = item;
+      if(shouldPrint) cout << i->toString() << endl;
+      currentF->instructions.push_back(i);
+      if (shouldPrint) cout << "Instruction_label_rule end" << endl;
+    }
+  };
+
+  template <> struct action<Instruction_assignment_rule> {
+    template <typename Input>
+  static void apply(const Input &in, Program &p) {
+      if (shouldPrint) cout << "Instruction_assignment_rule start" << endl;
       auto currentF = p.functions.back();
 
       auto i = new Instruction_assignment();
@@ -765,80 +634,34 @@ template <>
       parsed_items.pop_back();
       i->dst = dynamic_cast<Variable*>(parsed_items.back());
       parsed_items.pop_back();
-      if(shouldPrint) cout << i->toString() << endl;
-      /*
-       * Add the just-created instruction to the current function.
-       */
+      if (shouldPrint) cout << "Instruction_assignment_rule start" << endl;
       currentF->instructions.push_back(i);
     }
   };
 
-  template <>
-  struct action<Instruction_load_rule>
-  {
+  template <> struct action<Instruction_arithmetic_rule> {
     template <typename Input>
-    static void apply(const Input &in, Program &p)
-    {
-      if (shouldPrint)
-        cout << "Instruction_load_rule: " << in.string() << endl;
-
+  static void apply(const Input &in, Program &p) {
+      if (shouldPrint) cout << "Instruction_arithmetic_rule start" << endl;
       auto currentF = p.functions.back();
-
-      auto i = new Instruction_load();
-      i->src = dynamic_cast<Variable*>(parsed_items.back());
+      auto i = new Instruction_arithmetic();
+      i->oprand2 = parsed_items.back();
       parsed_items.pop_back();
-      i->op = dynamic_cast<Operation*>(parsed_items.back()); 
+      i->op = parsed_items.back();
+      parsed_items.pop_back();
+      i->oprand1 = parsed_items.back();
       parsed_items.pop_back();
       i->dst = dynamic_cast<Variable*>(parsed_items.back());
       parsed_items.pop_back();
-      if(shouldPrint) cout << i->toString() << endl;
-      currentF->instructions.push_back(i);
-    }
-  };
-  template <>
-  struct action<Instruction_store_rule>
-  {
-    template <typename Input>
-    static void apply(const Input &in, Program &p)
-    {
-      if (shouldPrint)
-        cout << "Instruction_store_rule: " << in.string() << endl;
-
-      auto currentF = p.functions.back();
-
-      auto i = new Instruction_store();
-      i->src = parsed_items.back();
-      parsed_items.pop_back();
-      i->dst = parsed_items.back();
-      parsed_items.pop_back();
-      i->op = dynamic_cast<Operation*>(parsed_items.back()); 
-      parsed_items.pop_back();
-      if(shouldPrint) cout << i->toString() << endl;
+      if (shouldPrint) cout << "Instruction_arithmetic_rule end" << endl;
       currentF->instructions.push_back(i);
     }
   };
 
-  template <>
-  struct action<compare_op_rule>
-  {
+  template <> struct action<Instruction_cmp_rule> {
     template <typename Input>
-    static void apply(const Input &in, Program &p)
-    {
-      // if (shouldPrint)
-      //   cout << "compare_op_rule: " << in.string() << endl;
-      Operation *i = new Operation(in.string());
-      parsed_items.push_back(i);
-    }
-  };
-
-  template <>
-  struct action<Instruction_cmp_rule>
-  {
-    template <typename Input>
-    static void apply(const Input &in, Program &p)
-    {
-      if (shouldPrint)
-        cout << "Instruction_cmp_rule: " << in.string() << endl;
+  static void apply(const Input &in, Program &p) {
+      if (shouldPrint) cout << "Instruction_cmp_rule start" << endl;
       auto currentF = p.functions.back();
 
       auto i = new Instruction_cmp();
@@ -850,27 +673,102 @@ template <>
       parsed_items.pop_back();
       i->dst = dynamic_cast<Variable*>(parsed_items.back());
       parsed_items.pop_back();
-      if(shouldPrint) cout << i->toString() << endl;
+
+      if(shouldPrint) cout << "Instruction_cmp_rule end" << endl;
+      currentF->instructions.push_back(i);
+    }
+  };
+  
+  template <> struct action<Instruction_call_rule> {
+    template <typename Input>
+  static void apply(const Input &in, Program &p) {
+      if (shouldPrint) cout << "Instruction_call_rule start" << endl;
+      auto currentF = p.functions.back();
+      auto i = new Instruction_call_noassign();
+      reverse(list_of_args.begin(), list_of_args.end());
+      while(!list_of_args.empty()) {
+        i->args.push_back(list_of_args.back());
+        list_of_args.pop_back();
+        parsed_items.pop_back();
+      }
+      i->callee = parsed_items.back();
+      parsed_items.pop_back();
+      if (shouldPrint) cout << "Instruction_call_rule start" << endl;
       currentF->instructions.push_back(i);
     }
   };
 
-  Program parse_file(char *fileName)
-  {
+  template <> struct action<Instruction_call_assignment_rule> {
+    template <typename Input>
+  static void apply(const Input &in, Program &p) {
+      if (shouldPrint) cout << "Instruction_call_assignment_rule start" << endl;
+      auto currentF = p.functions.back();
+      auto i = new Instruction_call_assignment();
+      for (auto item : list_of_args) {
+         i->args.push_back(item);
+         parsed_items.pop_back();
+      }
+      list_of_args = {};
+      i->callee = parsed_items.back();
+      parsed_items.pop_back();
+      i->dst = dynamic_cast<Variable*>(parsed_items.back());
+      parsed_items.pop_back();
+      currentF->instructions.push_back(i);
+    }
+  };
 
-    /*
+  template <> struct action<Instruction_load_rule> {
+    template <typename Input>
+  static void apply(const Input &in, Program &p) {
+      if (shouldPrint) cout << "Instruction_load_rule start" << endl;
+
+      auto currentF = p.functions.back();
+
+      auto i = new Instruction_load();
+      i->src = dynamic_cast<Variable*>(parsed_items.back());
+      parsed_items.pop_back();
+      i->op = dynamic_cast<Operation*>(parsed_items.back()); 
+      parsed_items.pop_back();
+      i->dst = dynamic_cast<Variable*>(parsed_items.back());
+      parsed_items.pop_back();
+      if (shouldPrint) cout << "Instruction_load_rule start" << endl;
+      currentF->instructions.push_back(i);
+    }
+  };
+
+  template <> struct action<Instruction_store_rule> {
+    template <typename Input>
+  static void apply(const Input &in, Program &p) {
+      if (shouldPrint) cout << "Instruction_store_rule start" << endl;
+
+      auto currentF = p.functions.back();
+
+      auto i = new Instruction_store();
+      i->src = parsed_items.back();
+      parsed_items.pop_back();
+      i->dst = parsed_items.back();
+      parsed_items.pop_back();
+      i->op = dynamic_cast<Operation*>(parsed_items.back()); 
+      parsed_items.pop_back();
+      if (shouldPrint) cout << "Instruction_store_rule end" << endl;
+      currentF->instructions.push_back(i);
+    }
+  };
+
+  Program parse_file (char *fileName){
+
+    /* 
      * Check the grammar for some possible issues.
      */
-    pegtl::analyze<grammar>();
+    pegtl::analyze< grammar >();
 
     /*
      * Parse.
-     */
-    file_input<> fileInput(fileName);
+     */   
+    file_input< > fileInput(fileName);
     Program p;
-    parse<grammar, action>(fileInput, p);
+    parse< grammar, action >(fileInput, p);
 
     return p;
   }
-
 }

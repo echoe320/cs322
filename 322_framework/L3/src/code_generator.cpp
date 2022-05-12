@@ -7,8 +7,8 @@
 #include "code_generator.h"
 #include "instruction_select.h"
 
-extern bool is_debug; 
-namespace L3{
+extern bool shouldPrint; 
+namespace L3 {
   int arg_reg_list[] = {L3::reg::rdi, L3::reg::rsi, L3::reg::rdx, L3::reg::rcx, L3::reg::r8, L3::reg::r9};
 
   bool comp_label(Label *l1, Label *l2) {
@@ -17,6 +17,8 @@ namespace L3{
 
   void label_global(Program *p) {
     std::vector<Label *> labels;
+    p->ll = "";
+
     for (auto f : p->functions) {
       for (auto i : f->instructions) {
         Instruction_label *l = dynamic_cast<Instruction_label *>(i);
@@ -25,48 +27,43 @@ namespace L3{
         }
       }
     }
-    p->ll = "";
 
     if (labels.size() == 0) return;
     std::sort(labels.begin(), labels.end(), comp_label);
 
     std::string llg = labels[0]->get().substr(1);
     p->ll = llg;
-    llg = llg + "_global_";
+    llg += "_global_";
 
     for (auto f : p->functions) {
       std::string fname = f->name.substr(1);
       for (auto i : f->instructions) {
-        Instruction_label *l = dynamic_cast<Instruction_label *>(i);
-        Instruction_br_label *bl = dynamic_cast<Instruction_br_label *>(i);
-        Instruction_br_t *bt = dynamic_cast<Instruction_br_t *>(i);
-        Instruction_assignment *a = dynamic_cast<Instruction_assignment *>(i);
-        if (l) {
+        if (dynamic_cast<Instruction_label *>(i)) {
+          Instruction_label *l = dynamic_cast<Instruction_label *>(i);
           std::string temp = l->label->get();
           l->label = new Label(":" + llg + fname + "_" + temp.substr(1));
-          if(is_debug) cout << "label: " << temp << endl;
-        } else if(bl) {
-          std::string temp = bl->label->get();
-          bl->label = new Label(":" + llg + fname + "_" + temp.substr(1));
-          if(is_debug) cout << "br label: " << temp << endl;                    
-        } else if(bt) {
-          std::string temp = bt->label->get();
-          bt->label = new Label(":" + llg + fname + "_" + temp.substr(1));
-          if(is_debug) cout << "bt label: " << temp << endl;                    
-        } else if(a) {
-          Label* label = dynamic_cast<Label*>(a->src);
-          if(label) {
+          if(shouldPrint) cout << "label: " << temp << endl;
+        } else if(dynamic_cast<Instruction_assignment *>(i)) {
+          Instruction_assignment *a = dynamic_cast<Instruction_assignment *>(i);
+          if(dynamic_cast<Label*>(a->src)) {
+            Label* label = dynamic_cast<Label*>(a->src);
             std::string temp = label->get();
             label = new Label(":" + llg + fname + "_" + temp.substr(1));
-            if(is_debug) cout << "assign label: " << temp << endl; 
-          }                   
+            if(shouldPrint) cout << "assign label: " << temp << endl; 
+          }
+        } else if(dynamic_cast<Instruction_br_label *>(i)) {
+          Instruction_br_label *bl = dynamic_cast<Instruction_br_label *>(i);
+          std::string temp = bl->label->get();
+          bl->label = new Label(":" + llg + fname + "_" + temp.substr(1));
+          if(shouldPrint) cout << "br label: " << temp << endl;                    
+        } else if(dynamic_cast<Instruction_br_t *>(i)) {
+          Instruction_br_t *bt = dynamic_cast<Instruction_br_t *>(i);
+          std::string temp = bt->label->get();
+          bt->label = new Label(":" + llg + fname + "_" + temp.substr(1));
+          if(shouldPrint) cout << "bt label: " << temp << endl;                    
         }
       }
     }
-  }
-
-  string temp_var(string varname) {
-      return "%tmp_" + varname.substr(1);
   }
 
   Gen_Code_Visitors::Gen_Code_Visitors(std::ofstream &outF) : outputFile(outF) {
@@ -76,51 +73,51 @@ namespace L3{
   /* Defining Visitor Functions */
 
   void Gen_Code_Visitors::VisitInstruction(Instruction_ret_not *element){
-    
+    this->outputFile << "\t\t" << element->toString() << std::endl;
   }
   
   void Gen_Code_Visitors::VisitInstruction(Instruction_ret_t *element){
-    
+    this->outputFile << "\t\t" << element->toString() << std::endl;
   }
 
   void Gen_Code_Visitors::VisitInstruction(Instruction_assignment *element) {
-    
+    this->outputFile << "\t\t" << element->toString() << std::endl;
   }
 
   void Gen_Code_Visitors::VisitInstruction(Instruction_load *element) {
-    
+    this->outputFile << "\t\t" << element->toString() << std::endl;
   }
 
   void Gen_Code_Visitors::VisitInstruction(Instruction_arithmetic *element){
-    
+    this->outputFile << "\t\t" << element->toString() << std::endl;
   }
 
   void Gen_Code_Visitors::VisitInstruction(Instruction_store *element){
-    
+    this->outputFile << "\t\t" << element->toString() << std::endl;
   }
 
   void Gen_Code_Visitors::VisitInstruction(Instruction_cmp *element){
-    
+    this->outputFile << "\t\t" << element->toString() << std::endl;
   }
 
   void Gen_Code_Visitors::VisitInstruction(Instruction_br_label *element){
-   
+    this->outputFile << "\t\t" << element->toString() << std::endl;
   }
 
   void Gen_Code_Visitors::VisitInstruction(Instruction_br_t *element){
-    
+    this->outputFile << "\t\t" << element->toString() << std::endl;
   }
 
   void Gen_Code_Visitors::VisitInstruction(Instruction_call_noassign *element){
-         
+    this->outputFile << "\t\t" << element->toString() << std::endl;
   }
 
   void Gen_Code_Visitors::VisitInstruction(Instruction_call_assignment *element){
-    
+    this->outputFile << "\t\t" << element->toString() << std::endl;
   }
 
   void Gen_Code_Visitors::VisitInstruction(Instruction_label *element){
-    
+    this->outputFile << "\t\t" << element->toString() << std::endl;
   }
 
   void generate_L2_file(Program p){
@@ -162,16 +159,12 @@ namespace L3{
 
       /* Naive Solution */
       for (auto i : f->instructions) {
-        std::cout << i->toString() << std::endl;
+        // std::cout << i->toString() << std::endl;
         i->Accept(&v);
       }
 
       /* Instruction select TODO*/
-      // vector<string> L2_instructions = L3::inst_select(p, f);
-      
-      // for(string s : L2_instructions) {
-      //   outputFile << "\t" << s; 
-      // }
+      // void select_instruction(Program p, Function* f);
       
       /* end of function */
       outputFile << "\t)\n"; 

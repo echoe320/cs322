@@ -24,12 +24,12 @@ namespace L3 {
     if (shouldPrint) std::cout << "visited return instruction" << "\n";
     // gen = rax + callee save registers
     for (auto count : callee_reg_list) {
-      Register* regi = new Register(static_cast<reg>(count));
+      Register* regi; // = new Register(static_cast<reg>(count));
       // if (shouldPrint) std::cout << regi->toString() << "\n";
       element->reads.insert(regi);
     }
     // rax
-    Register* regi = new Register(rax);
+    Register* regi; //= new Register(rax);
     element->reads.insert(regi);
 
     element->writes.clear();
@@ -39,82 +39,105 @@ namespace L3 {
   void Gen_Kill_Visitors::VisitInstruction(Instruction_assignment *element){
     if (shouldPrint) std::cout << "visited assignment instruction" << "\n";
     // init variables to check
-    auto fields = element->get();
-    auto src = std::get<0>(fields);
-    auto dst = std::get<1>(fields);
+    // auto fields = element->get();
+    auto src = element->src;//std::get<0>(fields);
+    auto dst = element->dst;//std::get<1>(fields);
 
     //if src is a variable/register, add to GEN (aka reads)
     if (dynamic_cast<Variable *>(src) != nullptr) element->reads.insert(src);
-    else if (dynamic_cast<Register *>(src) != nullptr) {
-      element->reads.insert(src);
-    }
+    // else if (dynamic_cast<Register *>(src) != nullptr) {
+    //   element->reads.insert(src);
+    // }
     //check if dst is a variable/register
     if (dynamic_cast<Variable *>(dst) != nullptr) element->writes.insert(dst);
-    else if (dynamic_cast<Register *>(dst) != nullptr) element->writes.insert(dst);
+    // else if (dynamic_cast<Register *>(dst) != nullptr) element->writes.insert(dst);
   }
 
   void Gen_Kill_Visitors::VisitInstruction(Instruction_arithmetic *element){
     if (shouldPrint) std::cout << "visited arithmetic instruction" << "\n";
-    auto fields = element->get();
-    auto src = std::get<0>(fields);
-    auto dst = std::get<1>(fields);
+    // auto fields = element->get();
+    auto src2 = element->oprand2;
+    auto src1 = element->oprand1;//std::get<0>(fields);
+    auto dst = element->dst;//std::get<1>(fields);
 
     element->reads.insert(dst);
     element->writes.insert(dst);
-    if (dynamic_cast<Variable *>(src) != nullptr) element->reads.insert(src);
-    else if (dynamic_cast<Register *>(src) != nullptr) element->reads.insert(src);
+    if (dynamic_cast<Variable *>(src2) != nullptr) element->reads.insert(src2);
+    // else if (dynamic_cast<Register *>(src2) != nullptr) element->reads.insert(src2);
   }
 
   void Gen_Kill_Visitors::VisitInstruction(Instruction_cmp *element){
     if (shouldPrint) std::cout << "visited compare instruction" << "\n";
-    auto fields = element->get();
-    auto dst = std::get<0>(fields);
-    auto arg1 = std::get<1>(fields);
-    auto arg2 = std::get<2>(fields);
+    // auto fields = element->get();
+    auto dst = element->dst; //std::get<0>(fields);
+    auto arg1 = element->oprand1; //std::get<1>(fields);
+    auto arg2 = element->oprand2; //std::get<2>(fields);
 
     element->writes.insert(dst);
     // check if arg1 is variable
     if (dynamic_cast<Variable *>(arg1) != nullptr) element->reads.insert(arg1);
-    else if (dynamic_cast<Register *>(arg1) != nullptr) element->reads.insert(arg1);
+    // else if (dynamic_cast<Register *>(arg1) != nullptr) element->reads.insert(arg1);
     // check if arg2 is variable
     if (dynamic_cast<Variable *>(arg2) != nullptr) {
       element->reads.insert(arg2);
-    } else if (dynamic_cast<Register *>(arg2) != nullptr) {
-      element->reads.insert(arg2);
     }
+    // } else if (dynamic_cast<Register *>(arg2) != nullptr) {
+    //   element->reads.insert(arg2);
+    // }
   }
 
   //TODO: change from L2 to L3
-  void Gen_Kill_Visitors::VisitInstruction(Instruction_calls *element){
-    if (shouldPrint) std::cout << "visited function call instruction" << "\n";
-    auto fields = element->get();
-    auto u = std::get<0>(fields);
-    auto N = std::get<1>(fields);
+  // void Gen_Kill_Visitors::VisitInstruction(Instruction_call_noassign *element){
+  //   if (shouldPrint) std::cout << "visited function call instruction" << "\n";
+  //   auto fields = element->get();
+  //   auto u = std::get<0>(fields);
+  //   auto N = std::get<1>(fields);
     
-    // gen = u, args used
-    if (dynamic_cast<Register *>(u) != nullptr) element->reads.insert(u);
-    else if (dynamic_cast<Variable *>(u) != nullptr) element->reads.insert(u);
+  //   // gen = u, args used
+  //   if (dynamic_cast<Register *>(u) != nullptr) element->reads.insert(u);
+  //   else if (dynamic_cast<Variable *>(u) != nullptr) element->reads.insert(u);
     
-    //adding 
-    Number* num = (Number*) N;
-    int numArgs = num->get(); // get the number field from N 
-    for (int i = 0; i < numArgs; i++){
-      int arg_reg = arg_reg_list[i];
-      Register* regi = new Register(static_cast<reg>(arg_reg));
-      element->reads.insert(regi);
-    }
+  //   //adding 
+  //   Number* num = (Number*) N;
+  //   int numArgs = num->get(); // get the number field from N 
+  //   for (int i = 0; i < numArgs; i++){
+  //     int arg_reg = arg_reg_list[i];
+  //     Register* regi = new Register(static_cast<reg>(arg_reg));
+  //     element->reads.insert(regi);
+  //   }
 
-    // kill = caller save registers
-    for (auto count : caller_reg_list) {
-      Register* regi = new Register(static_cast<reg>(count));
-      element->writes.insert(regi);
-    }
-  }
+  //   // kill = caller save registers
+  //   for (auto count : caller_reg_list) {
+  //     Register* regi = new Register(static_cast<reg>(count));
+  //     element->writes.insert(regi);
+  //   }
+  // }
 
   void Gen_Kill_Visitors::VisitInstruction(Instruction_label *element){
     if (shouldPrint) std::cout << "visited label instruction" << "\n";
     element->reads.clear();
     element->writes.clear();
+  }
+
+  void Gen_Kill_Visitors::VisitInstruction(Instruction_ret_t *element){
+  }
+
+  void Gen_Kill_Visitors::VisitInstruction(Instruction_load *element){
+  }
+
+  void Gen_Kill_Visitors::VisitInstruction(Instruction_store *element){
+  }
+
+  void Gen_Kill_Visitors::VisitInstruction(Instruction_br_label *element){
+  }
+
+  void Gen_Kill_Visitors::VisitInstruction(Instruction_br_t *element){
+  }
+
+  void Gen_Kill_Visitors::VisitInstruction(Instruction_call_noassign *element){
+  }
+
+  void Gen_Kill_Visitors::VisitInstruction(Instruction_call_assignment *element){
   }
 
   void create_liveness_list(Function* f) {
@@ -140,10 +163,11 @@ namespace L3 {
           if (dynamic_cast<Variable *>(item) != nullptr){
             Variable* var_temp = (Variable*)item;
             std::cout << var_temp->toString() << " ";
-          } else if (dynamic_cast<Register *>(item) != nullptr) {
-            Register* reg_temp = (Register*)item;
-            std::cout << reg_temp->toString() << " ";
           }
+          // } else if (dynamic_cast<Register *>(item) != nullptr) {
+          //   Register* reg_temp = (Register*)item;
+          //   std::cout << reg_temp->toString() << " ";
+          // }
         } 
         count++;
         std::cout << std::endl;
@@ -157,10 +181,11 @@ namespace L3 {
           if (dynamic_cast<Variable *>(item) != nullptr){
             Variable* var_temp = (Variable*)item;
             std::cout << var_temp->toString() << " ";
-          } else if (dynamic_cast<Register *>(item) != nullptr) {
-            Register* reg_temp = (Register*)item;
-            std::cout << reg_temp->toString() << " ";
           }
+          // } else if (dynamic_cast<Register *>(item) != nullptr) {
+          //   Register* reg_temp = (Register*)item;
+          //   std::cout << reg_temp->toString() << " ";
+          // }
         }
         count++;
         std::cout << std::endl;

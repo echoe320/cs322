@@ -7,7 +7,7 @@ namespace L3{
 
   class Gen_Kill_Visitors : public Visitor {
     void VisitInstruction (Instruction_ret_not *element) override;
-    virtual void VisitInstruction(Instruction_ret_t *element) override;
+    void VisitInstruction(Instruction_ret_t *element) override;
     void VisitInstruction (Instruction_assignment *element) override;
     void VisitInstruction (Instruction_arithmetic *element) override;
     // void VisitInstruction (Instruction_crement *element) override;
@@ -15,7 +15,7 @@ namespace L3{
     void VisitInstruction (Instruction_cmp *element) override;
     // void VisitInstruction (Instruction_cjump *element) override;
     // void VisitInstruction (Instruction_lea *element) override;
-    void VisitInstruction (Instruction_calls *element) override;
+    // void VisitInstruction (Instruction_call_noassign *element) override;
     // void VisitInstruction (Instruction_runtime *element) override;
     void VisitInstruction (Instruction_label *element) override;
     // void VisitInstruction (Instruction_goto *element) override;
